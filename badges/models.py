@@ -25,7 +25,6 @@ class Badge(models.Model):
     def __str__(self):
         return self.name
 
-
 class BadgeRequirement(models.Model):
     badge = models.ForeignKey(
         Badge,
