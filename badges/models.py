@@ -10,14 +10,13 @@ class Badge(models.Model):
         ('trail_skills', "Trail Skills"),
         ('winter_skills', "Winter Skills"),
         ('paddling_skills', "Paddling Skills"),
-        ('aquatic_skills', "Paddling Skills"),
+        ('aquatic_skills', "Aquatic Skills"),
         ('emergency_skills', "Emergency Skills"),
         ('personal_progression', "Personal Progression"),
 
     ]
 
     name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -33,6 +32,7 @@ class BadgeRequirement(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    hint = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
