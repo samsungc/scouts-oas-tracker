@@ -31,3 +31,17 @@ class ChangePasswordView(APIView):
             {"detail": "Password changed successfully."},
             status=status.HTTP_200_OK
         )
+
+class ScoutListView(generics.ListAPIView):
+    """Returns all users with role='scout'. Scouters and admins only."""
+    from .serializers import ScoutListSerializer
+    serializer_class = ScoutListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        from submissions.permissions import IsScouterOrAdmin
+        return [permissions.IsAuthenticated(), IsScouterOrAdmin()]
+
+    def get_queryset(self):
+        from .models import User
+        return User.objects.filter(role="scout").order_by("username")

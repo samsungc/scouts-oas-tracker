@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import BadgeSubmission, SubmissionEvidence
-from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer
+from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer
 from .permissions import IsScouterOrAdmin
 
 

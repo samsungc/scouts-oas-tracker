@@ -1,0 +1,142 @@
+.card {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scout {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-primary-dark);
+}
+
+.date {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.requirementInfo {
+  background: #f0f5fb;
+  border: 1px solid #c2d6ed;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.requirementId {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.requirementHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badgeName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  background: rgba(21, 101, 167, 0.1);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.requirementTitle {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+
+.requirementDesc {
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.requirementHint {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.hintLabel {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-accent-dark, #b07a00);
+}
+
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evidenceTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.evidenceList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evidenceItem {
+  background: var(--color-bg-page);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.textNote {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fileLink {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.reviewerNotes {
+  background: #fdf8ed;
+  border: 1px solid var(--color-accent-dark);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: #5a3a00;
+}
