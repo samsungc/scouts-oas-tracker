@@ -1,3 +1,35 @@
-.env
-media
+# Python
+__pycache__/
+badges/__pycache__/
+submissions/__pycache__/
+users/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+db.sqlite3
 api.http
+
+# Environment variables
+.env
+.env.*
+
+# Virtual environments
+venv/
+.env/
+.venv/
+.claude/
+
+# Media uploads
+media/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
