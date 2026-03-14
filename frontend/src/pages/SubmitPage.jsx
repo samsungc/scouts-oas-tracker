@@ -35,22 +35,22 @@ export default function SubmitPage() {
           getBadges(),
         ])
 
-        // Find which badge this requirement belongs to
+        // Find which badge this requirement belongs to (fetch all in parallel)
         let foundReq = null
         let foundBadgeName = ''
-        for (const badge of allBadges) {
-          try {
-            const detail = await getBadgeDetail(badge.id)
-            const req = detail.requirements.find(
-              (r) => String(r.id) === String(requirementId)
-            )
-            if (req) {
-              foundReq = req
-              foundBadgeName = badge.name
-              break
-            }
-          } catch {
-            // skip
+        const details = await Promise.all(
+          allBadges.map((b) => getBadgeDetail(b.id).catch(() => null))
+        )
+        for (let i = 0; i < details.length; i++) {
+          const detail = details[i]
+          if (!detail) continue
+          const req = detail.requirements.find(
+            (r) => String(r.id) === String(requirementId)
+          )
+          if (req) {
+            foundReq = req
+            foundBadgeName = allBadges[i].name
+            break
           }
         }
 

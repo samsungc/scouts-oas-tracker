@@ -100,14 +100,16 @@ export default function ScoutsPage() {
           getBadges(),
           getReviewSubmissions(),
         ])
-        const details = await Promise.all(badgeList.map((b) => getBadgeDetail(b.id)))
         setScouts(scoutList)
-        setBadgeDetails(details)
         setAllSubmissions(subs)
-      } catch {
-        setError('Failed to load scout data. Please try refreshing.')
-      } finally {
         setLoading(false)
+        // Fetch badge details in the background — completion counts
+        // will fill in once these resolve.
+        const details = await Promise.all(badgeList.map((b) => getBadgeDetail(b.id)))
+        setBadgeDetails(details)
+      } catch {
+        setLoading(false)
+        setError('Failed to load scout data. Please try refreshing.')
       }
     }
     load()

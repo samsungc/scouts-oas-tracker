@@ -53,15 +53,6 @@ export default function BadgesPage() {
           }
         }
         setSubmissionsMap(map)
-
-        // Eagerly fetch all badge details for scouts so completion
-        // progress can be computed for every category header.
-        if (isScout && badgeList.length > 0) {
-          const details = await Promise.all(badgeList.map((b) => getBadgeDetail(b.id)))
-          const cache = new Map()
-          badgeList.forEach((b, i) => cache.set(b.id, details[i]))
-          setDetailCache(cache)
-        }
       } catch {
         setError('Failed to load badges. Please try refreshing the page.')
       } finally {
@@ -70,6 +61,17 @@ export default function BadgesPage() {
     }
     load()
   }, [user])
+
+  // Background-fetch all badge details for scouts after initial render,
+  // so completion progress and lock state fill in without blocking the page.
+  useEffect(() => {
+    if (!isScout || badges.length === 0) return
+    badges.forEach((b) => {
+      getBadgeDetail(b.id)
+        .then((detail) => setDetailCache((prev) => new Map(prev).set(b.id, detail)))
+        .catch(() => {})
+    })
+  }, [isScout, badges])
 
   const handleDetailLoaded = useCallback((badgeId, detail) => {
     setDetailCache((prev) => new Map(prev).set(badgeId, detail))
