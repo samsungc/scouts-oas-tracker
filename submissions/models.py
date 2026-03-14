@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from badges.models import Badge, BadgeRequirement
+from badges.models import BadgeRequirement
 
 
 class BadgeSubmission(models.Model):
