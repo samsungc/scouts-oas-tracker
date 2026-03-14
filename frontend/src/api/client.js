@@ -1,5 +1,9 @@
 const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') + '/api'
 
+console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+console.log("MODE:", import.meta.env.MODE);
+console.log("PROD:", import.meta.env.PROD);
+
 function getAccessToken() {
   return localStorage.getItem('access')
 }
