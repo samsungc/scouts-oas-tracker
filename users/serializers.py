@@ -31,3 +31,10 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.context["request"].user
         password_validation.validate_password(value, user=user)
         return value
+
+class ScoutListSerializer(serializers.ModelSerializer):
+    """Minimal scout profile returned to scouters/admins."""
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "last_login"]
+        read_only_fields = ["id", "username", "first_name", "last_name", "last_login"]

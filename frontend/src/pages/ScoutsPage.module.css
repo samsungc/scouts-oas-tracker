@@ -1,0 +1,226 @@
+.pageHeader {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* ── Stats grid ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+@media (min-width: 640px) {
+  .statsGrid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.statCard {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 4px;
+}
+
+.statWindow {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Search ── */
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s;
+  background: var(--color-white);
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}
+
+.searchCount {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Scout table ── */
+.table {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.tableHead {
+  display: grid;
+  grid-template-columns: 1fr 130px 130px 120px 110px 28px;
+  padding: 10px 18px;
+  background: var(--color-primary-dark);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  gap: 12px;
+}
+
+.scoutRow {
+  display: grid;
+  grid-template-columns: 1fr 130px 130px 120px 110px 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-white);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.scoutRow:hover {
+  background: #f0f5fb;
+}
+
+.scoutNameCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.scoutDisplayName {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+
+.scoutUsername {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.lastLogin {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.scoutBadges {
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.allDone {
+  color: var(--color-status-approved);
+  font-weight: 700;
+}
+
+.badgeOf {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.pending {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.pendingAlert {
+  color: var(--color-status-submitted);
+  font-weight: 600;
+}
+
+.lastSub {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.rowChevron {
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  text-align: right;
+}
+
+/* ── Empty / footnote ── */
+.empty {
+  background: var(--color-white);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 48px;
+  text-align: center;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+.footNote {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+
+/* ── Back button (detail view) ── */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+
+.backBtn:hover {
+  color: var(--color-primary-dark);
+}

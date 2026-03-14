@@ -40,3 +40,7 @@ class BadgeSubmissionSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class RejectSubmissionSerializer(serializers.Serializer):
+    reviewer_notes = serializers.CharField(required=True)
