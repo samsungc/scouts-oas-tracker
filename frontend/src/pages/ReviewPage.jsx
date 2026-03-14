@@ -44,20 +44,21 @@ export default function ReviewPage() {
     setLoading(true)
     setError('')
     try {
-      const [data, map] = await Promise.all([
-        getReviewSubmissions(filter || undefined),
-        buildRequirementMap(),
-      ])
+      // Start building the requirement map immediately (or use cache),
+      // but don't block the submission list on it.
+      const mapPromise = buildRequirementMap().catch(() => ({}))
+      const data = await getReviewSubmissions(filter || undefined)
       setSubmissions(data)
+      setLoading(false)
+      const map = await mapPromise
       setRequirementMap(map)
     } catch (err) {
+      setLoading(false)
       if (err.status === 403) {
         setError('You do not have permission to view this page.')
       } else {
         setError('Failed to load submissions. Please try refreshing.')
       }
-    } finally {
-      setLoading(false)
     }
   }
 
