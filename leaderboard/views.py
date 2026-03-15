@@ -12,10 +12,11 @@ from submissions.models import BadgeSubmission
 from badges.models import Badge
 
 RANK_LABELS = [
-    (500, "Legendary Scout"),
-    (300, "Good Scout"),
-    (150, "Scout"),
-    (50, "Novice"),
+    (6767, "OAS Master"),
+    (5000, "Legendary Scout"),
+    (3000, "Good Scout"),
+    (2000, "Scout"),
+    (1000, "Novice"),
     (0, "Noob"),
 ]
 

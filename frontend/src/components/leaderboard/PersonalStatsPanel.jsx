@@ -1,5 +1,14 @@
 import styles from './PersonalStatsPanel.module.css'
 
+const RANK_LEVELS = [
+  { threshold: 0,    label: 'Noob' },
+  { threshold: 1000, label: 'Novice' },
+  { threshold: 2000, label: 'Scout' },
+  { threshold: 3000, label: 'Good Scout' },
+  { threshold: 5000, label: 'Legendary Scout' },
+  { threshold: 6767, label: 'OAS Master' },
+]
+
 const CATEGORY_LABELS = {
   vertical_skills: 'Vertical Skills',
   sailing_skills: 'Sailing Skills',
@@ -53,6 +62,22 @@ export default function PersonalStatsPanel({ stats }) {
               Best: {longest_streak_days} days
             </span>
           )}
+          <div className={styles.rankLadder}>
+            {RANK_LEVELS.map((level) => {
+              const reached = total_points >= level.threshold
+              const isCurrent = rank_label === level.label
+              return (
+                <div
+                  key={level.threshold}
+                  className={`${styles.rankStep} ${reached ? styles.rankReached : ''} ${isCurrent ? styles.rankCurrent : ''}`}
+                >
+                  <span className={styles.rankDot} />
+                  <span className={styles.rankStepLabel}>{level.label}</span>
+                  <span className={styles.rankStepPts}>{level.threshold.toLocaleString()} pts</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className={styles.pills}>
