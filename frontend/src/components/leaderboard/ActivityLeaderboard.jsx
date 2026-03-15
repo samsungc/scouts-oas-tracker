@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getActivityLeaderboard } from '../../api/leaderboard'
+import Pagination from '../ui/Pagination'
 import Spinner from '../ui/Spinner'
 import ErrorMessage from '../ui/ErrorMessage'
 import styles from './ActivityLeaderboard.module.css'
@@ -11,14 +12,17 @@ const WINDOWS = [
 ]
 
 const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
+const PAGE_SIZE = 5
 
 export default function ActivityLeaderboard({ myStats, currentUserId }) {
   const [window, setWindow] = useState('7d')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
+    setPage(1)
     load(window)
   }, [window])
 
@@ -34,6 +38,10 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
       setLoading(false)
     }
   }
+
+  const entries = data?.entries ?? []
+  const totalPages = Math.ceil(entries.length / PAGE_SIZE)
+  const pageEntries = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className={styles.section}>
@@ -57,13 +65,13 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
 
       {!loading && !error && data && (
         <>
-          {data.entries.length === 0 ? (
+          {entries.length === 0 ? (
             <div className={styles.empty}>
               No activity in this period yet. Start submitting to climb the board!
             </div>
           ) : (
             <div className={styles.table}>
-              {data.entries.map((entry) => {
+              {pageEntries.map((entry) => {
                 const isMe = entry.scout_id === currentUserId
                 const streakDays = myStats?.current_streak_days || 0
                 const showFlame = isMe && streakDays >= 3
@@ -90,6 +98,7 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
               })}
             </div>
           )}
+          <Pagination page={page} totalPages={totalPages} onPage={setPage} />
         </>
       )}
     </div>

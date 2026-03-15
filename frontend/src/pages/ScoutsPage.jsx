@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
-import { getScouts } from '../api/users'
+import { getScoutStats } from '../api/users'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import CreateUserModal from '../components/scouts/CreateUserModal'
 import Spinner from '../components/ui/Spinner'
@@ -86,13 +86,16 @@ function formatLastLogin(dateStr) {
 // ─── component ──────────────────────────────────────────────────────────────
 
 export default function ScoutsPage() {
-  const [scouts, setScouts] = useState([])          // from /api/users/scouts/
+  const [scouts, setScouts] = useState([])        // from /api/users/scouts/stats/
+  const [summary, setSummary] = useState(null)    // aggregate counts from stats endpoint
   const [badgeDetails, setBadgeDetails] = useState([])
-  const [allSubmissions, setAllSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [selectedScout, setSelectedScout] = useState(null)
+  const [detailScout, setDetailScout] = useState(null)   // enriched scout for detail view
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState('')
   const [page, setPage] = useState(1)
   const [showCreateUser, setShowCreateUser] = useState(false)
 
@@ -100,13 +103,12 @@ export default function ScoutsPage() {
     setLoading(true)
     setError('')
     try {
-      const [scoutList, badgeList, subs] = await Promise.all([
-        getScouts(),
+      const [statsRes, badgeList] = await Promise.all([
+        getScoutStats(),
         getBadges(),
-        getReviewSubmissions(),
       ])
-      setScouts(scoutList)
-      setAllSubmissions(subs)
+      setScouts(statsRes.scouts)
+      setSummary(statsRes.summary)
       setBadgeDetails(badgeList)
       setLoading(false)
     } catch {
@@ -119,46 +121,36 @@ export default function ScoutsPage() {
     load()
   }, [load])
 
-  // Group submissions by scout username
-  const subsByScout = useMemo(() => {
-    const map = {}
-    for (const sub of allSubmissions) {
-      const u = sub.scout_username
-      if (!map[u]) map[u] = []
-      map[u].push(sub)
-    }
-    return map
-  }, [allSubmissions])
-
-  // Enrich each scout with computed stats
-  const enrichedScouts = useMemo(
-    () =>
-      scouts.map((scout) => {
-        const scoutSubs = subsByScout[scout.username] ?? []
-        const { subByReq, completions, lastSubmittedAt } = buildScoutStats(
-          scoutSubs,
-          badgeDetails,
-        )
-        return { ...scout, subByReq, completions, lastSubmittedAt, submissions: scoutSubs }
-      }),
-    [scouts, subsByScout, badgeDetails],
+  // When a scout row is clicked, lazy-load their submissions for the detail view
+  const handleScoutClick = useCallback(
+    async (scout) => {
+      setSelectedScout(scout.username)
+      setDetailScout(null)
+      setDetailLoading(true)
+      setDetailError('')
+      try {
+        const subs = await getReviewSubmissions({ scout_id: scout.id })
+        const { subByReq, completions, lastSubmittedAt } = buildScoutStats(subs, badgeDetails)
+        setDetailScout({ ...scout, subByReq, completions, lastSubmittedAt, submissions: subs })
+      } catch {
+        setDetailError('Failed to load scout details. Please try again.')
+      } finally {
+        setDetailLoading(false)
+      }
+    },
+    [badgeDetails],
   )
 
-  // ── Summary stats ──
-  const now = Date.now()
-  const allCompletions = enrichedScouts.flatMap((s) => s.completions)
-  const stats = {
-    total: scouts.length,
-    last24h: allCompletions.filter((c) => now - c.completedAt < 86_400_000).length,
-    lastWeek: allCompletions.filter((c) => now - c.completedAt < 7 * 86_400_000).length,
-    lastMonth: allCompletions.filter((c) => now - c.completedAt < 30 * 86_400_000).length,
-  }
+  const activeBadgeCount = summary?.active_badge_count ?? badgeDetails.filter((b) => b.is_active).length
 
-  const activeBadgeCount = badgeDetails.filter((b) => b.is_active).length
-
-  const filteredScouts = enrichedScouts.filter((s) =>
-    s.username.toLowerCase().includes(search.toLowerCase()) ||
-    `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()),
+  const filteredScouts = useMemo(
+    () =>
+      scouts.filter(
+        (s) =>
+          s.username.toLowerCase().includes(search.toLowerCase()) ||
+          `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [scouts, search],
   )
 
   const totalPages = Math.ceil(filteredScouts.length / PAGE_SIZE)
@@ -166,17 +158,20 @@ export default function ScoutsPage() {
 
   // ── Scout detail view ──
   if (selectedScout) {
-    const scout = enrichedScouts.find((s) => s.username === selectedScout)
     return (
       <div>
         <button className={styles.backBtn} onClick={() => setSelectedScout(null)}>
           ← Back to Scouts
         </button>
-        <ScoutDetail
-          scout={scout}
-          badgeDetails={badgeDetails}
-          activeBadgeCount={activeBadgeCount}
-        />
+        {detailLoading && <Spinner centered />}
+        {detailError && <ErrorMessage message={detailError} />}
+        {detailScout && (
+          <ScoutDetail
+            scout={detailScout}
+            badgeDetails={badgeDetails}
+            activeBadgeCount={activeBadgeCount}
+          />
+        )}
       </div>
     )
   }
@@ -205,26 +200,26 @@ export default function ScoutsPage() {
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}
 
-      {!loading && !error && (
+      {!loading && !error && summary && (
         <>
           {/* ── Stats row ── */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{stats.total}</span>
+              <span className={styles.statValue}>{summary.total}</span>
               <span className={styles.statLabel}>Total Scouts</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{stats.last24h}</span>
+              <span className={styles.statValue}>{summary.completions_24h}</span>
               <span className={styles.statLabel}>Badges Completed</span>
               <span className={styles.statWindow}>Past 24 hours</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{stats.lastWeek}</span>
+              <span className={styles.statValue}>{summary.completions_7d}</span>
               <span className={styles.statLabel}>Badges Completed</span>
               <span className={styles.statWindow}>Past 7 days</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{stats.lastMonth}</span>
+              <span className={styles.statValue}>{summary.completions_30d}</span>
               <span className={styles.statLabel}>Badges Completed</span>
               <span className={styles.statWindow}>Past 30 days</span>
             </div>
@@ -262,7 +257,6 @@ export default function ScoutsPage() {
                 <span></span>
               </div>
               {paginatedScouts.map((scout) => {
-                const pending = scout.submissions.filter((s) => s.status === 'submitted').length
                 const displayName =
                   scout.first_name || scout.last_name
                     ? `${scout.first_name} ${scout.last_name}`.trim()
@@ -271,7 +265,7 @@ export default function ScoutsPage() {
                   <button
                     key={scout.id}
                     className={styles.scoutRow}
-                    onClick={() => setSelectedScout(scout.username)}
+                    onClick={() => handleScoutClick(scout)}
                   >
                     <span className={styles.scoutNameCol}>
                       <span className={styles.scoutDisplayName}>{displayName}</span>
@@ -282,19 +276,19 @@ export default function ScoutsPage() {
                     <span className={styles.scoutBadges}>
                       <span
                         className={
-                          scout.completions.length === activeBadgeCount && activeBadgeCount > 0
+                          scout.badges_complete === activeBadgeCount && activeBadgeCount > 0
                             ? styles.allDone
                             : ''
                         }
                       >
-                        {scout.completions.length}
+                        {scout.badges_complete}
                       </span>
                       <span className={styles.badgeOf}> / {activeBadgeCount}</span>
                     </span>
-                    <span className={`${styles.pending} ${pending > 0 ? styles.pendingAlert : ''}`}>
-                      {pending > 0 ? `${pending} pending` : '—'}
+                    <span className={`${styles.pending} ${scout.pending_review > 0 ? styles.pendingAlert : ''}`}>
+                      {scout.pending_review > 0 ? `${scout.pending_review} pending` : '—'}
                     </span>
-                    <span className={styles.lastSub}>{timeSince(scout.lastSubmittedAt)}</span>
+                    <span className={styles.lastSub}>{timeSince(scout.last_submission_at)}</span>
                     <span className={styles.lastLogin}>{formatLastLogin(scout.last_login)}</span>
                     <span className={styles.rowChevron}>›</span>
                   </button>

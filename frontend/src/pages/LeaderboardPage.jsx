@@ -16,9 +16,6 @@ export default function LeaderboardPage() {
   const [myStats, setMyStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [bannerDismissed, setBannerDismissed] = useState(
-    () => sessionStorage.getItem('leaderboard_banner_dismissed') === '1'
-  )
 
   useEffect(() => {
     load()
@@ -40,11 +37,6 @@ export default function LeaderboardPage() {
     }
   }
 
-  function dismissBanner() {
-    sessionStorage.setItem('leaderboard_banner_dismissed', '1')
-    setBannerDismissed(true)
-  }
-
   if (loading) return <Spinner centered />
   if (error) return <ErrorMessage message={error} />
 
@@ -54,10 +46,6 @@ export default function LeaderboardPage() {
         <h1 className={styles.title}>Leaderboard</h1>
         <p className={styles.subtitle}>See how your venturer is progressing through badge requirements.</p>
       </div>
-
-      {!bannerDismissed && champions && (
-        <GroupMilestoneBanner champions={champions} onDismiss={dismissBanner} />
-      )}
 
       {isScout && myStats && <PersonalStatsPanel stats={myStats} />}
 
@@ -69,20 +57,6 @@ export default function LeaderboardPage() {
           currentUserId={user?.id}
         />
       )}
-    </div>
-  )
-}
-
-function GroupMilestoneBanner({ champions, onDismiss }) {
-  const totalChampions = champions.filter((c) => c.champion !== null).length
-  if (totalChampions === 0) return null
-
-  return (
-    <div className={styles.banner}>
-      <span>
-        🏕️ Your venturer has claimed {totalChampions} out of 10 category champion{totalChampions !== 1 ? 's' : ''}! Keep going!
-      </span>
-      <button className={styles.bannerClose} onClick={onDismiss}>✕</button>
     </div>
   )
 }

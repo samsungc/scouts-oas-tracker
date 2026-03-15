@@ -113,6 +113,72 @@
   letter-spacing: 0.04em;
 }
 
+/* Rank ladder */
+.rankLadder {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.rankStep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  width: 100%;
+}
+
+.rankDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg-page);
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.rankReached .rankDot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.rankCurrent .rankDot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.rankStepLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1;
+  flex: 1;
+}
+
+.rankReached .rankStepLabel {
+  color: var(--color-text);
+}
+
+.rankCurrent .rankStepLabel {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.rankStepPts {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rankReached .rankStepPts {
+  color: var(--color-text-muted);
+}
+
+.rankCurrent .rankStepPts {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
 /* Category bars */
 .categoryBars {
   border-top: 1.5px solid var(--color-border-light);

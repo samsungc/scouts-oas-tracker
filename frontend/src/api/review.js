@@ -1,8 +1,13 @@
 import { api } from './client'
 
-export function getReviewSubmissions(status) {
-  const qs = status ? `?status=${status}` : ''
-  return api.get(`/review/submissions/${qs}`)
+export function getReviewSubmissions(params) {
+  // Accept either a plain status string (legacy) or an object { status, scout_id }
+  const p = typeof params === 'string' ? { status: params } : (params ?? {})
+  const qs = new URLSearchParams()
+  if (p.status) qs.set('status', p.status)
+  if (p.scout_id) qs.set('scout_id', p.scout_id)
+  const query = qs.toString()
+  return api.get(`/review/submissions/${query ? '?' + query : ''}`)
 }
 
 export function approveSubmission(submissionId, reviewerNotes = '') {
