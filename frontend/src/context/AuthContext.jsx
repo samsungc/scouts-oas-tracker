@@ -48,6 +48,7 @@ export function AuthProvider({ children }) {
         isLoading,
         login,
         logout,
+        refreshUser: loadUser,
       }}
     >
       {children}

@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
 import { getScouts } from '../api/users'
 import ScoutDetail from '../components/scouts/ScoutDetail'
+import CreateUserModal from '../components/scouts/CreateUserModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import Pagination from '../components/ui/Pagination'
@@ -93,28 +94,30 @@ export default function ScoutsPage() {
   const [search, setSearch] = useState('')
   const [selectedScout, setSelectedScout] = useState(null)
   const [page, setPage] = useState(1)
+  const [showCreateUser, setShowCreateUser] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const [scoutList, badgeList, subs] = await Promise.all([
+        getScouts(),
+        getBadges(),
+        getReviewSubmissions(),
+      ])
+      setScouts(scoutList)
+      setAllSubmissions(subs)
+      setBadgeDetails(badgeList)
+      setLoading(false)
+    } catch {
+      setLoading(false)
+      setError('Failed to load scout data. Please try refreshing.')
+    }
+  }, [])
 
   useEffect(() => {
-    async function load() {
-      setLoading(true)
-      setError('')
-      try {
-        const [scoutList, badgeList, subs] = await Promise.all([
-          getScouts(),
-          getBadges(),
-          getReviewSubmissions(),
-        ])
-        setScouts(scoutList)
-        setAllSubmissions(subs)
-        setBadgeDetails(badgeList)
-        setLoading(false)
-      } catch {
-        setLoading(false)
-        setError('Failed to load scout data. Please try refreshing.')
-      }
-    }
     load()
-  }, [])
+  }, [load])
 
   // Group submissions by scout username
   const subsByScout = useMemo(() => {
@@ -182,11 +185,22 @@ export default function ScoutsPage() {
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.title}>Scouts</h1>
-        <p className={styles.subtitle}>
-          Summary of all scouts and their OAS badge progress.
-        </p>
+        <div>
+          <h1 className={styles.title}>Scouts</h1>
+          <p className={styles.subtitle}>
+            Summary of all scouts and their OAS badge progress.
+          </p>
+        </div>
+        <button className={styles.createUserBtn} onClick={() => setShowCreateUser(true)}>
+          + Create User
+        </button>
       </div>
+      {showCreateUser && (
+        <CreateUserModal
+          onClose={() => setShowCreateUser(false)}
+          onCreated={load}
+        />
+      )}
 
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}

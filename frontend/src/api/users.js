@@ -4,7 +4,23 @@ export function getMe() {
   return api.get('/users/me/')
 }
 
+export function updateMe(data) {
+  return api.patch('/users/me/', data)
+}
+
+export function changePassword(currentPassword, newPassword) {
+  return api.post('/users/change-password/', {
+    current_password: currentPassword,
+    new_password: newPassword,
+  })
+}
+
 /** Returns all scouts (role=scout). Scouter/admin only. */
 export function getScouts() {
   return api.get('/users/scouts/')
+}
+
+/** Create a new user. Scouter/admin only. */
+export function createUser(data) {
+  return api.post('/users/create/', data)
 }

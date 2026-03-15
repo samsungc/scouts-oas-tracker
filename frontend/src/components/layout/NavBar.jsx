@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import ProfileModal from '../ui/ProfileModal'
 import styles from './NavBar.module.css'
 
 export default function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [showProfile, setShowProfile] = useState(false)
 
   function handleLogout() {
     logout()
@@ -15,6 +18,7 @@ export default function NavBar() {
   const isScout = user?.role === 'scout'
 
   return (
+    <>
     <nav className={styles.nav}>
       <div className={styles.inner}>
         <div className={styles.brand}>
@@ -85,11 +89,16 @@ export default function NavBar() {
               Hello, {user.first_name || user.username}
             </span>
           )}
+          <button className={styles.profileBtn} onClick={() => setShowProfile(true)}>
+            My Profile
+          </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Sign Out
           </button>
         </div>
       </div>
     </nav>
+    {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
+    </>
   )
 }
