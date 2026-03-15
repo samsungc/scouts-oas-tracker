@@ -4,7 +4,10 @@ import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
+import Pagination from '../components/ui/Pagination'
 import styles from './ReviewPage.module.css'
+
+const PAGE_SIZE = 20
 
 const FILTERS = [
   { key: 'submitted', label: 'Pending Review' },
@@ -17,8 +20,10 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
+    setPage(1)
     loadSubmissions()
   }, [filter])
 
@@ -95,17 +100,24 @@ export default function ReviewPage() {
               </p>
             </div>
           ) : (
-            <div className={styles.cards}>
-              {submissions.map((sub) => (
-                <ReviewCard
-                  key={sub.id}
-                  submission={sub}
-                  requirement={sub.requirement_detail}
-                  onApproved={handleApproved}
-                  onRejectClick={setRejectTarget}
-                />
-              ))}
-            </div>
+            <>
+              <div className={styles.cards}>
+                {submissions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((sub) => (
+                  <ReviewCard
+                    key={sub.id}
+                    submission={sub}
+                    requirement={sub.requirement_detail}
+                    onApproved={handleApproved}
+                    onRejectClick={setRejectTarget}
+                  />
+                ))}
+              </div>
+              <Pagination
+                page={page}
+                totalPages={Math.ceil(submissions.length / PAGE_SIZE)}
+                onPage={setPage}
+              />
+            </>
           )}
         </>
       )}

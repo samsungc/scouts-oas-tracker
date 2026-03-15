@@ -12,6 +12,7 @@ export default function NavBar() {
   }
 
   const isReviewer = user?.role === 'scouter' || user?.role === 'admin'
+  const isScout = user?.role === 'scout'
 
   return (
     <nav className={styles.nav}>
@@ -29,6 +30,16 @@ export default function NavBar() {
           >
             Badges
           </NavLink>
+          {isScout && (
+            <NavLink
+              to="/my-submissions"
+              className={({ isActive }) =>
+                `${styles.link} ${isActive ? styles.active : ''}`
+              }
+            >
+              My Submissions
+            </NavLink>
+          )}
           {isReviewer && (
             <>
               <NavLink

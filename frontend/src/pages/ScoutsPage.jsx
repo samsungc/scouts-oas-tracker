@@ -5,7 +5,10 @@ import { getScouts } from '../api/users'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
+import Pagination from '../components/ui/Pagination'
 import styles from './ScoutsPage.module.css'
+
+const PAGE_SIZE = 20
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -89,6 +92,7 @@ export default function ScoutsPage() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [selectedScout, setSelectedScout] = useState(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     async function load() {
@@ -154,6 +158,9 @@ export default function ScoutsPage() {
     `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()),
   )
 
+  const totalPages = Math.ceil(filteredScouts.length / PAGE_SIZE)
+  const paginatedScouts = filteredScouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   // ── Scout detail view ──
   if (selectedScout) {
     const scout = enrichedScouts.find((s) => s.username === selectedScout)
@@ -216,7 +223,7 @@ export default function ScoutsPage() {
               className={styles.searchInput}
               placeholder="Search scouts by name or username…"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             />
             {search && (
               <span className={styles.searchCount}>
@@ -240,7 +247,7 @@ export default function ScoutsPage() {
                 <span>Last Login</span>
                 <span></span>
               </div>
-              {filteredScouts.map((scout) => {
+              {paginatedScouts.map((scout) => {
                 const pending = scout.submissions.filter((s) => s.status === 'submitted').length
                 const displayName =
                   scout.first_name || scout.last_name
@@ -281,6 +288,7 @@ export default function ScoutsPage() {
               })}
             </div>
           )}
+          <Pagination page={page} totalPages={totalPages} onPage={setPage} />
         </>
       )}
     </div>
