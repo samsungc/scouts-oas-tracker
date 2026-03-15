@@ -11,3 +11,10 @@ export function getBadgeDetail(id) {
 export function getRequirement(id) {
   return api.get(`/badges/requirements/${id}/`)
 }
+
+export function importBadgeRecords(file, dryRun = false) {
+  const form = new FormData()
+  form.append('file', file)
+  if (dryRun) form.append('dry_run', 'true')
+  return api.post('/badges/import/', form)
+}

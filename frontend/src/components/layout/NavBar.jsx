@@ -68,6 +68,16 @@ export default function NavBar() {
               </NavLink>
             </>
           )}
+          {user?.role === 'admin' && (
+            <NavLink
+              to="/import"
+              className={({ isActive }) =>
+                `${styles.link} ${isActive ? styles.active : ''}`
+              }
+            >
+              Import
+            </NavLink>
+          )}
         </div>
         <div className={styles.userArea}>
           {user && (

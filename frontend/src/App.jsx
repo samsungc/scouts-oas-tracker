@@ -10,6 +10,7 @@ import ScoutsPage from './pages/ScoutsPage'
 import MySubmissionsPage from './pages/MySubmissionsPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import NotFoundPage from './pages/NotFoundPage'
+import ImportPage from './pages/ImportPage'
 
 function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -110,6 +111,17 @@ export default function App() {
           <ProtectedRoute roles={['scouter', 'admin']}>
             <Layout>
               <ScoutsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/import"
+        element={
+          <ProtectedRoute roles={['admin']}>
+            <Layout>
+              <ImportPage />
             </Layout>
           </ProtectedRoute>
         }
