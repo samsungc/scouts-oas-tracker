@@ -26,8 +26,11 @@ export default function BadgeCategoryGroup({
   detailCache,
   onDetailLoaded,
   isScout,
+  isSearching,
+  filteredReqsMap,
 }) {
   const [open, setOpen] = useState(true)
+  const isOpen = isSearching || open
 
   // Sort by numeric suffix so "Vertical Skills 2" always follows "Vertical Skills 1"
   const sortedBadges = [...badges].sort((a, b) => badgeOrder(a.name) - badgeOrder(b.name))
@@ -52,7 +55,7 @@ export default function BadgeCategoryGroup({
       <button
         className={styles.categoryHeader}
         onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
+        aria-expanded={isOpen}
       >
         <span className={styles.categoryLabel}>{categoryLabel}</span>
 
@@ -62,10 +65,10 @@ export default function BadgeCategoryGroup({
           </span>
         )}
 
-        <span className={`${styles.chevron} ${open ? styles.chevronUp : ''}`}>▾</span>
+        <span className={`${styles.chevron} ${isOpen ? styles.chevronUp : ''}`}>▾</span>
       </button>
 
-      {open && (
+      {isOpen && (
         <div className={styles.grid}>
           {sortedBadges.map((badge, idx) => (
             <BadgeCard
@@ -76,6 +79,8 @@ export default function BadgeCategoryGroup({
               onDetailLoaded={onDetailLoaded}
               isComplete={completeFlags[idx]}
               isLocked={lockedFlags[idx]}
+              isSearching={isSearching}
+              filteredRequirements={filteredReqsMap?.get(badge.id)}
             />
           ))}
         </div>

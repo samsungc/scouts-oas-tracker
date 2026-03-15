@@ -24,6 +24,15 @@ function writeCache(data) {
   try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })) } catch {}
 }
 
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return debounced
+}
+
 const CATEGORY_LABELS = {
   vertical_skills: 'Vertical Skills',
   sailing_skills: 'Sailing Skills',
@@ -47,6 +56,8 @@ export default function BadgesPage() {
   const [detailCache, setDetailCache] = useState(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 200)
 
   useEffect(() => {
     async function load() {
@@ -98,6 +109,33 @@ export default function BadgesPage() {
     grouped[badge.category].push(badge)
   }
 
+  // Filter badges/requirements by search query
+  const isSearching = debouncedQuery.trim().length > 0
+  const lowerQuery = debouncedQuery.toLowerCase().trim()
+
+  const filteredReqsMap = new Map()
+  const displayGrouped = {}
+
+  if (isSearching) {
+    for (const badge of badges) {
+      const reqs = badge.requirements ?? []
+      const matched = reqs.filter(
+        (r) =>
+          r.title?.toLowerCase().includes(lowerQuery) ||
+          r.description?.toLowerCase().includes(lowerQuery),
+      )
+      if (matched.length > 0) {
+        filteredReqsMap.set(badge.id, matched)
+        if (!displayGrouped[badge.category]) displayGrouped[badge.category] = []
+        displayGrouped[badge.category].push(badge)
+      }
+    }
+  } else {
+    Object.assign(displayGrouped, grouped)
+  }
+
+  const noResults = isSearching && Object.keys(displayGrouped).length === 0
+
   return (
     <div>
       <div className={styles.pageHeader}>
@@ -108,24 +146,49 @@ export default function BadgesPage() {
         </p>
       </div>
 
+      <div className={styles.searchBar}>
+        <input
+          type="search"
+          className={styles.searchInput}
+          placeholder="Search requirements…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <button
+            className={styles.clearBtn}
+            onClick={() => setQuery('')}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}
 
       {!loading && !error && (
         <div>
-          {CATEGORY_ORDER.filter((cat) => grouped[cat]?.length > 0).map((cat) => (
-            <BadgeCategoryGroup
-              key={cat}
-              categoryKey={cat}
-              categoryLabel={CATEGORY_LABELS[cat]}
-              badges={grouped[cat]}
-              submissionsMap={submissionsMap}
-              detailCache={detailCache}
-              onDetailLoaded={handleDetailLoaded}
-              isScout={isScout}
-            />
-          ))}
-          {badges.length === 0 && (
+          {noResults ? (
+            <p className={styles.noResults}>No requirements found for &ldquo;{debouncedQuery}&rdquo;.</p>
+          ) : (
+            CATEGORY_ORDER.filter((cat) => displayGrouped[cat]?.length > 0).map((cat) => (
+              <BadgeCategoryGroup
+                key={cat}
+                categoryKey={cat}
+                categoryLabel={CATEGORY_LABELS[cat]}
+                badges={displayGrouped[cat]}
+                submissionsMap={submissionsMap}
+                detailCache={detailCache}
+                onDetailLoaded={handleDetailLoaded}
+                isScout={isScout}
+                isSearching={isSearching}
+                filteredReqsMap={filteredReqsMap}
+              />
+            ))
+          )}
+          {!isSearching && badges.length === 0 && (
             <p className={styles.empty}>No badges available yet.</p>
           )}
         </div>
