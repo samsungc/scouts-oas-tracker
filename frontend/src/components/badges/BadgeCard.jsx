@@ -11,8 +11,11 @@ export default function BadgeCard({
   onDetailLoaded,
   isComplete,
   isLocked,
+  isSearching,
+  filteredRequirements,
 }) {
   const [expanded, setExpanded] = useState(false)
+  const isExpanded = isSearching || expanded
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,7 +38,12 @@ export default function BadgeCard({
     setExpanded((v) => !v)
   }
 
-  const requirementCount = detail?.requirements?.length ?? null
+  const requirementsToShow = filteredRequirements ?? detail?.requirements
+
+  const totalCount = detail?.requirements?.length ?? badge.requirements?.length ?? null
+  const requirementCount = filteredRequirements
+    ? `${filteredRequirements.length} / ${totalCount ?? '?'} match`
+    : totalCount
 
   const cardClass = [
     styles.card,
@@ -49,13 +57,17 @@ export default function BadgeCard({
       <button
         className={styles.header}
         onClick={badge.is_active ? toggleExpand : undefined}
-        aria-expanded={expanded}
+        aria-expanded={isExpanded}
         disabled={!badge.is_active}
       >
         <div className={styles.headerLeft}>
           <span className={styles.name}>{badge.name}</span>
           {requirementCount !== null && (
-            <span className={styles.count}>{requirementCount} requirements</span>
+            <span className={styles.count}>
+              {typeof requirementCount === 'string'
+                ? requirementCount
+                : `${requirementCount} requirements`}
+            </span>
           )}
         </div>
         <div className={styles.headerRight}>
@@ -69,14 +81,14 @@ export default function BadgeCard({
             <span className={styles.lockedTag}>🔒 Locked</span>
           )}
           {badge.is_active && (
-            <span className={`${styles.chevron} ${expanded ? styles.chevronUp : ''}`}>
+            <span className={`${styles.chevron} ${isExpanded ? styles.chevronUp : ''}`}>
               ▾
             </span>
           )}
         </div>
       </button>
 
-      {expanded && badge.is_active && (
+      {isExpanded && badge.is_active && (
         <div className={styles.body}>
           {isLocked && (
             <p className={styles.lockedNotice}>
@@ -85,12 +97,12 @@ export default function BadgeCard({
           )}
           {loading && <Spinner size="sm" />}
           {error && <p className={styles.error}>{error}</p>}
-          {detail && !loading && (
+          {requirementsToShow && !loading && (
             <div className={styles.requirements}>
-              {detail.requirements.length === 0 ? (
+              {requirementsToShow.length === 0 ? (
                 <p className={styles.empty}>No requirements listed.</p>
               ) : (
-                detail.requirements
+                requirementsToShow
                   .slice()
                   .sort((a, b) => a.order - b.order)
                   .map((req) => (
