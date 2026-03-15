@@ -3,6 +3,7 @@ import { getBadges } from '../api/badges'
 import { getSubmissions } from '../api/submissions'
 import { useAuth } from '../context/AuthContext'
 import BadgeCategoryGroup from '../components/badges/BadgeCategoryGroup'
+import BatchApprovalModal from '../components/review/BatchApprovalModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import styles from './BadgesPage.module.css'
@@ -51,6 +52,7 @@ const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS)
 export default function BadgesPage() {
   const { user } = useAuth()
   const isScout = user?.role === 'scout'
+  const isScouter = user?.role === 'scouter' || user?.role === 'admin'
   const [badges, setBadges] = useState([])
   const [submissionsMap, setSubmissionsMap] = useState(new Map())
   const [detailCache, setDetailCache] = useState(new Map())
@@ -58,6 +60,7 @@ export default function BadgesPage() {
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 200)
+  const [batchReviewReq, setBatchReviewReq] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -143,6 +146,7 @@ export default function BadgesPage() {
         <p className={styles.subtitle}>
           Browse all badge categories and their requirements.
           {isScout && ' Click a requirement to submit your evidence.'}
+          {isScouter && ' Click Review on any requirement to batch-approve scouts.'}
         </p>
       </div>
 
@@ -185,6 +189,7 @@ export default function BadgesPage() {
                 isScout={isScout}
                 isSearching={isSearching}
                 filteredReqsMap={filteredReqsMap}
+                onBatchReview={isScouter ? setBatchReviewReq : undefined}
               />
             ))
           )}
@@ -192,6 +197,13 @@ export default function BadgesPage() {
             <p className={styles.empty}>No badges available yet.</p>
           )}
         </div>
+      )}
+
+      {batchReviewReq && (
+        <BatchApprovalModal
+          requirement={batchReviewReq}
+          onClose={() => setBatchReviewReq(null)}
+        />
       )}
     </div>
   )

@@ -16,10 +16,16 @@
 
 .filterBar {
   display: flex;
-  gap: 4px;
+  align-items: flex-end;
+  justify-content: space-between;
   margin-bottom: 24px;
   border-bottom: 2px solid var(--color-border);
   padding-bottom: 0;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 4px;
 }
 
 .filterBtn {

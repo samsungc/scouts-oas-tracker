@@ -28,6 +28,7 @@ export default function BadgeCategoryGroup({
   isScout,
   isSearching,
   filteredReqsMap,
+  onBatchReview,
 }) {
   const [open, setOpen] = useState(true)
   const isOpen = isSearching || open
@@ -81,6 +82,7 @@ export default function BadgeCategoryGroup({
               isLocked={lockedFlags[idx]}
               isSearching={isSearching}
               filteredRequirements={filteredReqsMap?.get(badge.id)}
+              onBatchReview={onBatchReview}
             />
           ))}
         </div>

@@ -75,15 +75,25 @@ export default function ReviewPage() {
       </div>
 
       <div className={styles.filterBar}>
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            className={`${styles.filterBtn} ${filter === f.key ? styles.active : ''}`}
-            onClick={() => setFilter(f.key)}
-          >
-            {f.label}
-          </button>
-        ))}
+        <div className={styles.filterTabs}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              className={`${styles.filterBtn} ${filter === f.key ? styles.active : ''}`}
+              onClick={() => setFilter(f.key)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        {!loading && !error && submissions.length > PAGE_SIZE && (
+          <Pagination
+            compact
+            page={page}
+            totalPages={Math.ceil(submissions.length / PAGE_SIZE)}
+            onPage={setPage}
+          />
+        )}
       </div>
 
       {loading && <Spinner centered />}
