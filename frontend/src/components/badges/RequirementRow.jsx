@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import StatusPill from '../ui/StatusPill'
@@ -8,6 +9,7 @@ export default function RequirementRow({ requirement, badgeId, submissionsMap, b
   const navigate = useNavigate()
   const submission = submissionsMap?.get(requirement.id)
   const isScout = user?.role === 'scout'
+  const [hintOpen, setHintOpen] = useState(false)
 
   return (
     <div className={styles.row}>
@@ -19,9 +21,19 @@ export default function RequirementRow({ requirement, badgeId, submissionsMap, b
             <p className={styles.description}>{requirement.description}</p>
           )}
           {requirement.hint && (
-            <p className={styles.hint}>
-              <span className={styles.hintLabel}>Hint:</span> {requirement.hint}
-            </p>
+            <div className={styles.hintBlock}>
+              <button
+                className={styles.hintToggle}
+                onClick={() => setHintOpen((v) => !v)}
+                aria-expanded={hintOpen}
+              >
+                <span className={styles.hintLabel}>Hint</span>
+                <span className={`${styles.hintChevron} ${hintOpen ? styles.hintChevronUp : ''}`}>▾</span>
+              </button>
+              {hintOpen && (
+                <p className={styles.hint}>{requirement.hint}</p>
+              )}
+            </div>
           )}
         </div>
       </div>

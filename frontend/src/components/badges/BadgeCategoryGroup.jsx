@@ -62,7 +62,6 @@ export default function BadgeCategoryGroup({
           </span>
         )}
 
-        <span className={styles.badge}>{badges.length}</span>
         <span className={`${styles.chevron} ${open ? styles.chevronUp : ''}`}>▾</span>
       </button>
 

@@ -43,15 +43,48 @@
   line-height: 1.4;
 }
 
-.hint {
-  font-size: 0.8rem;
+.hintBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hintToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   color: var(--color-primary);
-  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.hintToggle:hover {
+  opacity: 0.75;
 }
 
 .hintLabel {
   font-weight: 600;
-  font-style: normal;
+}
+
+.hintChevron {
+  font-size: 0.75rem;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.hintChevronUp {
+  transform: rotate(180deg);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  font-style: italic;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .actions {

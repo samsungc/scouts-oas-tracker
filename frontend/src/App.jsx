@@ -7,6 +7,7 @@ import BadgesPage from './pages/BadgesPage'
 import SubmitPage from './pages/SubmitPage'
 import ReviewPage from './pages/ReviewPage'
 import ScoutsPage from './pages/ScoutsPage'
+import MySubmissionsPage from './pages/MySubmissionsPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function ProtectedRoute({ children, roles }) {
@@ -64,6 +65,17 @@ export default function App() {
           <ProtectedRoute roles={['scout']}>
             <Layout>
               <SubmitPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/my-submissions"
+        element={
+          <ProtectedRoute roles={['scout']}>
+            <Layout>
+              <MySubmissionsPage />
             </Layout>
           </ProtectedRoute>
         }
