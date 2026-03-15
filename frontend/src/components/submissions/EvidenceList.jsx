@@ -1,4 +1,5 @@
 import { deleteEvidence } from '../../api/submissions'
+import { mediaUrl } from '../../api/client'
 import styles from './EvidenceList.module.css'
 
 export default function EvidenceList({ evidence, isDraft, onDeleted }) {
@@ -19,16 +20,20 @@ export default function EvidenceList({ evidence, isDraft, onDeleted }) {
             {ev.text_note && (
               <p className={styles.textNote}>{ev.text_note}</p>
             )}
-            {ev.file && (
-              <a
-                href={ev.file}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.fileLink}
-              >
-                📎 {ev.file.split('/').pop()}
-              </a>
-            )}
+            {ev.file && (() => {
+              const url = mediaUrl(ev.file)
+              const filename = ev.file.split('/').pop()
+              const isImage = /\.(jpe?g|png|gif|webp|svg)(\?.*)?$/i.test(filename)
+              return isImage ? (
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  <img src={url} alt={filename} className={styles.imagePreview} />
+                </a>
+              ) : (
+                <a href={url} target="_blank" rel="noopener noreferrer" className={styles.fileLink}>
+                  📎 {filename}
+                </a>
+              )
+            })()}
             <span className={styles.timestamp}>
               {new Date(ev.uploaded_at).toLocaleDateString()}
             </span>

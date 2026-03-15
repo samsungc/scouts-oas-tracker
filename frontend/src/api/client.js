@@ -1,4 +1,11 @@
-const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') + '/api'
+const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const BASE = API_ORIGIN + '/api'
+
+export function mediaUrl(path) {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return API_ORIGIN + path
+}
 
 console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
 console.log("MODE:", import.meta.env.MODE);
