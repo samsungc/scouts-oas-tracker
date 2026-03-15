@@ -6,6 +6,13 @@ class BadgeRequirementSerializer(serializers.ModelSerializer):
         model = BadgeRequirement
         fields = ["id", "title", "description", "hint"]
 
+class BadgeRequirementDetailSerializer(serializers.ModelSerializer):
+    badge_name = serializers.CharField(source='badge.name', read_only=True)
+
+    class Meta:
+        model = BadgeRequirement
+        fields = ["id", "title", "description", "hint", "badge_name"]
+
 class BadgeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badge

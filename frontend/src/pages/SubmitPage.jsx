@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { getBadges, getBadgeDetail } from '../api/badges'
+import { getRequirement } from '../api/badges'
 import { getSubmissions, createSubmission } from '../api/submissions'
 import SubmissionCard from '../components/submissions/SubmissionCard'
 import Button from '../components/ui/Button'
@@ -30,32 +30,13 @@ export default function SubmitPage() {
       setLoading(true)
       setError('')
       try {
-        const [allSubs, allBadges] = await Promise.all([
+        const [allSubs, reqData] = await Promise.all([
           getSubmissions(),
-          getBadges(),
+          getRequirement(requirementId),
         ])
 
-        // Find which badge this requirement belongs to (fetch all in parallel)
-        let foundReq = null
-        let foundBadgeName = ''
-        const details = await Promise.all(
-          allBadges.map((b) => getBadgeDetail(b.id).catch(() => null))
-        )
-        for (let i = 0; i < details.length; i++) {
-          const detail = details[i]
-          if (!detail) continue
-          const req = detail.requirements.find(
-            (r) => String(r.id) === String(requirementId)
-          )
-          if (req) {
-            foundReq = req
-            foundBadgeName = allBadges[i].name
-            break
-          }
-        }
-
-        setRequirement(foundReq)
-        setBadgeName(foundBadgeName)
+        setRequirement(reqData)
+        setBadgeName(reqData.badge_name)
 
         const relatedSubs = allSubs.filter(
           (s) => String(s.requirement) === String(requirementId)
