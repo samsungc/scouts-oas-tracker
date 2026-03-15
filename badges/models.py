@@ -35,5 +35,8 @@ class BadgeRequirement(models.Model):
     hint = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        ordering = ['order']
+
     def __str__(self):
         return f"{self.badge.name} - {self.title}"

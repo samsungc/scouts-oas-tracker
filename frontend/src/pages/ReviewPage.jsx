@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getReviewSubmissions } from '../api/review'
-import { getRequirement } from '../api/badges'
 import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Spinner from '../components/ui/Spinner'
@@ -15,28 +14,13 @@ const FILTERS = [
 export default function ReviewPage() {
   const [filter, setFilter] = useState('submitted')
   const [submissions, setSubmissions] = useState([])
-  const [requirementMap, setRequirementMap] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
-  // Cache badge details so we don't re-fetch on filter change
-  const reqMapRef = useRef({})
 
   useEffect(() => {
     loadSubmissions()
   }, [filter])
-
-  async function buildRequirementMap(subs) {
-    const uniqueIds = [...new Set(subs.map((s) => s.requirement))]
-    const missing = uniqueIds.filter((id) => !reqMapRef.current[id])
-    if (missing.length > 0) {
-      const fetched = await Promise.all(missing.map((id) => getRequirement(id).catch(() => null)))
-      fetched.forEach((req) => {
-        if (req) reqMapRef.current[req.id] = { ...req, badgeName: req.badge_name }
-      })
-    }
-    return { ...reqMapRef.current }
-  }
 
   async function loadSubmissions() {
     setLoading(true)
@@ -44,16 +28,14 @@ export default function ReviewPage() {
     try {
       const data = await getReviewSubmissions(filter || undefined)
       setSubmissions(data)
-      setLoading(false)
-      const map = await buildRequirementMap(data).catch(() => ({}))
-      setRequirementMap(map)
     } catch (err) {
-      setLoading(false)
       if (err.status === 403) {
         setError('You do not have permission to view this page.')
       } else {
         setError('Failed to load submissions. Please try refreshing.')
       }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -118,7 +100,7 @@ export default function ReviewPage() {
                 <ReviewCard
                   key={sub.id}
                   submission={sub}
-                  requirement={requirementMap[sub.requirement]}
+                  requirement={sub.requirement_detail}
                   onApproved={handleApproved}
                   onRejectClick={setRejectTarget}
                 />

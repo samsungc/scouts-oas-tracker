@@ -42,7 +42,7 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         {requirement ? (
           <>
             <div className={styles.requirementHeader}>
-              <span className={styles.badgeName}>{requirement.badgeName}</span>
+              <span className={styles.badgeName}>{requirement.badge_name}</span>
               <span className={styles.requirementTitle}>{requirement.title}</span>
             </div>
             {requirement.description && (
