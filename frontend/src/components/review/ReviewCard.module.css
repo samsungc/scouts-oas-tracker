@@ -127,6 +127,14 @@
   color: var(--color-primary);
 }
 
+.imagePreview {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: var(--radius-sm);
+  display: block;
+  cursor: zoom-in;
+}
+
 .actions {
   display: flex;
   gap: 10px;
