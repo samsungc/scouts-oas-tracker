@@ -13,6 +13,7 @@ class Badge(models.Model):
         ('aquatic_skills', "Aquatic Skills"),
         ('emergency_skills', "Emergency Skills"),
         ('personal_progression', "Personal Progression"),
+        ('awards', "Awards")
 
     ]
 
