@@ -14,8 +14,16 @@ const FILTERS = [
   { key: '', label: 'All Submissions' },
 ]
 
+const DATE_RANGES = [
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last month', days: 30 },
+  { label: 'Last year', days: 365 },
+  { label: 'All time', days: null },
+]
+
 export default function ReviewPage() {
   const [filter, setFilter] = useState('submitted')
+  const [dateRange, setDateRange] = useState(7)
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -25,13 +33,14 @@ export default function ReviewPage() {
   useEffect(() => {
     setPage(1)
     loadSubmissions()
-  }, [filter])
+  }, [filter, dateRange])
 
   async function loadSubmissions() {
     setLoading(true)
     setError('')
     try {
-      const data = await getReviewSubmissions(filter || undefined)
+      const params = filter ? { status: filter } : { days: dateRange ?? undefined }
+      const data = await getReviewSubmissions(params)
       setSubmissions(data)
     } catch (err) {
       if (err.status === 403) {
@@ -80,12 +89,25 @@ export default function ReviewPage() {
             <button
               key={f.key}
               className={`${styles.filterBtn} ${filter === f.key ? styles.active : ''}`}
-              onClick={() => setFilter(f.key)}
+              onClick={() => { setFilter(f.key); setDateRange(7) }}
             >
               {f.label}
             </button>
           ))}
         </div>
+        {filter === '' && (
+          <div className={styles.dateRangeGroup}>
+            {DATE_RANGES.map((r) => (
+              <button
+                key={r.days}
+                className={`${styles.dateRangeBtn} ${dateRange === r.days ? styles.dateRangeBtnActive : ''}`}
+                onClick={() => setDateRange(r.days)}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
         {!loading && !error && submissions.length > PAGE_SIZE && (
           <Pagination
             compact
