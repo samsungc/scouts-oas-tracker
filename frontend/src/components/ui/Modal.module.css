@@ -15,6 +15,10 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
 }
 
 .header {
@@ -44,4 +48,5 @@
 
 .body {
   padding: 20px 24px 24px;
+  overflow-y: auto;
 }
