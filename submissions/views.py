@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
@@ -104,7 +106,15 @@ class ReviewSubmissionViewSet(
         if requirement_id:
             queryset = queryset.filter(requirement_id=requirement_id)
 
-        return queryset.order_by("-created_at")
+        days_param = self.request.query_params.get("days")
+        if days_param:
+            try:
+                cutoff = timezone.now() - timedelta(days=int(days_param))
+                queryset = queryset.filter(submitted_at__gte=cutoff)
+            except ValueError:
+                pass
+
+        return queryset.order_by("-submitted_at")
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
