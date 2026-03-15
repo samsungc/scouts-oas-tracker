@@ -14,6 +14,17 @@ class SubmissionEvidenceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "uploaded_at"]
 
+    def validate_file(self, value):
+        if value is None:
+            return value
+        max_size = 10 * 1024 * 1024  # 10 MB
+        if value.size > max_size:
+            raise serializers.ValidationError("File must be 10 MB or smaller.")
+        allowed_types = ("image/", "video/", "application/pdf")
+        if not any(value.content_type.startswith(t) for t in allowed_types):
+            raise serializers.ValidationError("Only photos, videos, and PDFs are allowed.")
+        return value
+
 
 class BadgeSubmissionSerializer(serializers.ModelSerializer):
     evidence = SubmissionEvidenceSerializer(many=True, read_only=True)

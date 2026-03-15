@@ -11,10 +11,23 @@ export default function EvidenceForm({ submissionId, onAdded }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const ALLOWED_TYPES = ['image/', 'video/', 'application/pdf']
+  const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (mode === 'text' && !textNote.trim()) return
     if (mode === 'file' && !file) return
+    if (mode === 'file') {
+      if (file.size > MAX_SIZE) {
+        setError('File must be 10 MB or smaller.')
+        return
+      }
+      if (!ALLOWED_TYPES.some((t) => file.type.startsWith(t))) {
+        setError('Only photos, videos, and PDFs are allowed.')
+        return
+      }
+    }
     setLoading(true)
     setError('')
     try {
@@ -65,6 +78,7 @@ export default function EvidenceForm({ submissionId, onAdded }) {
         <input
           className={styles.fileInput}
           type="file"
+          accept="image/*,video/*,.pdf"
           onChange={(e) => setFile(e.target.files[0] || null)}
           required
         />
