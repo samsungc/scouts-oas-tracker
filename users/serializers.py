@@ -4,6 +4,8 @@ from .models import User
 
 
 class MeSerializer(serializers.ModelSerializer):
+    peer_review_eligible = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -13,8 +15,15 @@ class MeSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "role",
+            "peer_review_eligible",
         ]
         read_only_fields = ["id", "username", "role"]
+
+    def get_peer_review_eligible(self, obj):
+        if obj.role != 'scout':
+            return False
+        from submissions.utils import get_peer_reviewable_requirement_ids
+        return bool(get_peer_reviewable_requirement_ids(obj))
 
 
 class ChangePasswordSerializer(serializers.Serializer):

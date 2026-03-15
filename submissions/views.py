@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import BadgeSubmission, SubmissionEvidence
 from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer
 from .permissions import IsScouterOrAdmin
+from .utils import get_peer_reviewable_requirement_ids
 
 
 class BadgeSubmissionViewSet(viewsets.ModelViewSet):
@@ -202,6 +203,88 @@ class ReviewSubmissionViewSet(
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+class PeerReviewViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = BadgeSubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        eligible_req_ids = get_peer_reviewable_requirement_ids(self.request.user)
+
+        queryset = BadgeSubmission.objects.filter(
+            requirement_id__in=eligible_req_ids,
+        ).exclude(
+            scout=self.request.user,
+        ).select_related(
+            "scout",
+            "requirement",
+            "reviewed_by",
+        ).prefetch_related("evidence")
+
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+        else:
+            queryset = queryset.filter(status="submitted")
+
+        return queryset.order_by("-submitted_at")
+
+    @action(detail=False, methods=["get"], url_path="eligible_requirements")
+    def eligible_requirements(self, request):
+        from badges.models import Badge, BadgeRequirement
+        eligible_req_ids = get_peer_reviewable_requirement_ids(request.user)
+        requirements = BadgeRequirement.objects.filter(
+            id__in=eligible_req_ids
+        ).select_related("badge").values(
+            "id", "title", "badge__id", "badge__name", "badge__category"
+        )
+        return Response(list(requirements))
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        submission = self.get_object()
+
+        if submission.status != "submitted":
+            return Response(
+                {"detail": "Only submitted submissions can be approved."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        submission.status = "approved"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = request.user
+        submission.reviewer_notes = request.data.get("reviewer_notes", "")
+        submission.save()
+
+        serializer = self.get_serializer(submission, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        submission = self.get_object()
+
+        if submission.status != "submitted":
+            return Response(
+                {"detail": "Only submitted submissions can be rejected."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        action_serializer = RejectSubmissionSerializer(data=request.data)
+        action_serializer.is_valid(raise_exception=True)
+
+        submission.status = "rejected"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = request.user
+        submission.reviewer_notes = action_serializer.validated_data["reviewer_notes"]
+        submission.save()
+
+        serializer = self.get_serializer(submission, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SubmissionEvidenceViewSet(
     mixins.DestroyModelMixin,

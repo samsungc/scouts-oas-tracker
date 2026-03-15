@@ -5,10 +5,12 @@ import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
 import styles from './RejectModal.module.css'
 
-export default function RejectModal({ submission, onRejected, onClose }) {
+export default function RejectModal({ submission, onRejected, onClose, onReject }) {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const rejectAction = onReject ?? ((id, notes) => rejectSubmission(id, notes))
 
   async function handleConfirm() {
     if (!notes.trim()) {
@@ -18,7 +20,7 @@ export default function RejectModal({ submission, onRejected, onClose }) {
     setLoading(true)
     setError('')
     try {
-      const updated = await rejectSubmission(submission.id, notes.trim())
+      const updated = await rejectAction(submission.id, notes.trim())
       onRejected(updated)
     } catch (err) {
       setError(err.message || 'Failed to reject submission.')
