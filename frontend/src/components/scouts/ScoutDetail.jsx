@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './ScoutDetail.module.css'
+import ReviewCard from '../review/ReviewCard'
+import RejectModal from '../review/RejectModal'
+import Modal from '../ui/Modal'
 
 // ─── constants ──────────────────────────────────────────────────────────────
 
@@ -53,10 +56,32 @@ function formatDate(dateStr) {
 
 export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
   const [expandedBadge, setExpandedBadge] = useState(null)
+  const [localSubByReq, setLocalSubByReq] = useState(() => ({ ...scout.subByReq }))
+  const [reviewTarget, setReviewTarget] = useState(null) // { sub, req, badge }
+  const [rejectTarget, setRejectTarget] = useState(null) // sub
+
+  useEffect(() => {
+    setLocalSubByReq({ ...scout.subByReq })
+  }, [scout.username])
+
+  function handleApproved(updated) {
+    setLocalSubByReq((prev) => ({ ...prev, [updated.requirement]: updated }))
+    setReviewTarget(null)
+  }
+
+  function handleRejectClick(sub) {
+    setReviewTarget(null)
+    setRejectTarget(sub)
+  }
+
+  function handleRejected(updated) {
+    setLocalSubByReq((prev) => ({ ...prev, [updated.requirement]: updated }))
+    setRejectTarget(null)
+  }
 
   if (!scout) return null
 
-  const { subByReq } = scout
+  const subByReq = localSubByReq
 
   // ── Per-badge stats ──
   const activeBadges = badgeDetails.filter((b) => b.is_active)
@@ -110,6 +135,29 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
 
   return (
     <div>
+      {reviewTarget && (
+        <Modal title="Review Submission" onClose={() => setReviewTarget(null)}>
+          <ReviewCard
+            submission={reviewTarget.sub}
+            requirement={{
+              badge_name: reviewTarget.badge.name,
+              title: reviewTarget.req.title,
+              description: reviewTarget.req.description,
+              hint: reviewTarget.req.hint,
+            }}
+            onApproved={handleApproved}
+            onRejectClick={handleRejectClick}
+          />
+        </Modal>
+      )}
+      {rejectTarget && (
+        <RejectModal
+          submission={rejectTarget}
+          onRejected={handleRejected}
+          onClose={() => setRejectTarget(null)}
+        />
+      )}
+
       {/* ── Scout header ── */}
       <div className={styles.header}>
         <h2 className={styles.scoutName}>
@@ -247,12 +295,16 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
                             ? formatDate(sub?.created_at)
                             : null
 
-                        return (
-                          <div key={req.id} className={`${styles.reqRow} ${styles['req_' + status]}`}>
+                        const isReviewable = status === 'submitted'
+                        const rowEl = (
+                          <>
                             <span className={styles.reqIcon}>{icons[status]}</span>
                             <span className={styles.reqTitle}>{req.title}</span>
                             {dateStr && (
                               <span className={styles.reqDate}>{dateStr}</span>
+                            )}
+                            {isReviewable && (
+                              <span className={styles.reviewBadge}>Review</span>
                             )}
                             {sub?.reviewer_notes && (
                               <span
@@ -262,6 +314,20 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
                                 📝
                               </span>
                             )}
+                          </>
+                        )
+
+                        return isReviewable ? (
+                          <button
+                            key={req.id}
+                            className={`${styles.reqRow} ${styles['req_' + status]} ${styles.reqRowClickable}`}
+                            onClick={() => setReviewTarget({ sub, req, badge })}
+                          >
+                            {rowEl}
+                          </button>
+                        ) : (
+                          <div key={req.id} className={`${styles.reqRow} ${styles['req_' + status]}`}>
+                            {rowEl}
                           </div>
                         )
                       })}
