@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { getReviewSubmissions } from '../api/review'
-import { getBadges, getBadgeDetail } from '../api/badges'
+import { getBadges } from '../api/badges'
 import { getScouts } from '../api/users'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import Spinner from '../components/ui/Spinner'
@@ -102,11 +102,8 @@ export default function ScoutsPage() {
         ])
         setScouts(scoutList)
         setAllSubmissions(subs)
+        setBadgeDetails(badgeList)
         setLoading(false)
-        // Fetch badge details in the background — completion counts
-        // will fill in once these resolve.
-        const details = await Promise.all(badgeList.map((b) => getBadgeDetail(b.id)))
-        setBadgeDetails(details)
       } catch {
         setLoading(false)
         setError('Failed to load scout data. Please try refreshing.')
