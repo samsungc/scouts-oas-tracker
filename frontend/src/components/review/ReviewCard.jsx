@@ -6,15 +6,17 @@ import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
 import styles from './ReviewCard.module.css'
 
-export default function ReviewCard({ submission, requirement, onApproved, onRejectClick }) {
+export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const approveAction = onApprove ?? ((id) => approveSubmission(id))
 
   async function handleApprove() {
     setLoading(true)
     setError('')
     try {
-      const updated = await approveSubmission(submission.id)
+      const updated = await approveAction(submission.id)
       onApproved(updated)
     } catch (err) {
       setError(err.message || 'Failed to approve.')

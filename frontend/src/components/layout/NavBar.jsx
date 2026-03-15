@@ -52,6 +52,16 @@ export default function NavBar() {
               My Submissions
             </NavLink>
           )}
+          {isScout && user?.peer_review_eligible && (
+            <NavLink
+              to="/peer-review"
+              className={({ isActive }) =>
+                `${styles.link} ${isActive ? styles.active : ''}`
+              }
+            >
+              Peer Review
+            </NavLink>
+          )}
           {isReviewer && (
             <>
               <NavLink

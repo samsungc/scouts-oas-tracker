@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import BadgesPage from './pages/BadgesPage'
 import SubmitPage from './pages/SubmitPage'
 import ReviewPage from './pages/ReviewPage'
+import PeerReviewPage from './pages/PeerReviewPage'
 import ScoutsPage from './pages/ScoutsPage'
 import MySubmissionsPage from './pages/MySubmissionsPage'
 import LeaderboardPage from './pages/LeaderboardPage'
@@ -100,6 +101,17 @@ export default function App() {
           <ProtectedRoute roles={['scouter', 'admin']}>
             <Layout>
               <ReviewPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/peer-review"
+        element={
+          <ProtectedRoute roles={['scout']}>
+            <Layout>
+              <PeerReviewPage />
             </Layout>
           </ProtectedRoute>
         }
