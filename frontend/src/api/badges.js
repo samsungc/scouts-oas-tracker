@@ -7,3 +7,7 @@ export function getBadges() {
 export function getBadgeDetail(id) {
   return api.get(`/badges/${id}/`)
 }
+
+export function getRequirement(id) {
+  return api.get(`/badges/requirements/${id}/`)
+}

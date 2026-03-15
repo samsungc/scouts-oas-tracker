@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getReviewSubmissions } from '../api/review'
-import { getBadges, getBadgeDetail } from '../api/badges'
+import { getRequirement } from '../api/badges'
 import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Spinner from '../components/ui/Spinner'
@@ -20,37 +20,32 @@ export default function ReviewPage() {
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
   // Cache badge details so we don't re-fetch on filter change
-  const reqMapRef = useRef(null)
+  const reqMapRef = useRef({})
 
   useEffect(() => {
     loadSubmissions()
   }, [filter])
 
-  async function buildRequirementMap() {
-    if (reqMapRef.current) return reqMapRef.current
-    const badges = await getBadges()
-    const details = await Promise.all(badges.map((b) => getBadgeDetail(b.id)))
-    const map = {}
-    details.forEach((badge) => {
-      badge.requirements.forEach((req) => {
-        map[req.id] = { ...req, badgeName: badge.name }
+  async function buildRequirementMap(subs) {
+    const uniqueIds = [...new Set(subs.map((s) => s.requirement))]
+    const missing = uniqueIds.filter((id) => !reqMapRef.current[id])
+    if (missing.length > 0) {
+      const fetched = await Promise.all(missing.map((id) => getRequirement(id).catch(() => null)))
+      fetched.forEach((req) => {
+        if (req) reqMapRef.current[req.id] = { ...req, badgeName: req.badge_name }
       })
-    })
-    reqMapRef.current = map
-    return map
+    }
+    return { ...reqMapRef.current }
   }
 
   async function loadSubmissions() {
     setLoading(true)
     setError('')
     try {
-      // Start building the requirement map immediately (or use cache),
-      // but don't block the submission list on it.
-      const mapPromise = buildRequirementMap().catch(() => ({}))
       const data = await getReviewSubmissions(filter || undefined)
       setSubmissions(data)
       setLoading(false)
-      const map = await mapPromise
+      const map = await buildRequirementMap(data).catch(() => ({}))
       setRequirementMap(map)
     } catch (err) {
       setLoading(false)
