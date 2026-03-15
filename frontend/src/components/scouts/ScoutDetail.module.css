@@ -261,3 +261,25 @@
 
 .req_approved  { background: #fafffe; }
 .req_submitted { background: #fffdf5; }
+
+.reqRowClickable {
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  border: none;
+  font: inherit;
+}
+
+.reqRowClickable:hover {
+  background: #fff8e8;
+}
+
+.reviewBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
