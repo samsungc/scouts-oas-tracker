@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import BadgeSubmission, SubmissionEvidence
-from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer
+from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer
 from .permissions import IsScouterOrAdmin
 
 
@@ -124,6 +124,51 @@ class ReviewSubmissionViewSet(
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="batch_direct_approve")
+    def batch_direct_approve(self, request):
+        serializer = BatchDirectApproveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        requirement_id = serializer.validated_data["requirement_id"]
+        scout_ids = serializer.validated_data["scout_ids"]
+        reviewer_notes = serializer.validated_data["reviewer_notes"]
+        now = timezone.now()
+
+        approved_count = 0
+        already_approved_count = 0
+
+        for scout_id in scout_ids:
+            submission = BadgeSubmission.objects.filter(
+                scout_id=scout_id, requirement_id=requirement_id
+            ).first()
+
+            if submission is None:
+                BadgeSubmission.objects.create(
+                    scout_id=scout_id,
+                    requirement_id=requirement_id,
+                    status="approved",
+                    submitted_at=now,
+                    reviewed_at=now,
+                    reviewed_by=request.user,
+                    reviewer_notes=reviewer_notes,
+                )
+                approved_count += 1
+            elif submission.status == "approved":
+                already_approved_count += 1
+            else:
+                submission.status = "approved"
+                submission.submitted_at = submission.submitted_at or now
+                submission.reviewed_at = now
+                submission.reviewed_by = request.user
+                submission.reviewer_notes = reviewer_notes
+                submission.save()
+                approved_count += 1
+
+        return Response(
+            {"approved_count": approved_count, "already_approved_count": already_approved_count},
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["post"])
     def reject(self, request, pk=None):

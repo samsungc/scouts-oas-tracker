@@ -129,6 +129,36 @@
   gap: 12px;
 }
 
+.sortBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: color 0.1s;
+}
+
+.sortBtn:hover {
+  color: #fff;
+}
+
+.sortActive {
+  color: var(--color-accent);
+}
+
+.sortIcon {
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
 .scoutRow {
   display: grid;
   grid-template-columns: 1fr 130px 130px 120px 110px 28px;

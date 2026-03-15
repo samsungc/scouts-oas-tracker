@@ -4,11 +4,12 @@ import { useAuth } from '../../context/AuthContext'
 import StatusPill from '../ui/StatusPill'
 import styles from './RequirementRow.module.css'
 
-export default function RequirementRow({ requirement, badgeId, submissionsMap, badgeLocked }) {
+export default function RequirementRow({ requirement, badgeId, submissionsMap, badgeLocked, onBatchReview }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const submission = submissionsMap?.get(requirement.id)
   const isScout = user?.role === 'scout'
+  const isScouter = user?.role === 'scouter' || user?.role === 'admin'
   const [hintOpen, setHintOpen] = useState(false)
 
   return (
@@ -58,6 +59,16 @@ export default function RequirementRow({ requirement, badgeId, submissionsMap, b
               Start
             </button>
           )}
+        </div>
+      )}
+      {isScouter && onBatchReview && (
+        <div className={styles.actions}>
+          <button
+            className={styles.reviewBtn}
+            onClick={() => onBatchReview(requirement)}
+          >
+            Review
+          </button>
         </div>
       )}
     </div>

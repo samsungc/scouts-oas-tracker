@@ -112,9 +112,14 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         </div>
       )}
 
-      {submission.reviewer_notes && (
+      {(submission.reviewed_by_username || submission.reviewer_notes) && (
         <div className={styles.reviewerNotes}>
-          <strong>Notes:</strong> {submission.reviewer_notes}
+          {submission.reviewed_by_username && (
+            <span className={styles.reviewedBy}>Reviewed by {submission.reviewed_by_username}</span>
+          )}
+          {submission.reviewer_notes && (
+            <span><strong>Notes:</strong> {submission.reviewer_notes}</span>
+          )}
         </div>
       )}
     </div>

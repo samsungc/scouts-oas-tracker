@@ -98,6 +98,8 @@ export default function ScoutsPage() {
   const [detailError, setDetailError] = useState('')
   const [page, setPage] = useState(1)
   const [showCreateUser, setShowCreateUser] = useState(false)
+  const [sortKey, setSortKey] = useState('name')
+  const [sortDir, setSortDir] = useState('asc')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -143,15 +145,45 @@ export default function ScoutsPage() {
 
   const activeBadgeCount = summary?.active_badge_count ?? badgeDetails.filter((b) => b.is_active).length
 
-  const filteredScouts = useMemo(
-    () =>
-      scouts.filter(
-        (s) =>
-          s.username.toLowerCase().includes(search.toLowerCase()) ||
-          `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [scouts, search],
-  )
+  function handleSort(key) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+    setPage(1)
+  }
+
+  const filteredScouts = useMemo(() => {
+    const lower = search.toLowerCase()
+    const filtered = scouts.filter(
+      (s) =>
+        s.username.toLowerCase().includes(lower) ||
+        `${s.first_name} ${s.last_name}`.toLowerCase().includes(lower),
+    )
+
+    const dir = sortDir === 'asc' ? 1 : -1
+    return [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case 'name': {
+          const na = `${a.first_name} ${a.last_name}`.trim() || a.username
+          const nb = `${b.first_name} ${b.last_name}`.trim() || b.username
+          return na.localeCompare(nb) * dir
+        }
+        case 'badges':
+          return (a.badges_complete - b.badges_complete) * dir
+        case 'pending':
+          return (a.pending_review - b.pending_review) * dir
+        case 'lastSub':
+          return ((a.last_submission_at ?? '') < (b.last_submission_at ?? '') ? -1 : 1) * dir
+        case 'lastLogin':
+          return ((a.last_login ?? '') < (b.last_login ?? '') ? -1 : 1) * dir
+        default:
+          return 0
+      }
+    })
+  }, [scouts, search, sortKey, sortDir])
 
   const totalPages = Math.ceil(filteredScouts.length / PAGE_SIZE)
   const paginatedScouts = filteredScouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -249,11 +281,24 @@ export default function ScoutsPage() {
           ) : (
             <div className={styles.table}>
               <div className={styles.tableHead}>
-                <span>Scout</span>
-                <span>Badges Complete</span>
-                <span>Pending Review</span>
-                <span>Last Submission</span>
-                <span>Last Login</span>
+                {[
+                  { key: 'name', label: 'Scout' },
+                  { key: 'badges', label: 'Badges Complete' },
+                  { key: 'pending', label: 'Pending Review' },
+                  { key: 'lastSub', label: 'Last Submission' },
+                  { key: 'lastLogin', label: 'Last Login' },
+                ].map(({ key, label }) => (
+                  <button
+                    key={key}
+                    className={`${styles.sortBtn} ${sortKey === key ? styles.sortActive : ''}`}
+                    onClick={() => handleSort(key)}
+                  >
+                    {label}
+                    <span className={styles.sortIcon}>
+                      {sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ' ⬍'}
+                    </span>
+                  </button>
+                ))}
                 <span></span>
               </div>
               {paginatedScouts.map((scout) => {

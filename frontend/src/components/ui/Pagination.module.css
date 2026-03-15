@@ -6,6 +6,11 @@
   padding: 20px 0 4px;
 }
 
+.compact {
+  padding: 0 0 6px;
+  gap: 8px;
+}
+
 .btn {
   background: var(--color-primary);
   color: var(--color-white);

@@ -13,6 +13,7 @@ export default function BadgeCard({
   isLocked,
   isSearching,
   filteredRequirements,
+  onBatchReview,
 }) {
   const [expanded, setExpanded] = useState(false)
   const isExpanded = isSearching || expanded
@@ -112,6 +113,7 @@ export default function BadgeCard({
                       badgeId={badge.id}
                       submissionsMap={submissionsMap}
                       badgeLocked={isLocked}
+                      onBatchReview={onBatchReview}
                     />
                   ))
               )}
