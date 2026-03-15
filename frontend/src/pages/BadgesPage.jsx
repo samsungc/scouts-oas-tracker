@@ -1,11 +1,28 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getBadges, getBadgeDetail } from '../api/badges'
+import { getBadges } from '../api/badges'
 import { getSubmissions } from '../api/submissions'
 import { useAuth } from '../context/AuthContext'
 import BadgeCategoryGroup from '../components/badges/BadgeCategoryGroup'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import styles from './BadgesPage.module.css'
+
+const CACHE_KEY = 'badges_cache'
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+function readCache() {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const { data, ts } = JSON.parse(raw)
+    if (Date.now() - ts > CACHE_TTL) return null
+    return data
+  } catch { return null }
+}
+
+function writeCache(data) {
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })) } catch {}
+}
 
 const CATEGORY_LABELS = {
   vertical_skills: 'Vertical Skills',
@@ -36,11 +53,19 @@ export default function BadgesPage() {
       setLoading(true)
       setError('')
       try {
+        const cached = readCache()
         const [badgeList, submissionList] = await Promise.all([
-          getBadges(),
+          cached ? Promise.resolve(cached) : getBadges().then((data) => { writeCache(data); return data }),
           isScout ? getSubmissions() : Promise.resolve([]),
         ])
         setBadges(badgeList)
+
+        // Badges now include requirements — pre-populate the detail cache
+        const cache = new Map()
+        for (const badge of badgeList) {
+          cache.set(badge.id, badge)
+        }
+        setDetailCache(cache)
 
         // Build requirement → latest submission map
         const map = new Map()
@@ -61,17 +86,6 @@ export default function BadgesPage() {
     }
     load()
   }, [user])
-
-  // Background-fetch all badge details for scouts after initial render,
-  // so completion progress and lock state fill in without blocking the page.
-  useEffect(() => {
-    if (!isScout || badges.length === 0) return
-    badges.forEach((b) => {
-      getBadgeDetail(b.id)
-        .then((detail) => setDetailCache((prev) => new Map(prev).set(b.id, detail)))
-        .catch(() => {})
-    })
-  }, [isScout, badges])
 
   const handleDetailLoaded = useCallback((badgeId, detail) => {
     setDetailCache((prev) => new Map(prev).set(badgeId, detail))
