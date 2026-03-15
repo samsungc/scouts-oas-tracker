@@ -3,8 +3,8 @@ from .models import Badge, BadgeRequirement
 from .serializers import BadgeListSerializer, BadgeDetailSerializer, BadgeRequirementDetailSerializer
 
 class BadgeListView(generics.ListAPIView):
-    queryset = Badge.objects.filter(is_active=True)
-    serializer_class = BadgeListSerializer
+    queryset = Badge.objects.filter(is_active=True).prefetch_related('requirements')
+    serializer_class = BadgeDetailSerializer
     permission_classes = [permissions.AllowAny]
 
 class BadgeDetailView(generics.RetrieveAPIView):
