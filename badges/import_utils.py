@@ -25,9 +25,21 @@ BADGE_PREFIX_MAP = {
 
 
 def _make_aware(value):
-    """Convert a date or naive datetime to an aware datetime."""
+    """Convert a date, naive datetime, or date string to an aware datetime."""
     if value is None:
         return None
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return None
+        for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%d/%m/%Y"):
+            try:
+                value = datetime.strptime(value, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            return None
     if isinstance(value, date) and not isinstance(value, datetime):
         value = datetime(value.year, value.month, value.day)
     if timezone.is_naive(value):

@@ -24,9 +24,9 @@ export default function ImportPage() {
     setError('')
     try {
       const res = await importBadgeRecords(file, dryRun)
-      setResult({ ...res.data, dryRun })
+      setResult({ ...res, dryRun })
     } catch (err) {
-      const msg = err.response?.data?.error || 'Import failed. Please try again.'
+      const msg = err.raw?.error || err.detail || 'Import failed. Please try again.'
       setError(msg)
     } finally {
       setLoading(false)
