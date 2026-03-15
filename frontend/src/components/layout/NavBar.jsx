@@ -30,6 +30,14 @@ export default function NavBar() {
           >
             Badges
           </NavLink>
+          <NavLink
+            to="/leaderboard"
+            className={({ isActive }) =>
+              `${styles.link} ${isActive ? styles.active : ''}`
+            }
+          >
+            Leaderboard
+          </NavLink>
           {isScout && (
             <NavLink
               to="/my-submissions"

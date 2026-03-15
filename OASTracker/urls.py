@@ -26,7 +26,8 @@ urlpatterns = [
     path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/users/", include("users.urls")),
     path("api/badges/", include("badges.urls")),
-    path("api/", include("submissions.urls"))
+    path("api/", include("submissions.urls")),
+    path("api/leaderboard/", include("leaderboard.urls")),
 ]
 
 if settings.DEBUG:
