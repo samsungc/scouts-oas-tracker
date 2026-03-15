@@ -8,6 +8,7 @@ import SubmitPage from './pages/SubmitPage'
 import ReviewPage from './pages/ReviewPage'
 import ScoutsPage from './pages/ScoutsPage'
 import MySubmissionsPage from './pages/MySubmissionsPage'
+import LeaderboardPage from './pages/LeaderboardPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function ProtectedRoute({ children, roles }) {
@@ -54,6 +55,17 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <BadgesPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <LeaderboardPage />
             </Layout>
           </ProtectedRoute>
         }
