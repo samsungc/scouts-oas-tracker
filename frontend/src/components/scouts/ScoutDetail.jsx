@@ -20,6 +20,8 @@ const CATEGORY_ORDER = [
 ]
 
 const CATEGORY_LABELS = {
+  awards: 'Awards',
+  personal_progression: 'Personal Progression',
   vertical_skills: 'Vertical Skills',
   sailing_skills: 'Sailing Skills',
   scoutcraft_skills: 'Scoutcraft Skills',
@@ -29,7 +31,6 @@ const CATEGORY_LABELS = {
   paddling_skills: 'Paddling Skills',
   aquatic_skills: 'Aquatic Skills',
   emergency_skills: 'Emergency Skills',
-  personal_progression: 'Personal Progression',
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────
