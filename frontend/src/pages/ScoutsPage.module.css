@@ -118,7 +118,7 @@
 
 .tableHead {
   display: grid;
-  grid-template-columns: 1fr 130px 130px 120px 110px 28px;
+  grid-template-columns: 1fr 110px 100px 70px 120px 120px 110px 28px;
   padding: 10px 18px;
   background: var(--color-primary-dark);
   color: rgba(255, 255, 255, 0.85);
@@ -142,7 +142,7 @@
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 2px;
+  justify-content: space-between;
   transition: color 0.1s;
 }
 
@@ -161,7 +161,7 @@
 
 .scoutRow {
   display: grid;
-  grid-template-columns: 1fr 130px 130px 120px 110px 28px;
+  grid-template-columns: 1fr 110px 100px 70px 120px 120px 110px 28px;
   align-items: center;
   gap: 12px;
   padding: 13px 18px;
@@ -198,6 +198,16 @@
 .lastLogin {
   font-size: 0.85rem;
   color: var(--color-text-muted);
+}
+
+.progression {
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.kva {
+  font-size: 0.85rem;
+  color: var(--color-text);
 }
 
 .scoutBadges {
