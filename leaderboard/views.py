@@ -123,46 +123,75 @@ class CategoryChampionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        rows = (
-            BadgeSubmission.objects
-            .filter(status='approved', requirement__badge__is_active=True)
-            .values(
-                'scout__id',
-                'scout__first_name',
-                'scout__last_name',
-                'scout__username',
-                'requirement__badge__id',
-                'requirement__badge__name',
-                'requirement__badge__category',
-            )
-            .annotate(req_count=Count('id'))
-            .order_by('requirement__badge__category', '-req_count')
+        from badges.models import Badge
+
+        # Load all active levelled badges, ordered highest level first within each category
+        badges = list(
+            Badge.objects
+            .filter(is_active=True, level__isnull=False)
+            .prefetch_related('requirements')
+            .order_by('category', '-level')
         )
 
-        seen_categories = set()
-        champions_map = {}
-        for row in rows:
-            cat = row['requirement__badge__category']
-            if cat not in seen_categories:
-                seen_categories.add(cat)
-                first = row['scout__first_name'] or ''
-                last = row['scout__last_name'] or ''
-                full_name = f"{first} {last}".strip() or row['scout__username']
-                champions_map[cat] = {
-                    'scout_id': row['scout__id'],
-                    'scout_display_name': full_name,
-                    'badge_name': row['requirement__badge__name'],
-                    'approved_req_count': row['req_count'],
-                }
+        # Count approved requirements per (scout, badge)
+        approved_counts = (
+            BadgeSubmission.objects
+            .filter(status='approved', requirement__badge__is_active=True)
+            .values('scout_id', 'requirement__badge_id')
+            .annotate(approved_req_count=Count('id', distinct=True))
+        )
+        scout_badge_approved = {
+            (r['scout_id'], r['requirement__badge_id']): r['approved_req_count']
+            for r in approved_counts
+        }
 
-        champions = [
-            {
+        # Load scouts
+        scouts = {s.id: s for s in User.objects.filter(role='scout')}
+
+        # For each badge, collect scouts who have completed it (all reqs approved)
+        badge_completions = {}  # badge_id -> [scout_id, ...]
+        for badge in badges:
+            total_reqs = badge.requirements.count()
+            if total_reqs == 0:
+                continue
+            completers = [
+                scout_id
+                for scout_id in scouts
+                if scout_badge_approved.get((scout_id, badge.id), 0) >= total_reqs
+            ]
+            if completers:
+                badge_completions[badge.id] = completers
+
+        # For each category find the highest level that has at least one completion
+        champions = []
+        for cat_key, cat_label in CATEGORY_LABELS.items():
+            cat_badges = [b for b in badges if b.category == cat_key]  # already sorted -level
+
+            champion_entry = None
+            for badge in cat_badges:
+                if badge.id in badge_completions:
+                    champion_scouts = []
+                    for scout_id in badge_completions[badge.id]:
+                        s = scouts[scout_id]
+                        first = s.first_name or ''
+                        last = s.last_name or ''
+                        full_name = f"{first} {last}".strip() or s.username
+                        champion_scouts.append({
+                            'scout_id': scout_id,
+                            'scout_display_name': full_name,
+                        })
+                    champion_entry = {
+                        'badge_name': badge.name,
+                        'badge_level': badge.level,
+                        'scouts': champion_scouts,
+                    }
+                    break
+
+            champions.append({
                 'category': cat_key,
                 'category_label': cat_label,
-                'champion': champions_map.get(cat_key),
-            }
-            for cat_key, cat_label in CATEGORY_LABELS.items()
-        ]
+                'champion': champion_entry,
+            })
 
         return Response({'champions': champions})
 
