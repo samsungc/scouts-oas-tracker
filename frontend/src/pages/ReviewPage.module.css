@@ -95,3 +95,10 @@
   flex-direction: column;
   gap: 16px;
 }
+
+@media (max-width: 640px) {
+  .filterBar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .dateRangeGroup { flex-wrap: wrap; }
+  .filterBtn { padding: 8px 12px; }
+  .title { font-size: 1.4rem; }
+}

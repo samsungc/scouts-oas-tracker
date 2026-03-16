@@ -125,3 +125,10 @@
 .logoutBtn:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+@media (max-width: 640px) {
+  .brandName { display: none; }
+  .greeting { display: none; }
+  .profileBtn { display: none; }
+  .mobileHide { display: none; }
+}

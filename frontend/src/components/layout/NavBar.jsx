@@ -37,7 +37,7 @@ export default function NavBar() {
           <NavLink
             to="/leaderboard"
             className={({ isActive }) =>
-              `${styles.link} ${isActive ? styles.active : ''}`
+              `${styles.link} ${styles.mobileHide} ${isActive ? styles.active : ''}`
             }
           >
             Leaderboard
@@ -46,7 +46,7 @@ export default function NavBar() {
             <NavLink
               to="/my-submissions"
               className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.active : ''}`
+                `${styles.link} ${styles.mobileHide} ${isActive ? styles.active : ''}`
               }
             >
               My Submissions
@@ -86,7 +86,7 @@ export default function NavBar() {
             <NavLink
               to="/import"
               className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.active : ''}`
+                `${styles.link} ${styles.mobileHide} ${isActive ? styles.active : ''}`
               }
             >
               Import

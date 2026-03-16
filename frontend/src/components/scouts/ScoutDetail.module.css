@@ -283,3 +283,9 @@
   padding: 2px 8px;
   white-space: nowrap;
 }
+
+@media (max-width: 640px) {
+  .reqRow { grid-template-columns: 20px 1fr auto; }
+  .reqDate { display: none; }
+  .scoutName { font-size: 1.3rem; }
+}
