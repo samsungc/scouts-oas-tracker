@@ -159,15 +159,6 @@ export default function BadgesPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        {query && (
-          <button
-            className={styles.clearBtn}
-            onClick={() => setQuery('')}
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        )}
       </div>
 
       {loading && <Spinner centered />}
