@@ -7,6 +7,8 @@ import Modal from '../ui/Modal'
 // ─── constants ──────────────────────────────────────────────────────────────
 
 const CATEGORY_ORDER = [
+  'awards',
+  'personal_progression',
   'vertical_skills',
   'sailing_skills',
   'scoutcraft_skills',
@@ -16,7 +18,6 @@ const CATEGORY_ORDER = [
   'paddling_skills',
   'aquatic_skills',
   'emergency_skills',
-  'personal_progression',
 ]
 
 const CATEGORY_LABELS = {
