@@ -81,17 +81,41 @@ class ScoutStatsView(APIView):
             .order_by("username")
         )
 
-        # Query 2: active badges and their requirement IDs
+        # Query 2: active badges — categorized
         badges = list(
             Badge.objects.filter(is_active=True).prefetch_related("requirements")
         )
+
+        EXCLUDED = {"awards", "personal_progression"}
+        regular_badges = [b for b in badges if b.category not in EXCLUDED]
+        pp_badges = [b for b in badges if b.category == "personal_progression"]
+        kva_badge = next((b for b in badges if b.name == "King's Venturer Award"), None)
+
+        # Regular badge lookups
         req_to_badge = {}
         badge_req_counts = {}
-        for badge in badges:
+        for badge in regular_badges:
             req_ids = [r.id for r in badge.requirements.all()]
             badge_req_counts[badge.id] = len(req_ids)
             for req_id in req_ids:
                 req_to_badge[req_id] = badge.id
+
+        # Personal progression lookups
+        pp_badge_level = {b.id: (b.level or 0) for b in pp_badges}
+        pp_req_to_badge = {}
+        pp_badge_req_counts = {}
+        for b in pp_badges:
+            req_ids = [r.id for r in b.requirements.all()]
+            pp_badge_req_counts[b.id] = len(req_ids)
+            for req_id in req_ids:
+                pp_req_to_badge[req_id] = b.id
+
+        # KVA lookups
+        kva_req_ids = set()
+        kva_total = 0
+        if kva_badge:
+            kva_req_ids = {r.id for r in kva_badge.requirements.all()}
+            kva_total = len(kva_req_ids)
 
         # Query 3: all approved submissions — only lean fields, no evidence/nested data
         approved_subs = BadgeSubmission.objects.filter(
@@ -100,14 +124,25 @@ class ScoutStatsView(APIView):
             requirement__badge__is_active=True,
         ).values("scout_id", "requirement_id", "reviewed_at")
 
-        # Group approved reqs by (scout_id, badge_id)
+        # Group approved reqs by type
         scout_badge_reqs = defaultdict(lambda: defaultdict(dict))
+        scout_pp_reqs = defaultdict(lambda: defaultdict(set))
+        scout_kva_reqs = defaultdict(set)
+
         for sub in approved_subs:
-            badge_id = req_to_badge.get(sub["requirement_id"])
+            req_id = sub["requirement_id"]
+            scout_id = sub["scout_id"]
+
+            if req_id in kva_req_ids:
+                scout_kva_reqs[scout_id].add(req_id)
+
+            pp_badge_id = pp_req_to_badge.get(req_id)
+            if pp_badge_id:
+                scout_pp_reqs[scout_id][pp_badge_id].add(req_id)
+
+            badge_id = req_to_badge.get(req_id)
             if badge_id:
-                scout_badge_reqs[sub["scout_id"]][badge_id][sub["requirement_id"]] = sub[
-                    "reviewed_at"
-                ]
+                scout_badge_reqs[scout_id][badge_id][req_id] = sub["reviewed_at"]
 
         # Compute per-scout completion counts + aggregate time-window stats
         now = datetime.now(timezone.utc)
@@ -116,9 +151,15 @@ class ScoutStatsView(APIView):
         scout_stats = {}
         summary_c24h = summary_c7d = summary_c30d = 0
 
-        for scout_id, badge_dict in scout_badge_reqs.items():
+        all_scout_ids = (
+            set(scout_badge_reqs.keys())
+            | set(scout_pp_reqs.keys())
+            | set(scout_kva_reqs.keys())
+        )
+
+        for scout_id in all_scout_ids:
             badges_complete = 0
-            for badge_id, reqs_approved in badge_dict.items():
+            for badge_id, reqs_approved in scout_badge_reqs[scout_id].items():
                 total_reqs = badge_req_counts.get(badge_id, 0)
                 if total_reqs > 0 and len(reqs_approved) == total_reqs:
                     badges_complete += 1
@@ -130,7 +171,20 @@ class ScoutStatsView(APIView):
                         summary_c7d += 1
                     if diff < D30:
                         summary_c30d += 1
-            scout_stats[scout_id] = badges_complete
+
+            pp_level = 0
+            for badge_id, req_set in scout_pp_reqs[scout_id].items():
+                total = pp_badge_req_counts.get(badge_id, 0)
+                if total > 0 and len(req_set) == total:
+                    lvl = pp_badge_level.get(badge_id, 0)
+                    if lvl > pp_level:
+                        pp_level = lvl
+
+            scout_stats[scout_id] = {
+                "badges_complete": badges_complete,
+                "personal_progression_level": pp_level,
+                "kva_requirements_completed": len(scout_kva_reqs[scout_id]),
+            }
 
         scouts_data = [
             {
@@ -139,7 +193,9 @@ class ScoutStatsView(APIView):
                 "first_name": s.first_name,
                 "last_name": s.last_name,
                 "last_login": s.last_login,
-                "badges_complete": scout_stats.get(s.id, 0),
+                "badges_complete": scout_stats.get(s.id, {}).get("badges_complete", 0),
+                "personal_progression_level": scout_stats.get(s.id, {}).get("personal_progression_level", 0),
+                "kva_requirements_completed": scout_stats.get(s.id, {}).get("kva_requirements_completed", 0),
                 "pending_review": s.pending_review_count,
                 "last_submission_at": s.last_submission_at,
             }
@@ -154,7 +210,8 @@ class ScoutStatsView(APIView):
                     "completions_24h": summary_c24h,
                     "completions_7d": summary_c7d,
                     "completions_30d": summary_c30d,
-                    "active_badge_count": len(badges),
+                    "active_badge_count": len(regular_badges),
+                    "kva_total": kva_total,
                 },
             }
         )

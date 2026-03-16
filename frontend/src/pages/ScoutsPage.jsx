@@ -51,6 +51,7 @@ function buildScoutStats(scoutSubs, badgeDetails) {
   const completions = []
   for (const badge of badgeDetails) {
     if (!badge.is_active) continue
+    if (badge.category === 'personal_progression' || badge.category === 'awards') continue
     const completedAt = badgeCompletionTime(badge, subByReq)
     if (completedAt !== null) {
       completions.push({ badgeId: badge.id, badgeName: badge.name, completedAt })
@@ -82,6 +83,8 @@ function formatLastLogin(dateStr) {
   if (!dateStr) return 'Never'
   return timeSince(dateStr)
 }
+
+const PP_LEVEL_LABELS = { 0: 'N/A', 1: 'Trailhead', 2: 'Tree Line', 3: 'Snow Line', 4: 'Summit' }
 
 // ─── component ──────────────────────────────────────────────────────────────
 
@@ -143,7 +146,9 @@ export default function ScoutsPage() {
     [badgeDetails],
   )
 
-  const activeBadgeCount = summary?.active_badge_count ?? badgeDetails.filter((b) => b.is_active).length
+  const activeBadgeCount = summary?.active_badge_count
+    ?? badgeDetails.filter((b) => b.is_active && b.category !== 'personal_progression' && b.category !== 'awards').length
+  const kvaTotal = summary?.kva_total ?? 0
 
   function handleSort(key) {
     if (key === sortKey) {
@@ -173,6 +178,10 @@ export default function ScoutsPage() {
         }
         case 'badges':
           return (a.badges_complete - b.badges_complete) * dir
+        case 'progression':
+          return ((a.personal_progression_level ?? 0) - (b.personal_progression_level ?? 0)) * dir
+        case 'kva':
+          return ((a.kva_requirements_completed ?? 0) - (b.kva_requirements_completed ?? 0)) * dir
         case 'pending':
           return (a.pending_review - b.pending_review) * dir
         case 'lastSub':
@@ -282,11 +291,13 @@ export default function ScoutsPage() {
             <div className={styles.table}>
               <div className={styles.tableHead}>
                 {[
-                  { key: 'name', label: 'Scout' },
-                  { key: 'badges', label: 'Badges Complete' },
-                  { key: 'pending', label: 'Pending Review', mobile: false },
-                  { key: 'lastSub', label: 'Last Submission', mobile: false },
-                  { key: 'lastLogin', label: 'Last Login', mobile: false },
+                  { key: 'name',        label: 'Scout' },
+                  { key: 'badges',      label: 'Badges Complete' },
+                  { key: 'progression', label: 'Progression',    mobile: false },
+                  { key: 'kva',         label: 'KVA',            mobile: false },
+                  { key: 'pending',     label: 'Pending Review', mobile: false },
+                  { key: 'lastSub',     label: 'Last Submission', mobile: false },
+                  { key: 'lastLogin',   label: 'Last Login',     mobile: false },
                 ].map(({ key, label, mobile }) => (
                   <button
                     key={key}
@@ -329,6 +340,13 @@ export default function ScoutsPage() {
                         {scout.badges_complete}
                       </span>
                       <span className={styles.badgeOf}> / {activeBadgeCount}</span>
+                    </span>
+                    <span className={`${styles.progression} ${styles.mobileHide}`}>
+                      {PP_LEVEL_LABELS[scout.personal_progression_level ?? 0]}
+                    </span>
+                    <span className={`${styles.kva} ${styles.mobileHide}`}>
+                      {scout.kva_requirements_completed ?? 0}
+                      {kvaTotal > 0 && <span className={styles.badgeOf}> / {kvaTotal}</span>}
                     </span>
                     <span className={`${styles.pending} ${styles.mobileHide} ${scout.pending_review > 0 ? styles.pendingAlert : ''}`}>
                       {scout.pending_review > 0 ? `${scout.pending_review} pending` : '—'}
