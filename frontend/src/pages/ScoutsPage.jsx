@@ -284,13 +284,13 @@ export default function ScoutsPage() {
                 {[
                   { key: 'name', label: 'Scout' },
                   { key: 'badges', label: 'Badges Complete' },
-                  { key: 'pending', label: 'Pending Review' },
-                  { key: 'lastSub', label: 'Last Submission' },
-                  { key: 'lastLogin', label: 'Last Login' },
-                ].map(({ key, label }) => (
+                  { key: 'pending', label: 'Pending Review', mobile: false },
+                  { key: 'lastSub', label: 'Last Submission', mobile: false },
+                  { key: 'lastLogin', label: 'Last Login', mobile: false },
+                ].map(({ key, label, mobile }) => (
                   <button
                     key={key}
-                    className={`${styles.sortBtn} ${sortKey === key ? styles.sortActive : ''}`}
+                    className={`${styles.sortBtn} ${sortKey === key ? styles.sortActive : ''} ${mobile === false ? styles.mobileHide : ''}`}
                     onClick={() => handleSort(key)}
                   >
                     {label}
@@ -330,11 +330,11 @@ export default function ScoutsPage() {
                       </span>
                       <span className={styles.badgeOf}> / {activeBadgeCount}</span>
                     </span>
-                    <span className={`${styles.pending} ${scout.pending_review > 0 ? styles.pendingAlert : ''}`}>
+                    <span className={`${styles.pending} ${styles.mobileHide} ${scout.pending_review > 0 ? styles.pendingAlert : ''}`}>
                       {scout.pending_review > 0 ? `${scout.pending_review} pending` : '—'}
                     </span>
-                    <span className={styles.lastSub}>{timeSince(scout.last_submission_at)}</span>
-                    <span className={styles.lastLogin}>{formatLastLogin(scout.last_login)}</span>
+                    <span className={`${styles.lastSub} ${styles.mobileHide}`}>{timeSince(scout.last_submission_at)}</span>
+                    <span className={`${styles.lastLogin} ${styles.mobileHide}`}>{formatLastLogin(scout.last_login)}</span>
                     <span className={styles.rowChevron}>›</span>
                   </button>
                 )
