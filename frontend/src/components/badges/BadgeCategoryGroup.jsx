@@ -2,9 +2,10 @@ import { useState } from 'react'
 import BadgeCard from './BadgeCard'
 import styles from './BadgeCategoryGroup.module.css'
 
-/** Returns the trailing integer from a badge name, used for ordering within a category. */
-function badgeOrder(name) {
-  const m = name.match(/(\d+)\s*$/)
+/** Returns a sort key for a badge within its category. Uses the level field when set, otherwise falls back to trailing integer in the name. */
+function badgeOrder(badge) {
+  if (badge.level != null) return badge.level
+  const m = badge.name.match(/(\d+)\s*$/)
   return m ? parseInt(m[1], 10) : 0
 }
 
@@ -34,7 +35,7 @@ export default function BadgeCategoryGroup({
   const isOpen = isSearching || open
 
   // Sort by numeric suffix so "Vertical Skills 2" always follows "Vertical Skills 1"
-  const sortedBadges = [...badges].sort((a, b) => badgeOrder(a.name) - badgeOrder(b.name))
+  const sortedBadges = [...badges].sort((a, b) => badgeOrder(a) - badgeOrder(b))
 
   // Completion state for each sorted badge
   const completeFlags = sortedBadges.map((b) =>
