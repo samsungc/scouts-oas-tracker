@@ -17,6 +17,7 @@ export default function BatchApprovalModal({ requirement, onClose }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [lastSelection, setLastSelection] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -30,6 +31,12 @@ export default function BatchApprovalModal({ requirement, onClose }) {
         setScouts(scoutList)
         const approvedSet = new Set(approvedSubs.map((s) => s.scout_id).filter(Boolean))
         setAlreadyApprovedIds(approvedSet)
+        try {
+          const saved = localStorage.getItem('batch_approve_last_selection')
+          if (saved) setLastSelection(JSON.parse(saved))
+        } catch {
+          // ignore malformed storage
+        }
       } catch {
         setError('Failed to load scouts.')
       } finally {
@@ -62,7 +69,10 @@ export default function BatchApprovalModal({ requirement, onClose }) {
     setSubmitting(true)
     setError('')
     try {
-      const result = await batchDirectApprove(requirement.id, [...selected], notes.trim())
+      const approvedIds = [...selected]
+      localStorage.setItem('batch_approve_last_selection', JSON.stringify(approvedIds))
+      setLastSelection(approvedIds)
+      const result = await batchDirectApprove(requirement.id, approvedIds, notes.trim())
       setSuccessMsg(`${result.approved_count} scout${result.approved_count !== 1 ? 's' : ''} approved.`)
       setSelected(new Set())
       // Refresh approved set
@@ -84,6 +94,9 @@ export default function BatchApprovalModal({ requirement, onClose }) {
     : scouts
   const eligible = scouts.filter((s) => !alreadyApprovedIds.has(s.id))
   const allSelected = eligible.length > 0 && selected.size === eligible.length
+  const reselectEligible = lastSelection
+    ? lastSelection.filter((id) => !alreadyApprovedIds.has(id) && scouts.some((s) => s.id === id))
+    : []
 
   return (
     <Modal title={`Batch Approve: ${requirement.title}`} onClose={onClose}>
@@ -116,6 +129,15 @@ export default function BatchApprovalModal({ requirement, onClose }) {
                   />
                   <span>Select all eligible ({eligible.length})</span>
                 </label>
+                {reselectEligible.length > 0 && (
+                  <button
+                    type="button"
+                    className={styles.reselectBtn}
+                    onClick={() => setSelected(new Set(reselectEligible))}
+                  >
+                    Reselect most recent ({reselectEligible.length})
+                  </button>
+                )}
               </div>
 
               <div className={styles.scoutList}>

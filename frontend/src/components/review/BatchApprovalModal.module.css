@@ -39,7 +39,25 @@
 }
 
 .selectAllRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.reselectBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.reselectBtn:hover {
+  color: var(--color-primary-dark);
 }
 
 .checkLabel {
