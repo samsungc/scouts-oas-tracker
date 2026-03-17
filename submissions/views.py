@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -79,6 +80,12 @@ class BadgeSubmissionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class ReviewPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class ReviewSubmissionViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -86,6 +93,7 @@ class ReviewSubmissionViewSet(
 ):
     serializer_class = BadgeSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
+    pagination_class = ReviewPagination
 
     def get_queryset(self):
         queryset = BadgeSubmission.objects.select_related(

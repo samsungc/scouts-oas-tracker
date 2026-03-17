@@ -37,6 +37,7 @@ export function AuthProvider({ children }) {
 
   function logout() {
     api.clearTokens()
+    sessionStorage.clear()
     setUser(null)
   }
 

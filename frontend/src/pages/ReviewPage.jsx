@@ -25,6 +25,7 @@ export default function ReviewPage() {
   const [filter, setFilter] = useState('submitted')
   const [dateRange, setDateRange] = useState(7)
   const [submissions, setSubmissions] = useState([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
@@ -32,16 +33,30 @@ export default function ReviewPage() {
 
   useEffect(() => {
     setPage(1)
-    loadSubmissions()
   }, [filter, dateRange])
+
+  useEffect(() => {
+    loadSubmissions()
+  }, [filter, dateRange, page])
 
   async function loadSubmissions() {
     setLoading(true)
     setError('')
     try {
-      const params = filter ? { status: filter } : { days: dateRange ?? undefined }
+      const params = {
+        ...(filter ? { status: filter } : { days: dateRange ?? undefined }),
+        page,
+        page_size: PAGE_SIZE,
+      }
       const data = await getReviewSubmissions(params)
-      setSubmissions(data)
+      // Handle paginated response { count, results } or plain array (fallback)
+      if (data && typeof data.count === 'number' && Array.isArray(data.results)) {
+        setSubmissions(data.results)
+        setTotalCount(data.count)
+      } else {
+        setSubmissions(Array.isArray(data) ? data : [])
+        setTotalCount(Array.isArray(data) ? data.length : 0)
+      }
     } catch (err) {
       if (err.status === 403) {
         setError('You do not have permission to view this page.')
@@ -56,6 +71,7 @@ export default function ReviewPage() {
   function handleApproved(updated) {
     if (filter === 'submitted') {
       setSubmissions((prev) => prev.filter((s) => s.id !== updated.id))
+      setTotalCount((c) => c - 1)
     } else {
       setSubmissions((prev) =>
         prev.map((s) => (s.id === updated.id ? updated : s))
@@ -67,12 +83,15 @@ export default function ReviewPage() {
     setRejectTarget(null)
     if (filter === 'submitted') {
       setSubmissions((prev) => prev.filter((s) => s.id !== updated.id))
+      setTotalCount((c) => c - 1)
     } else {
       setSubmissions((prev) =>
         prev.map((s) => (s.id === updated.id ? updated : s))
       )
     }
   }
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
     <div>
@@ -108,11 +127,11 @@ export default function ReviewPage() {
             ))}
           </div>
         )}
-        {!loading && !error && submissions.length > PAGE_SIZE && (
+        {!loading && !error && totalPages > 1 && (
           <Pagination
             compact
             page={page}
-            totalPages={Math.ceil(submissions.length / PAGE_SIZE)}
+            totalPages={totalPages}
             onPage={setPage}
           />
         )}
@@ -134,7 +153,7 @@ export default function ReviewPage() {
           ) : (
             <>
               <div className={styles.cards}>
-                {submissions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((sub) => (
+                {submissions.map((sub) => (
                   <ReviewCard
                     key={sub.id}
                     submission={sub}
@@ -144,11 +163,13 @@ export default function ReviewPage() {
                   />
                 ))}
               </div>
-              <Pagination
-                page={page}
-                totalPages={Math.ceil(submissions.length / PAGE_SIZE)}
-                onPage={setPage}
-              />
+              {totalPages > 1 && (
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  onPage={setPage}
+                />
+              )}
             </>
           )}
         </>
