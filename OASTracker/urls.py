@@ -17,7 +17,6 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
-from django.views.static import serve
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -28,5 +27,10 @@ urlpatterns = [
     path("api/badges/", include("badges.urls")),
     path("api/", include("submissions.urls")),
     path("api/leaderboard/", include("leaderboard.urls")),
-    re_path(r"^media/(?P<path>.+)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
+
+if not getattr(settings, "USE_S3", False):
+    from django.views.static import serve
+    urlpatterns += [
+        re_path(r"^media/(?P<path>.+)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    ]
