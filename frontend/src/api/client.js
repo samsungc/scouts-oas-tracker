@@ -7,10 +7,6 @@ export function mediaUrl(path) {
   return API_ORIGIN + path
 }
 
-console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
-console.log("MODE:", import.meta.env.MODE);
-console.log("PROD:", import.meta.env.PROD);
-
 function getAccessToken() {
   return localStorage.getItem('access')
 }
@@ -29,18 +25,30 @@ function clearTokens() {
   localStorage.removeItem('refresh')
 }
 
+let refreshPromise = null
+
 async function refreshAccessToken() {
-  const refresh = getRefreshToken()
-  if (!refresh) throw new Error('No refresh token')
-  const res = await fetch(`${BASE}/auth/refresh/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh }),
-  })
-  if (!res.ok) throw new Error('Refresh failed')
-  const data = await res.json()
-  setTokens(data.access)
-  return data.access
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = (async () => {
+    const refresh = getRefreshToken()
+    if (!refresh) throw new Error('No refresh token')
+    const res = await fetch(`${BASE}/auth/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh }),
+    })
+    if (!res.ok) throw new Error('Refresh failed')
+    const data = await res.json()
+    setTokens(data.access)
+    return data.access
+  })()
+
+  try {
+    return await refreshPromise
+  } finally {
+    refreshPromise = null
+  }
 }
 
 export class ApiError extends Error {

@@ -39,6 +39,12 @@ class BadgeSubmission(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["scout", "status"], name="sub_scout_status_idx"),
+            models.Index(fields=["scout", "requirement", "status"], name="sub_scout_req_status_idx"),
+        ]
+
     def __str__(self):
         return f"{self.scout.username} - {self.requirement.title} ({self.status})"
 
