@@ -4,10 +4,7 @@ import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
-import Pagination from '../components/ui/Pagination'
 import styles from './ReviewPage.module.css'
-
-const PAGE_SIZE = 20
 
 const FILTERS = [
   { key: 'submitted', label: 'Pending Review' },
@@ -25,38 +22,21 @@ export default function ReviewPage() {
   const [filter, setFilter] = useState('submitted')
   const [dateRange, setDateRange] = useState(7)
   const [submissions, setSubmissions] = useState([])
-  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
-  const [page, setPage] = useState(1)
-
-  useEffect(() => {
-    setPage(1)
-  }, [filter, dateRange])
 
   useEffect(() => {
     loadSubmissions()
-  }, [filter, dateRange, page])
+  }, [filter, dateRange])
 
   async function loadSubmissions() {
     setLoading(true)
     setError('')
     try {
-      const params = {
-        ...(filter ? { status: filter } : { days: dateRange ?? undefined }),
-        page,
-        page_size: PAGE_SIZE,
-      }
+      const params = filter ? { status: filter } : { days: dateRange ?? undefined }
       const data = await getReviewSubmissions(params)
-      // Handle paginated response { count, results } or plain array (fallback)
-      if (data && typeof data.count === 'number' && Array.isArray(data.results)) {
-        setSubmissions(data.results)
-        setTotalCount(data.count)
-      } else {
-        setSubmissions(Array.isArray(data) ? data : [])
-        setTotalCount(Array.isArray(data) ? data.length : 0)
-      }
+      setSubmissions(Array.isArray(data) ? data : [])
     } catch (err) {
       if (err.status === 403) {
         setError('You do not have permission to view this page.')
@@ -71,11 +51,8 @@ export default function ReviewPage() {
   function handleApproved(updated) {
     if (filter === 'submitted') {
       setSubmissions((prev) => prev.filter((s) => s.id !== updated.id))
-      setTotalCount((c) => c - 1)
     } else {
-      setSubmissions((prev) =>
-        prev.map((s) => (s.id === updated.id ? updated : s))
-      )
+      setSubmissions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)))
     }
   }
 
@@ -83,15 +60,10 @@ export default function ReviewPage() {
     setRejectTarget(null)
     if (filter === 'submitted') {
       setSubmissions((prev) => prev.filter((s) => s.id !== updated.id))
-      setTotalCount((c) => c - 1)
     } else {
-      setSubmissions((prev) =>
-        prev.map((s) => (s.id === updated.id ? updated : s))
-      )
+      setSubmissions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)))
     }
   }
-
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
     <div>
@@ -127,14 +99,6 @@ export default function ReviewPage() {
             ))}
           </div>
         )}
-        {!loading && !error && totalPages > 1 && (
-          <Pagination
-            compact
-            page={page}
-            totalPages={totalPages}
-            onPage={setPage}
-          />
-        )}
       </div>
 
       {loading && <Spinner centered />}
@@ -151,26 +115,17 @@ export default function ReviewPage() {
               </p>
             </div>
           ) : (
-            <>
-              <div className={styles.cards}>
-                {submissions.map((sub) => (
-                  <ReviewCard
-                    key={sub.id}
-                    submission={sub}
-                    requirement={sub.requirement_detail}
-                    onApproved={handleApproved}
-                    onRejectClick={setRejectTarget}
-                  />
-                ))}
-              </div>
-              {totalPages > 1 && (
-                <Pagination
-                  page={page}
-                  totalPages={totalPages}
-                  onPage={setPage}
+            <div className={styles.cards}>
+              {submissions.map((sub) => (
+                <ReviewCard
+                  key={sub.id}
+                  submission={sub}
+                  requirement={sub.requirement_detail}
+                  onApproved={handleApproved}
+                  onRejectClick={setRejectTarget}
                 />
-              )}
-            </>
+              ))}
+            </div>
           )}
         </>
       )}

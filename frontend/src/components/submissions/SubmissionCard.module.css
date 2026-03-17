@@ -50,3 +50,24 @@
   border-top: 1px solid var(--color-border-light);
   padding-top: 12px;
 }
+
+.noEvidenceWarning {
+  background: #fdf8ed;
+  border: 1px solid var(--color-accent-dark);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.noEvidenceWarning p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #5a3a00;
+}
+
+.noEvidenceActions {
+  display: flex;
+  gap: 8px;
+}

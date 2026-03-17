@@ -11,10 +11,20 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
   const [sub, setSub] = useState(submission)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [warnNoEvidence, setWarnNoEvidence] = useState(false)
 
   const isDraft = sub.status === 'draft'
 
-  async function handleSubmitForReview() {
+  function handleSubmitClick() {
+    if (sub.evidence.length === 0) {
+      setWarnNoEvidence(true)
+    } else {
+      doSubmit()
+    }
+  }
+
+  async function doSubmit() {
+    setWarnNoEvidence(false)
     setLoading(true)
     setError('')
     try {
@@ -83,14 +93,28 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
         <EvidenceForm submissionId={sub.id} onAdded={handleEvidenceAdded} />
       )}
 
+      {warnNoEvidence && (
+        <div className={styles.noEvidenceWarning}>
+          <p>You have no evidence attached. Scouters may reject this submission.</p>
+          <div className={styles.noEvidenceActions}>
+            <Button variant="primary" size="sm" onClick={doSubmit} disabled={loading}>
+              {loading ? 'Submitting…' : 'Submit Anyway'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setWarnNoEvidence(false)} disabled={loading}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       <ErrorMessage message={error} />
 
-      {isDraft && (
+      {isDraft && !warnNoEvidence && (
         <div className={styles.actions}>
           <Button
             variant="primary"
             size="sm"
-            onClick={handleSubmitForReview}
+            onClick={handleSubmitClick}
             disabled={loading}
           >
             {loading ? 'Submitting…' : 'Submit for Review'}

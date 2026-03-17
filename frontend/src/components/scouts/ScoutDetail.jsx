@@ -36,8 +36,9 @@ const CATEGORY_LABELS = {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function badgeOrder(name) {
-  const m = name.match(/(\d+)\s*$/)
+function badgeOrder(badge) {
+  if (badge.level != null) return badge.level
+  const m = badge.name.match(/(\d+)\s*$/)
   return m ? parseInt(m[1], 10) : 0
 }
 
@@ -96,7 +97,7 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
     byCategory[cat].push(badge)
   }
   for (const cat of Object.keys(byCategory)) {
-    byCategory[cat].sort((a, b) => badgeOrder(a.name) - badgeOrder(b.name))
+    byCategory[cat].sort((a, b) => badgeOrder(a) - badgeOrder(b))
   }
 
   const allBadgeStats = activeBadges.map((badge) => {
