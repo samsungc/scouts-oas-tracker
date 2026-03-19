@@ -115,7 +115,7 @@ class ReviewSubmissionViewSet(
             except ValueError:
                 pass
 
-        return queryset.order_by("submitted_at")
+        return queryset.order_by("-submitted_at")
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
