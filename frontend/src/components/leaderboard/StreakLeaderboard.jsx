@@ -1,60 +1,76 @@
-import { useState, useEffect } from 'react'
-import { getActivityLeaderboard } from '../../api/leaderboard'
+import { useState, useEffect, useMemo } from 'react'
+import { getStreakLeaderboard } from '../../api/leaderboard'
 import Pagination from '../ui/Pagination'
 import Spinner from '../ui/Spinner'
 import ErrorMessage from '../ui/ErrorMessage'
 import styles from './ActivityLeaderboard.module.css'
 
-const WINDOWS = [
-  { key: '24h', label: '24 Hours' },
-  { key: '7d', label: '7 Days' },
-  { key: '30d', label: '30 Days' },
+const TABS = [
+  { key: 'current', label: 'Current Streak' },
+  { key: 'alltime', label: 'All-Time Streak' },
 ]
 
 const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
 const PAGE_SIZE = 5
 
-export default function ActivityLeaderboard({ myStats, currentUserId }) {
-  const [window, setWindow] = useState('7d')
+export default function StreakLeaderboard({ currentUserId }) {
+  const [tab, setTab] = useState('current')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    setPage(1)
-    load(window)
-  }, [window])
-
-  async function load(w) {
-    setLoading(true)
-    setError('')
-    try {
-      const result = await getActivityLeaderboard(w)
-      setData(result)
-    } catch {
-      setError('Failed to load leaderboard.')
-    } finally {
-      setLoading(false)
+    async function load() {
+      setLoading(true)
+      setError('')
+      try {
+        const result = await getStreakLeaderboard()
+        setData(result)
+      } catch {
+        setError('Failed to load streak leaderboard.')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    load()
+  }, [])
 
-  const entries = data?.entries ?? []
-  const totalPages = Math.ceil(entries.length / PAGE_SIZE)
-  const pageEntries = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [tab])
+
+  const ranked = useMemo(() => {
+    if (!data) return []
+    const field = tab === 'current' ? 'current_streak' : 'longest_streak'
+    const sorted = [...data.entries].sort((a, b) => b[field] - a[field])
+    let rank = 1
+    let prevVal = null
+    let counter = 0
+    return sorted.map((entry) => {
+      counter++
+      const val = entry[field]
+      if (val !== prevVal) rank = counter
+      prevVal = val
+      return { ...entry, rank, streakDays: val }
+    })
+  }, [data, tab])
+
+  const totalPages = Math.ceil(ranked.length / PAGE_SIZE)
+  const pageEntries = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Most Active Scouts</h2>
+        <h2 className={styles.title}>Streak Leaderboard</h2>
         <div className={styles.tabs}>
-          {WINDOWS.map((w) => (
+          {TABS.map((t) => (
             <button
-              key={w.key}
-              className={`${styles.tab} ${window === w.key ? styles.active : ''}`}
-              onClick={() => setWindow(w.key)}
+              key={t.key}
+              className={`${styles.tab} ${tab === t.key ? styles.active : ''}`}
+              onClick={() => setTab(t.key)}
             >
-              {w.label}
+              {t.label}
             </button>
           ))}
         </div>
@@ -66,17 +82,14 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
       {!loading && !error && data && (
         <>
           <div className={styles.tableWrap}>
-          {entries.length === 0 ? (
+          {ranked.length === 0 ? (
             <div className={styles.empty}>
-              No activity in this period yet. Start submitting to climb the board!
+              No streak data yet. Start submitting every day!
             </div>
           ) : (
             <div className={styles.table}>
               {pageEntries.map((entry) => {
                 const isMe = entry.scout_id === currentUserId
-                const streakDays = myStats?.current_streak_days || 0
-                const showFlame = isMe && streakDays >= 3
-
                 return (
                   <div
                     key={entry.scout_id}
@@ -87,13 +100,13 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
                     </span>
                     <span className={styles.name}>
                       {entry.scout_display_name}
-                      {showFlame && <span className={styles.flame}>🔥</span>}
                       {isMe && <span className={styles.youBadge}>you</span>}
                     </span>
-                    <span className={styles.count}>
-                      {entry.approved_count} req{entry.approved_count !== 1 ? 's' : ''}
+                    <span className={styles.pts}>
+                      {entry.streakDays === 0
+                        ? 'No streak'
+                        : `🔥 ${entry.streakDays} day${entry.streakDays !== 1 ? 's' : ''}`}
                     </span>
-                    <span className={styles.pts}>{entry.points} pts</span>
                   </div>
                 )
               })}

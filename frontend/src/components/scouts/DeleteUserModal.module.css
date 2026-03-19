@@ -1,0 +1,111 @@
+.desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+
+.search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-white);
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+.search:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(21, 101, 167, 0.15);
+}
+
+.list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+}
+
+.scoutItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.scoutItem:first-child { border-top: none; }
+.scoutItem:hover { background: #f0f5fb; }
+
+.selected {
+  background: #e8f0fb;
+}
+.selected:hover { background: #dce8f8; }
+
+.scoutName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.scoutUsername {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.confirmText {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cancelBtn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cancelBtn:hover:not(:disabled) { background: var(--color-bg-page); }
+.cancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.deactivateBtn {
+  background: #b71c1c;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.deactivateBtn:hover:not(:disabled) { background: #8b0000; }
+.deactivateBtn:disabled { opacity: 0.5; cursor: not-allowed; }

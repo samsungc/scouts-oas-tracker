@@ -1,0 +1,49 @@
+.banner {
+  background: #eef4fc;
+  border-bottom: 2px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  color: var(--color-primary-dark);
+}
+
+.text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.approved {
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.rejected {
+  font-weight: 700;
+  color: #b71c1c;
+}
+
+.sep {
+  font-weight: 400;
+  color: var(--color-primary-dark);
+}
+
+.dismiss {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color 0.12s, background 0.12s;
+}
+.dismiss:hover {
+  color: var(--color-primary-dark);
+  background: rgba(0, 0, 0, 0.06);
+}

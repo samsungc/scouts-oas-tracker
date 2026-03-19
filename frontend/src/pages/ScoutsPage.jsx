@@ -4,6 +4,7 @@ import { getBadges } from '../api/badges'
 import { getScoutStats } from '../api/users'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import CreateUserModal from '../components/scouts/CreateUserModal'
+import DeleteUserModal from '../components/scouts/DeleteUserModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import Pagination from '../components/ui/Pagination'
@@ -101,6 +102,7 @@ export default function ScoutsPage() {
   const [detailError, setDetailError] = useState('')
   const [page, setPage] = useState(1)
   const [showCreateUser, setShowCreateUser] = useState(false)
+  const [showDeleteUser, setShowDeleteUser] = useState(false)
   const [sortKey, setSortKey] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
 
@@ -227,14 +229,26 @@ export default function ScoutsPage() {
             Summary of all scouts and their OAS badge progress.
           </p>
         </div>
-        <button className={styles.createUserBtn} onClick={() => setShowCreateUser(true)}>
-          + Create User
-        </button>
+        <div className={styles.headerActions}>
+          <button className={styles.deleteUserBtn} onClick={() => setShowDeleteUser(true)}>
+            Delete User
+          </button>
+          <button className={styles.createUserBtn} onClick={() => setShowCreateUser(true)}>
+            + Create User
+          </button>
+        </div>
       </div>
       {showCreateUser && (
         <CreateUserModal
           onClose={() => setShowCreateUser(false)}
           onCreated={load}
+        />
+      )}
+      {showDeleteUser && (
+        <DeleteUserModal
+          scouts={scouts}
+          onClose={() => setShowDeleteUser(false)}
+          onDeleted={load}
         />
       )}
 

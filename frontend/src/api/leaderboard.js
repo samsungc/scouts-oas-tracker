@@ -11,3 +11,7 @@ export function getCategoryChampions() {
 export function getMyStats() {
   return api.get('/leaderboard/my-stats/')
 }
+
+export function getStreakLeaderboard() {
+  return api.get('/leaderboard/streaks/')
+}

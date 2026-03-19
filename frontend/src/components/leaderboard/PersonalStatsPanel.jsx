@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import styles from './PersonalStatsPanel.module.css'
 
 const RANK_LEVELS = [
@@ -24,6 +25,7 @@ const CATEGORY_LABELS = {
 }
 
 export default function PersonalStatsPanel({ stats }) {
+  const [categoryOpen, setCategoryOpen] = useState(false)
   const {
     total_approved,
     total_submitted,
@@ -63,6 +65,7 @@ export default function PersonalStatsPanel({ stats }) {
               Best: {longest_streak_days} days
             </span>
           )}
+          <span className={styles.streakHint}>Build a streak by submitting requirements every day</span>
           <div className={styles.rankLadder}>
             {RANK_LEVELS.map((level) => {
               const reached = total_points >= level.threshold
@@ -99,23 +102,31 @@ export default function PersonalStatsPanel({ stats }) {
 
       {categoryEntries.length > 0 && (
         <div className={styles.categoryBars}>
-          <h3 className={styles.barsTitle}>Progress by Category</h3>
-          {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
-            const count = approved_by_category[key] || 0
-            const pct = (count / maxCategoryCount) * 100
-            return (
-              <div key={key} className={styles.barRow}>
-                <span className={styles.barLabel}>{label}</span>
-                <div className={styles.barTrack}>
-                  <div
-                    className={styles.barFill}
-                    style={{ width: `${pct}%` }}
-                  />
+          <button
+            className={styles.barsTitleBtn}
+            onClick={() => setCategoryOpen((v) => !v)}
+          >
+            <span className={styles.barsTitle}>Progress by Category</span>
+            <span className={`${styles.chevron} ${categoryOpen ? styles.chevronOpen : ''}`}>▾</span>
+          </button>
+          <div className={`${styles.barsCollapsible} ${categoryOpen ? styles.barsOpen : ''}`}>
+            {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
+              const count = approved_by_category[key] || 0
+              const pct = (count / maxCategoryCount) * 100
+              return (
+                <div key={key} className={styles.barRow}>
+                  <span className={styles.barLabel}>{label}</span>
+                  <div className={styles.barTrack}>
+                    <div
+                      className={styles.barFill}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className={styles.barCount}>{count}</span>
                 </div>
-                <span className={styles.barCount}>{count}</span>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

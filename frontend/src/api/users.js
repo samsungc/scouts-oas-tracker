@@ -32,3 +32,8 @@ export function getScoutStats() {
 export function createUser(data) {
   return api.post('/users/create/', data)
 }
+
+/** Deactivate a user (set is_active=False). Scouter/admin only. */
+export function deactivateUser(id) {
+  return api.patch(`/users/${id}/deactivate/`)
+}

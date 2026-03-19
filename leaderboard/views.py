@@ -196,6 +196,38 @@ class CategoryChampionsView(APIView):
         return Response({'champions': champions})
 
 
+class StreakLeaderboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        scouts = list(User.objects.filter(role='scout', is_active=True))
+
+        # Fetch all (scout_id, date) pairs in one query
+        rows = (
+            BadgeSubmission.objects
+            .filter(scout__role='scout', scout__is_active=True, submitted_at__isnull=False)
+            .values('scout_id', 'submitted_at__date')
+            .distinct()
+        )
+        dates_by_scout = defaultdict(set)
+        for row in rows:
+            dates_by_scout[row['scout_id']].add(row['submitted_at__date'])
+
+        entries = []
+        for scout in scouts:
+            dates = dates_by_scout.get(scout.id, set())
+            current, longest = compute_streak(dates)
+            display_name = scout.get_full_name() or scout.username
+            entries.append({
+                'scout_id': scout.id,
+                'scout_display_name': display_name,
+                'current_streak': current,
+                'longest_streak': longest,
+            })
+
+        return Response({'entries': entries})
+
+
 class MyStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -231,12 +263,11 @@ class MyStatsView(APIView):
         total_points = (total_approved * 10) + (completed_badges * 25)
         rank_label = get_rank_label(total_points)
 
-        approved_dates = {
-            sub.reviewed_at.date()
-            for sub in approved_subs
-            if sub.reviewed_at
-        }
-        current_streak, longest_streak = compute_streak(approved_dates)
+        submitted_dates = set(
+            BadgeSubmission.objects.filter(scout=user, submitted_at__isnull=False)
+            .values_list('submitted_at__date', flat=True)
+        )
+        current_streak, longest_streak = compute_streak(submitted_dates)
 
         today = timezone.now().date()
         daily_counts = defaultdict(int)

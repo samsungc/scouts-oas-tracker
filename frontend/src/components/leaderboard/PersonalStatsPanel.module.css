@@ -79,6 +79,13 @@
   color: var(--color-text-muted);
 }
 
+.streakHint {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
 /* Stat pills */
 .pills {
   display: flex;
@@ -185,13 +192,45 @@
   padding-top: 20px;
 }
 
+.barsTitleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+
 .barsTitle {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: 14px;
+}
+
+.chevron {
+  font-size: 1.4rem;
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.barsCollapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.barsOpen {
+  max-height: 600px;
 }
 
 .barRow {
