@@ -115,7 +115,9 @@ class ReviewSubmissionViewSet(
             except ValueError:
                 pass
 
-        return queryset.order_by("-submitted_at")
+        # Pending Review (filtered by status) → oldest first; All Submissions → newest first
+        order = "submitted_at" if status_param else "-submitted_at"
+        return queryset.order_by(order)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
