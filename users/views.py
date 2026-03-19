@@ -47,7 +47,7 @@ class ScoutListView(generics.ListAPIView):
 
     def get_queryset(self):
         from .models import User
-        return User.objects.filter(role="scout").order_by("username")
+        return User.objects.filter(role="scout", is_active=True).order_by("username")
 
 
 class ScoutStatsView(APIView):
@@ -68,9 +68,9 @@ class ScoutStatsView(APIView):
 
         from .models import User
 
-        # Query 1: scouts with pending count + last submission date
+        # Query 1: active scouts with pending count + last submission date
         scouts = list(
-            User.objects.filter(role="scout")
+            User.objects.filter(role="scout", is_active=True)
             .annotate(
                 pending_review_count=Count(
                     "badge_submissions",
@@ -120,6 +120,7 @@ class ScoutStatsView(APIView):
         # Query 3: all approved submissions — only lean fields, no evidence/nested data
         approved_subs = BadgeSubmission.objects.filter(
             scout__role="scout",
+            scout__is_active=True,
             status="approved",
             requirement__badge__is_active=True,
         ).values("scout_id", "requirement_id", "reviewed_at")
@@ -235,3 +236,34 @@ class CreateUserView(generics.CreateAPIView):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("You cannot create a user with a higher role than your own.")
         serializer.save()
+
+
+class DeactivateUserView(APIView):
+    """Set is_active=False for a user. Scouters and admins only."""
+
+    def get_permissions(self):
+        from submissions.permissions import IsScouterOrAdmin
+        return [permissions.IsAuthenticated(), IsScouterOrAdmin()]
+
+    def patch(self, request, user_id):
+        from .models import User
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if user == request.user:
+            return Response(
+                {"detail": "You cannot deactivate your own account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if ROLE_HIERARCHY.get(user.role, 0) > ROLE_HIERARCHY.get(request.user.role, 0):
+            return Response(
+                {"detail": "You cannot deactivate a user with a higher role than your own."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+        return Response({"detail": "User deactivated successfully."}, status=status.HTTP_200_OK)

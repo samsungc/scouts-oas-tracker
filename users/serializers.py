@@ -15,9 +15,10 @@ class MeSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "role",
+            "last_login",
             "peer_review_eligible",
         ]
-        read_only_fields = ["id", "username", "role"]
+        read_only_fields = ["id", "username", "role", "last_login"]
 
     def get_peer_review_eligible(self, obj):
         if obj.role != 'scout':

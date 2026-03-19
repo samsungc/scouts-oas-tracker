@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { getCategoryChampions, getMyStats } from '../api/leaderboard'
 import PersonalStatsPanel from '../components/leaderboard/PersonalStatsPanel'
 import ActivityLeaderboard from '../components/leaderboard/ActivityLeaderboard'
+import StreakLeaderboard from '../components/leaderboard/StreakLeaderboard'
 import CategoryChampionsGrid from '../components/leaderboard/CategoryChampionsGrid'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
@@ -44,12 +45,14 @@ export default function LeaderboardPage() {
     <div>
       <div className={styles.pageHeader}>
         <h1 className={styles.title}>Leaderboard</h1>
-        <p className={styles.subtitle}>See how your venturer is progressing through badge requirements.</p>
+        <p className={styles.subtitle}>See how you stack up against other Venturers!</p>
       </div>
 
       {isScout && myStats && <PersonalStatsPanel stats={myStats} />}
 
       <ActivityLeaderboard myStats={myStats} currentUserId={user?.id} />
+
+      <StreakLeaderboard currentUserId={user?.id} />
 
       {champions && (
         <CategoryChampionsGrid

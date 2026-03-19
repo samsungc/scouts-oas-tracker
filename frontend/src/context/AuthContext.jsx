@@ -16,6 +16,10 @@ export function AuthProvider({ children }) {
     }
     try {
       const me = await getMe()
+      // Keep stored last_login up-to-date for use at next explicit login
+      if (me.last_login) {
+        localStorage.setItem('oas_last_login', me.last_login)
+      }
       setUser(me)
     } catch {
       api.clearTokens()
@@ -30,8 +34,18 @@ export function AuthProvider({ children }) {
   }, [loadUser])
 
   async function login(username, password) {
+    // Capture the previous login time before this new login updates it
+    const prevLogin = localStorage.getItem('oas_last_login')
     await apiLogin(username, password)
     const me = await getMe()
+    // Store the new last_login for the next login cycle
+    if (me.last_login) {
+      localStorage.setItem('oas_last_login', me.last_login)
+    }
+    // Signal the notification banner to check for activity since last login
+    if (prevLogin && me.role === 'scout') {
+      sessionStorage.setItem('oas_notify_since', prevLogin)
+    }
     setUser(me)
   }
 

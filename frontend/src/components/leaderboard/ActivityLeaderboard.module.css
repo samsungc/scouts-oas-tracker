@@ -59,6 +59,10 @@
   font-size: 0.9rem;
 }
 
+.tableWrap {
+  min-height: 280px;
+}
+
 .table {
   display: flex;
   flex-direction: column;
