@@ -43,12 +43,12 @@
   transition: background 0.12s;
 }
 .scoutItem:first-child { border-top: none; }
-.scoutItem:hover { background: #f0f5fb; }
+.scoutItem:hover { background: var(--color-row-hover-bg); }
 
 .selected {
-  background: #e8f0fb;
+  background: var(--color-row-selected-bg);
 }
-.selected:hover { background: #dce8f8; }
+.selected:hover { background: var(--color-row-selected-hover-bg); }
 
 .scoutName {
   font-size: 0.9rem;

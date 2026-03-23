@@ -8,6 +8,16 @@ export default function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showProfile, setShowProfile] = useState(false)
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('oas_theme') || 'light'
+  )
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('oas_theme', next)
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? 'dark' : '')
+  }
 
   function handleLogout() {
     logout()
@@ -23,7 +33,6 @@ export default function NavBar() {
       <div className={styles.inner}>
         <div className={styles.brand}>
           <span className={styles.brandName}>OAS Badge Tracker</span>
-          <span className={styles.groupName}>6th Richmond Hill Scout Group</span>
         </div>
         <div className={styles.links}>
           <NavLink
@@ -99,6 +108,9 @@ export default function NavBar() {
               Hello, {user.first_name || user.username}
             </span>
           )}
+          <button className={styles.themeBtn} onClick={toggleTheme} title="Toggle dark mode">
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
           <button className={styles.profileBtn} onClick={() => setShowProfile(true)}>
             My Profile
           </button>

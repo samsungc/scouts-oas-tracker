@@ -218,7 +218,7 @@
 }
 
 .scoutRow:hover {
-  background: #f0f5fb;
+  background: var(--color-row-hover-bg);
 }
 
 .scoutNameCol {

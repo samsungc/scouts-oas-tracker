@@ -123,10 +123,10 @@
 .errorMsg {
   margin-top: 14px;
   padding: 10px 14px;
-  background: #fff3f3;
-  border: 1px solid #fca5a5;
+  background: var(--color-surface-rejected-bg);
+  border: 1px solid var(--color-surface-rejected-border, var(--color-status-rejected));
   border-radius: 6px;
-  color: #b91c1c;
+  color: var(--color-status-rejected);
   font-size: 0.9rem;
 }
 
@@ -138,12 +138,12 @@
 
 .dryRunBanner {
   padding: 10px 16px;
-  background: #fffbeb;
+  background: var(--color-surface-warning);
   border: 1.5px solid var(--color-accent);
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #92400e;
+  color: var(--color-surface-warning-text);
   margin-bottom: 20px;
 }
 
@@ -166,7 +166,7 @@
 
 .statCardCreated {
   border-color: var(--color-primary);
-  background: #f0f7ff;
+  background: var(--color-surface-info);
 }
 
 .statValue {
@@ -186,7 +186,7 @@
 
 .warningsSection {
   background: var(--color-white);
-  border: 1.5px solid #fbbf24;
+  border: 1.5px solid var(--color-accent);
   border-radius: 10px;
   padding: 20px 24px;
 }
@@ -194,7 +194,7 @@
 .warningsTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: #92400e;
+  color: var(--color-surface-warning-text);
   margin-bottom: 14px;
 }
 
@@ -223,7 +223,7 @@
 
 .noWarnings {
   font-size: 0.9rem;
-  color: #15803d;
+  color: var(--color-status-approved);
   font-weight: 500;
   padding: 12px 0;
 }

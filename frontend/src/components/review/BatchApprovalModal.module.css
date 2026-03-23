@@ -5,9 +5,9 @@
 }
 
 .success {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
+  background: var(--color-badge-complete-tag-bg);
+  color: var(--color-badge-complete-tag-text);
+  border: 1px solid var(--color-badge-complete-tag-border);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   font-size: 0.875rem;
@@ -100,7 +100,15 @@
 }
 
 .scoutRow:not(.scoutRowApproved):hover {
-  background: var(--color-bg-hover, #f0f4f8);
+  background: var(--color-row-hover-bg);
+}
+
+.scoutRowSelected {
+  background: var(--color-row-selected-bg);
+}
+
+.scoutRowSelected:hover {
+  background: var(--color-row-selected-hover-bg);
 }
 
 .scoutRow input[type='checkbox'] {
@@ -123,9 +131,9 @@
 
 .approvedTag {
   font-size: 0.75rem;
-  color: #2e7d32;
-  background: #e8f5e9;
-  border: 1px solid #c8e6c9;
+  color: var(--color-badge-complete-tag-text);
+  background: var(--color-badge-complete-tag-bg);
+  border: 1px solid var(--color-badge-complete-tag-border);
   border-radius: 10px;
   padding: 2px 8px;
   white-space: nowrap;

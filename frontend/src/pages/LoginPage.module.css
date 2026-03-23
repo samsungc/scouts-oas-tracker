@@ -100,9 +100,9 @@
 }
 
 .error {
-  background: #f5f0e8;
-  border: 1px solid var(--color-accent-dark);
-  color: #7a4f00;
+  background: var(--color-surface-warning);
+  border: 1px solid var(--color-surface-warning-border);
+  color: var(--color-surface-warning-text);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 0.85rem;

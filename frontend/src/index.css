@@ -19,6 +19,46 @@
   --color-status-approved: #2a7d2a;
   --color-status-rejected: #c62828;
 
+  --color-surface-warning: #fdf8ed;
+  --color-surface-warning-border: #c8841a;
+  --color-surface-warning-text: #5a3a00;
+  --color-surface-info: #f0f5fb;
+  --color-surface-info-border: #c2d6ed;
+  --color-surface-approved-bg: #dff2df;
+  --color-surface-rejected-bg: #fde8e8;
+  --color-surface-draft-bg: #e8e8e8;
+  --color-surface-submitted-bg: #fff3dc;
+  --color-surface-highlight-my: #fff8ec;
+  --color-surface-highlight-my-hover: #fff3d6;
+  --color-overlay: rgba(13, 59, 110, 0.45);
+  --color-badge-complete-bg: #f4fbf4;
+  --color-badge-complete-border: #4caf50;
+  --color-badge-complete-tag-bg: #e6f4e6;
+  --color-badge-complete-tag-text: #2e7d32;
+  --color-badge-complete-tag-border: #a5d6a7;
+  --color-badge-rejected-bg: #fff5f5;
+  --color-badge-rejected-border: #e53935;
+  --color-badge-rejected-tag-bg: #fde8e8;
+  --color-badge-rejected-tag-text: #c62828;
+  --color-badge-rejected-tag-border: #ef9a9a;
+  --color-badge-locked-bg: #fafafa;
+  --color-badge-locked-tag-bg: #f0f0f0;
+  --color-badge-locked-tag-text: #757575;
+  --color-badge-locked-tag-border: #dddddd;
+  --color-badge-inactive-tag-bg: #e8e8e8;
+  --color-badge-inactive-tag-text: #888888;
+  --color-badge-submitted-bg: #fffcf2;
+  --color-req-approved-bg: #fafffe;
+  --color-req-submitted-bg: #fffdf5;
+  --color-req-rejected-bg: #fff8f8;
+  --color-req-hover-bg: #fff8e8;
+  --color-chip-none-bg: #f5f5f5;
+  --color-chip-none-text: #aaaaaa;
+  --color-surface-amber: #fff3d6;
+  --color-row-hover-bg: #f0f5fb;
+  --color-row-selected-bg: #e8f0fb;
+  --color-row-selected-hover-bg: #dce8f8;
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
@@ -69,6 +109,8 @@ button {
 input, textarea, select {
   font-family: var(--font-sans);
   font-size: 1rem;
+  background-color: var(--color-white);
+  color: var(--color-text);
 }
 
 ul {
@@ -82,4 +124,67 @@ ul {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+/* ============================================================
+   Dark Theme Overrides
+   ============================================================ */
+[data-theme="dark"] {
+  --color-primary: #63b3ed;
+  --color-primary-dark: #2b6cb0;
+  --color-primary-hover: #4299e1;
+  --color-accent: #f5a623;
+  --color-accent-dark: #c8841a;
+  --color-bg-page: #0d1b2e;
+  --color-white: #1a2f4a;
+  --color-text: #edf2f8;
+  --color-text-muted: #90adc6;
+  --color-border: #2c4a68;
+  --color-border-light: #1e3655;
+  --color-status-draft: #8fa3bc;
+  --color-status-submitted: #f0a040;
+  --color-status-approved: #4caf70;
+  --color-status-rejected: #ef5350;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --color-surface-warning: #1e2a14;
+  --color-surface-warning-border: #5a4200;
+  --color-surface-warning-text: #d4a340;
+  --color-surface-info: #0f1e30;
+  --color-surface-info-border: #2a3f58;
+  --color-surface-approved-bg: #0e2318;
+  --color-surface-rejected-bg: #2a0e0e;
+  --color-surface-draft-bg: #2a3040;
+  --color-surface-submitted-bg: #1e1800;
+  --color-surface-highlight-my: #1e1600;
+  --color-surface-highlight-my-hover: #2a1f00;
+  --color-overlay: rgba(5, 15, 30, 0.7);
+  --color-badge-complete-bg: #0e2318;
+  --color-badge-complete-border: #38a169;
+  --color-badge-complete-tag-bg: #1a3a28;
+  --color-badge-complete-tag-text: #68d391;
+  --color-badge-complete-tag-border: #276749;
+  --color-badge-rejected-bg: #2d1515;
+  --color-badge-rejected-border: #e53e3e;
+  --color-badge-rejected-tag-bg: #3d1c1c;
+  --color-badge-rejected-tag-text: #fc8181;
+  --color-badge-rejected-tag-border: #742a2a;
+  --color-badge-locked-bg: #1a2b40;
+  --color-badge-locked-tag-bg: #243448;
+  --color-badge-locked-tag-text: #90adc6;
+  --color-badge-locked-tag-border: #2c4a68;
+  --color-badge-inactive-tag-bg: #243448;
+  --color-badge-inactive-tag-text: #90adc6;
+  --color-badge-submitted-bg: #1e1a00;
+  --color-req-approved-bg: #0d1f16;
+  --color-req-submitted-bg: #1a1500;
+  --color-req-rejected-bg: #1e0e0e;
+  --color-req-hover-bg: #1a1400;
+  --color-chip-none-bg: #243448;
+  --color-chip-none-text: #90adc6;
+  --color-surface-amber: #1a1200;
+  --color-row-hover-bg: #1d3452;
+  --color-row-selected-bg: #1e3a58;
+  --color-row-selected-hover-bg: #254468;
 }
