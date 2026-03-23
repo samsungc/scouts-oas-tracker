@@ -14,7 +14,7 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
 
   async function handleConfirm() {
     if (!notes.trim()) {
-      setError('Please provide a reason for rejection.')
+      setError('Please provide a reason for returning.')
       return
     }
     setLoading(true)
@@ -23,14 +23,14 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
       const updated = await rejectAction(submission.id, notes.trim())
       onRejected(updated)
     } catch (err) {
-      setError(err.message || 'Failed to reject submission.')
+      setError(err.message || 'Failed to return submission.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Modal title="Reject Submission" onClose={onClose}>
+    <Modal title="Return Submission" onClose={onClose}>
       <div className={styles.info}>
         <span className={styles.scout}>{submission.scout_username}</span>
         <span className={styles.sep}>—</span>
@@ -40,7 +40,7 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
       </div>
 
       <label className={styles.label} htmlFor="reject-notes">
-        Reason for rejection <span className={styles.required}>*</span>
+        Reason for returning <span className={styles.required}>*</span>
       </label>
       <textarea
         id="reject-notes"
@@ -58,7 +58,7 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
           Cancel
         </Button>
         <Button variant="danger" onClick={handleConfirm} disabled={loading}>
-          {loading ? 'Rejecting…' : 'Confirm Rejection'}
+          {loading ? 'Returning…' : 'Confirm Return'}
         </Button>
       </div>
     </Modal>

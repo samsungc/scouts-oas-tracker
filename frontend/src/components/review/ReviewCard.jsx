@@ -91,7 +91,7 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
             onClick={() => onRejectClick(submission)}
             disabled={loading}
           >
-            ✕ Reject
+            ✕ Return
           </Button>
         </div>
       )}

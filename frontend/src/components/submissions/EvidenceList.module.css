@@ -62,7 +62,7 @@
 }
 
 .deleteBtn:hover {
-  background: #e8e8e8;
+  background: var(--color-border);
   color: var(--color-text);
 }
 

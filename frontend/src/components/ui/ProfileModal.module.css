@@ -85,7 +85,7 @@
 
 .success {
   font-size: 0.85rem;
-  color: #2e7d32;
+  color: var(--color-status-approved);
   font-weight: 500;
   margin: 4px 0 0;
 }

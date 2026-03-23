@@ -23,12 +23,12 @@
 }
 
 .reviewerNotes {
-  background: #fdf8ed;
-  border: 1px solid var(--color-accent-dark);
+  background: var(--color-surface-warning);
+  border: 1px solid var(--color-surface-warning-border);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 0.85rem;
-  color: #5a3a00;
+  color: var(--color-surface-warning-text);
 }
 
 .section {
@@ -52,8 +52,8 @@
 }
 
 .noEvidenceWarning {
-  background: #fdf8ed;
-  border: 1px solid var(--color-accent-dark);
+  background: var(--color-surface-warning);
+  border: 1px solid var(--color-surface-warning-border);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   display: flex;
@@ -64,7 +64,7 @@
 .noEvidenceWarning p {
   margin: 0;
   font-size: 0.875rem;
-  color: #5a3a00;
+  color: var(--color-surface-warning-text);
 }
 
 .noEvidenceActions {

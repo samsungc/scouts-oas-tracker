@@ -1,5 +1,5 @@
 .banner {
-  background: #eef4fc;
+  background: var(--color-surface-info);
   border-bottom: 2px solid var(--color-primary);
   display: flex;
   align-items: center;
@@ -19,12 +19,12 @@
 
 .approved {
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--color-status-approved);
 }
 
 .rejected {
   font-weight: 700;
-  color: #b71c1c;
+  color: var(--color-status-rejected);
 }
 
 .sep {

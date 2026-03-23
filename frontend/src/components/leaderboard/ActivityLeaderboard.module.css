@@ -83,12 +83,12 @@
 }
 
 .myRow {
-  background: #fff8ec;
+  background: var(--color-surface-highlight-my);
   border: 1.5px solid var(--color-accent);
 }
 
 .myRow:hover {
-  background: #fff3d6;
+  background: var(--color-surface-highlight-my-hover);
 }
 
 /* Rank indicators */

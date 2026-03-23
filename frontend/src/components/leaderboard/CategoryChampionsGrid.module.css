@@ -46,7 +46,7 @@
 .card.mine {
   border-color: var(--color-accent);
   border-width: 2px;
-  background: #fff8ec;
+  background: var(--color-surface-highlight-my);
 }
 
 .categoryLabel {

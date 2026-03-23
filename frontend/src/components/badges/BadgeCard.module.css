@@ -17,16 +17,16 @@
 
 /* Completed badge — green accent */
 .complete {
-  border-color: #4caf50;
-  background: #f4fbf4;
+  border-color: var(--color-badge-complete-border);
+  background: var(--color-badge-complete-bg);
 }
 
 .completeTag {
   font-size: 0.7rem;
   font-weight: 700;
-  background: #e6f4e6;
-  color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  background: var(--color-badge-complete-tag-bg);
+  color: var(--color-badge-complete-tag-text);
+  border: 1px solid var(--color-badge-complete-tag-border);
   padding: 2px 8px;
   border-radius: 20px;
   text-transform: uppercase;
@@ -35,16 +35,16 @@
 
 /* Rejected badge — red accent when any requirement was rejected */
 .rejected {
-  border-color: #e53935;
-  background: #fff5f5;
+  border-color: var(--color-badge-rejected-border);
+  background: var(--color-badge-rejected-bg);
 }
 
 .rejectedTag {
   font-size: 0.7rem;
   font-weight: 700;
-  background: #fde8e8;
-  color: #c62828;
-  border: 1px solid #ef9a9a;
+  background: var(--color-badge-rejected-tag-bg);
+  color: var(--color-badge-rejected-tag-text);
+  border: 1px solid var(--color-badge-rejected-tag-border);
   padding: 2px 8px;
   border-radius: 20px;
   text-transform: uppercase;
@@ -54,22 +54,22 @@
 /* Locked badge — muted with lock indicator */
 .locked {
   opacity: 0.72;
-  background: #fafafa;
+  background: var(--color-badge-locked-bg);
 }
 
 .lockedTag {
   font-size: 0.7rem;
   font-weight: 600;
-  background: #f0f0f0;
-  color: #757575;
-  border: 1px solid #ddd;
+  background: var(--color-badge-locked-tag-bg);
+  color: var(--color-badge-locked-tag-text);
+  border: 1px solid var(--color-badge-locked-tag-border);
   padding: 2px 8px;
   border-radius: 20px;
 }
 
 .lockedNotice {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-badge-locked-tag-text);
   font-style: italic;
   padding: 4px 0 8px;
   border-bottom: 1px solid var(--color-border-light);
@@ -119,8 +119,8 @@
 .inactiveTag {
   font-size: 0.7rem;
   font-weight: 600;
-  background: #e8e8e8;
-  color: #888;
+  background: var(--color-badge-inactive-tag-bg);
+  color: var(--color-badge-inactive-tag-text);
   padding: 2px 8px;
   border-radius: 20px;
   text-transform: uppercase;

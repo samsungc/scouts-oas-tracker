@@ -149,7 +149,7 @@ export default function BatchApprovalModal({ requirement, onClose }) {
                   return (
                     <label
                       key={scout.id}
-                      className={`${styles.scoutRow} ${approved ? styles.scoutRowApproved : ''}`}
+                      className={`${styles.scoutRow} ${approved ? styles.scoutRowApproved : ''} ${!approved && selected.has(scout.id) ? styles.scoutRowSelected : ''}`}
                     >
                       <input
                         type="checkbox"
