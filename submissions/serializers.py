@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BadgeSubmission, SubmissionEvidence
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
 from badges.serializers import BadgeRequirementDetailSerializer
 
 
@@ -62,6 +62,44 @@ class BadgeSubmissionSerializer(serializers.ModelSerializer):
 
 class RejectSubmissionSerializer(serializers.Serializer):
     reviewer_notes = serializers.CharField(required=True)
+
+
+class BadgeHandoutSerializer(serializers.ModelSerializer):
+    scout_name = serializers.SerializerMethodField()
+    scout_username = serializers.CharField(source="scout.username", read_only=True)
+    badge_name = serializers.CharField(source="badge.name", read_only=True)
+    badge_category = serializers.CharField(source="badge.category", read_only=True)
+
+    class Meta:
+        model = BadgeHandout
+        fields = [
+            "id",
+            "scout_id",
+            "scout_name",
+            "scout_username",
+            "badge_id",
+            "badge_name",
+            "badge_category",
+            "completed_at",
+            "handed_out",
+            "handed_out_at",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "scout_id",
+            "scout_name",
+            "scout_username",
+            "badge_id",
+            "badge_name",
+            "badge_category",
+            "completed_at",
+            "created_at",
+        ]
+
+    def get_scout_name(self, obj):
+        full_name = obj.scout.get_full_name()
+        return full_name if full_name.strip() else obj.scout.username
 
 
 class BatchDirectApproveSerializer(serializers.Serializer):

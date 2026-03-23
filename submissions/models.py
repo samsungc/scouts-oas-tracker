@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from badges.models import BadgeRequirement
+from badges.models import Badge, BadgeRequirement
 
 
 class BadgeSubmission(models.Model):
@@ -65,3 +65,28 @@ class SubmissionEvidence(models.Model):
 
     def __str__(self):
         return f"Evidence for {self.requirement_submission}"
+
+
+class BadgeHandout(models.Model):
+    scout = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="handouts",
+    )
+    badge = models.ForeignKey(
+        Badge,
+        on_delete=models.CASCADE,
+        related_name="handouts",
+    )
+    completed_at = models.DateTimeField()
+    handed_out = models.BooleanField(default=False)
+    handed_out_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("scout", "badge")]
+        ordering = ["-completed_at"]
+
+    def __str__(self):
+        status = "handed out" if self.handed_out else "pending"
+        return f"{self.scout.username} - {self.badge.name} ({status})"
