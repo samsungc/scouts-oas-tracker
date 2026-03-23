@@ -95,11 +95,7 @@ export default function SubmitPage() {
               {requirement?.title ?? `Requirement #${requirementId}`}
             </h1>
             {requirement?.description && (
-              <div className={styles.description}>
-                {requirement.description.split('\n\n').map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
+              <p className={styles.description}>{requirement.description}</p>
             )}
             {requirement?.hint && (
               <p className={styles.hint}>
