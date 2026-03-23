@@ -140,6 +140,16 @@ export default function BadgesPage() {
 
   const noResults = isSearching && Object.keys(displayGrouped).length === 0
 
+  const EXCLUDED_CATEGORIES = ['awards', 'personal_progression']
+  const oasBadges = badges.filter((b) => !EXCLUDED_CATEGORIES.includes(b.category))
+  const completedBadges = isScout
+    ? oasBadges.filter((b) => {
+        const reqs = b.requirements ?? []
+        return reqs.length > 0 && reqs.every((r) => submissionsMap.get(r.id)?.status === 'approved')
+      }).length
+    : 0
+  const totalBadges = oasBadges.length
+
   return (
     <div>
       <div className={styles.pageHeader}>
@@ -149,6 +159,20 @@ export default function BadgesPage() {
           {isScout && ' Click a requirement to submit your evidence.'}
           {isScouter && ' Click Review on any requirement to batch-approve scouts.'}
         </p>
+        {isScout && !loading && totalBadges > 0 && (
+          <div className={styles.progressBar}>
+            <div className={styles.progressText}>
+              <span className={styles.progressCount}>{completedBadges} / {totalBadges}</span>
+              <span className={styles.progressLabel}> OAS badges completed</span>
+            </div>
+            <div className={styles.progressTrack}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${(completedBadges / totalBadges) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={styles.searchBar}>
