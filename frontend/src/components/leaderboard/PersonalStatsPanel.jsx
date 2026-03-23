@@ -2,12 +2,12 @@ import { useState } from 'react'
 import styles from './PersonalStatsPanel.module.css'
 
 const RANK_LEVELS = [
-  { threshold: 0,    label: 'Noob' },
-  { threshold: 1000, label: 'Novice' },
-  { threshold: 2000, label: 'Scout' },
-  { threshold: 3000, label: 'Good Scout' },
-  { threshold: 5000, label: 'Legendary Scout' },
-  { threshold: 6767, label: 'OAS Master' },
+  { threshold: 0,    label: 'Bronze' },
+  { threshold: 1000, label: 'Silver' },
+  { threshold: 2000, label: 'Gold' },
+  { threshold: 3000, label: 'Platinum' },
+  { threshold: 5000, label: 'Diamond' },
+  { threshold: 6767, label: 'Master' },
 ]
 
 const CATEGORY_LABELS = {
