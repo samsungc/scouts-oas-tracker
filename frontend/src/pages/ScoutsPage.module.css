@@ -39,6 +39,30 @@
 }
 .createUserBtn:hover { background: var(--color-primary-dark); }
 
+.todoBtn {
+  background: none;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.todoBtn:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+.todoBtnActive {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.todoBtnActive:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
 .deleteUserBtn {
   background: none;
   color: #b71c1c;

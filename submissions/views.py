@@ -6,8 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import BadgeSubmission, SubmissionEvidence
-from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
+from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer, BadgeHandoutSerializer
 from .permissions import IsScouterOrAdmin
 from .utils import get_peer_reviewable_requirement_ids
 
@@ -309,6 +309,32 @@ class PeerReviewViewSet(
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BadgeHandoutViewSet(viewsets.ModelViewSet):
+    serializer_class = BadgeHandoutSerializer
+    permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        return BadgeHandout.objects.select_related("scout", "badge").order_by("-completed_at")
+
+    def partial_update(self, request, *args, **kwargs):
+        handout = self.get_object()
+        if not handout.handed_out:
+            handout.handed_out = True
+            handout.handed_out_at = timezone.now()
+            handout.save(update_fields=["handed_out", "handed_out_at"])
+        serializer = self.get_serializer(handout)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["post"])
+    def clear(self, request):
+        now = timezone.now()
+        BadgeHandout.objects.filter(handed_out=False).update(
+            handed_out=True, handed_out_at=now
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubmissionEvidenceViewSet(

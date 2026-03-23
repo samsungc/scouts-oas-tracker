@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
 import { getScoutStats } from '../api/users'
+import { getHandouts } from '../api/handouts'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import CreateUserModal from '../components/scouts/CreateUserModal'
 import DeleteUserModal from '../components/scouts/DeleteUserModal'
+import TodoModal from '../components/scouts/TodoModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import Pagination from '../components/ui/Pagination'
@@ -103,6 +105,8 @@ export default function ScoutsPage() {
   const [page, setPage] = useState(1)
   const [showCreateUser, setShowCreateUser] = useState(false)
   const [showDeleteUser, setShowDeleteUser] = useState(false)
+  const [showTodo, setShowTodo] = useState(false)
+  const [todoItems, setTodoItems] = useState([])
   const [sortKey, setSortKey] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
 
@@ -147,6 +151,16 @@ export default function ScoutsPage() {
     },
     [badgeDetails],
   )
+
+  async function openTodo() {
+    try {
+      const data = await getHandouts()
+      setTodoItems(data)
+    } catch {
+      setTodoItems([])
+    }
+    setShowTodo(true)
+  }
 
   const activeBadgeCount = summary?.active_badge_count
     ?? badgeDetails.filter((b) => b.is_active && b.category !== 'personal_progression' && b.category !== 'awards').length
@@ -230,6 +244,17 @@ export default function ScoutsPage() {
           </p>
         </div>
         <div className={styles.headerActions}>
+          {(() => {
+            const pendingCount = todoItems.filter((i) => !i.handed_out).length
+            return (
+              <button
+                className={`${styles.todoBtn} ${pendingCount > 0 ? styles.todoBtnActive : ''}`}
+                onClick={openTodo}
+              >
+                To-Do{pendingCount > 0 ? ` (${pendingCount})` : ''}
+              </button>
+            )
+          })()}
           <button className={styles.deleteUserBtn} onClick={() => setShowDeleteUser(true)}>
             Delete User
           </button>
@@ -249,6 +274,13 @@ export default function ScoutsPage() {
           scouts={scouts}
           onClose={() => setShowDeleteUser(false)}
           onDeleted={load}
+        />
+      )}
+      {showTodo && (
+        <TodoModal
+          items={todoItems}
+          setItems={setTodoItems}
+          onClose={() => setShowTodo(false)}
         />
       )}
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BadgeSubmission, SubmissionEvidence
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
 
 
 @admin.register(BadgeSubmission)
@@ -23,3 +23,11 @@ class SubmissionEvidenceAdmin(admin.ModelAdmin):
         "requirement_submission__requirement__title",
         "text_note",
     )
+
+
+@admin.register(BadgeHandout)
+class BadgeHandoutAdmin(admin.ModelAdmin):
+    list_display = ("scout", "badge", "completed_at", "handed_out", "handed_out_at", "created_at")
+    list_filter = ("handed_out", "badge")
+    search_fields = ("scout__username", "scout__first_name", "scout__last_name", "badge__name")
+    readonly_fields = ("completed_at", "created_at")
