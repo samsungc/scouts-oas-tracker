@@ -22,6 +22,7 @@ export default function ReviewPage() {
   const [filter, setFilter] = useState('submitted')
   const [dateRange, setDateRange] = useState(7)
   const [submissions, setSubmissions] = useState([])
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
@@ -101,34 +102,48 @@ export default function ReviewPage() {
         )}
       </div>
 
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="search"
+          placeholder="Search by scout name…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}
 
-      {!loading && !error && (
-        <>
-          {submissions.length === 0 ? (
-            <div className={styles.empty}>
-              <p>
-                {filter === 'submitted'
-                  ? 'No submissions pending review.'
-                  : 'No submissions found.'}
-              </p>
-            </div>
-          ) : (
-            <div className={styles.cards}>
-              {submissions.map((sub) => (
-                <ReviewCard
-                  key={sub.id}
-                  submission={sub}
-                  requirement={sub.requirement_detail}
-                  onApproved={handleApproved}
-                  onRejectClick={setRejectTarget}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      {!loading && !error && (() => {
+        const q = search.trim().toLowerCase()
+        const visible = q
+          ? submissions.filter((s) => s.scout_username?.toLowerCase().includes(q))
+          : submissions
+        return visible.length === 0 ? (
+          <div className={styles.empty}>
+            <p>
+              {q
+                ? `No submissions found for "${search}".`
+                : filter === 'submitted'
+                ? 'No submissions pending review.'
+                : 'No submissions found.'}
+            </p>
+          </div>
+        ) : (
+          <div className={styles.cards}>
+            {visible.map((sub) => (
+              <ReviewCard
+                key={sub.id}
+                submission={sub}
+                requirement={sub.requirement_detail}
+                onApproved={handleApproved}
+                onRejectClick={setRejectTarget}
+              />
+            ))}
+          </div>
+        )
+      })()}
 
       {rejectTarget && (
         <RejectModal

@@ -72,3 +72,81 @@
   font-style: italic;
   margin-top: 6px;
 }
+
+/* ── SMART Goal display ── */
+.smartGoal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.smartTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+
+.smartRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.smartLetter {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  min-width: 16px;
+  padding-top: 1px;
+}
+
+.smartContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.smartLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.smartText {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.goalStatement {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goalStatementLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.goalStatementText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  font-style: italic;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

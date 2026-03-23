@@ -46,7 +46,7 @@ export default function LoginNotificationBanner() {
   if (counts.rejected > 0)
     parts.push(
       <span key="rejected" className={styles.rejected}>
-        {counts.rejected} rejected
+        {counts.rejected} returned
       </span>,
     )
 

@@ -4,39 +4,64 @@ import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
 import styles from './EvidenceForm.module.css'
 
+const SMART_FIELDS = [
+  { key: 's', letter: 'S', label: 'Specific',    prompt: 'What am I going to do? Why is this important to me?' },
+  { key: 'm', letter: 'M', label: 'Measurable',  prompt: 'How will I measure my success? How will I know when I have achieved my goal?' },
+  { key: 'a', letter: 'A', label: 'Attainable',  prompt: 'What will I do to achieve this goal? How will I accomplish this goal?' },
+  { key: 'r', letter: 'R', label: 'Relevant',    prompt: 'Is this goal worthwhile? How will achieving it help me? Does this goal fit my values?' },
+  { key: 't', letter: 'T', label: 'Time-Bound',  prompt: 'When will I accomplish my goal? How long will I give myself?' },
+]
+
+const EMPTY_SMART = { s: '', m: '', a: '', r: '', t: '', goal: '' }
+
 export default function EvidenceForm({ submissionId, onAdded }) {
-  const [mode, setMode] = useState('text') // 'text' | 'file'
+  const [mode, setMode] = useState('text') // 'text' | 'file' | 'goal'
   const [textNote, setTextNote] = useState('')
   const [file, setFile] = useState(null)
+  const [smart, setSmart] = useState(EMPTY_SMART)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const ALLOWED_TYPES = ['image/', 'video/', 'application/pdf']
-  const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+  const MAX_SIZE = 10 * 1024 * 1024
+
+  function handleSmartChange(key, value) {
+    setSmart((prev) => ({ ...prev, [key]: value }))
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (mode === 'text' && !textNote.trim()) return
     if (mode === 'file' && !file) return
-    if (mode === 'file') {
-      if (file.size > MAX_SIZE) {
-        setError('File must be 10 MB or smaller.')
+    if (mode === 'goal') {
+      const missing = SMART_FIELDS.some((f) => !smart[f.key].trim())
+      if (missing || !smart.goal.trim()) {
+        setError('Please fill in all SMART goal fields.')
         return
       }
+    }
+    if (mode === 'file') {
+      if (file.size > MAX_SIZE) { setError('File must be 10 MB or smaller.'); return }
       if (!ALLOWED_TYPES.some((t) => file.type.startsWith(t))) {
         setError('Only photos, videos, and PDFs are allowed.')
         return
       }
     }
+
     setLoading(true)
     setError('')
     try {
-      const ev = await addEvidence(submissionId, {
-        textNote: mode === 'text' ? textNote.trim() : undefined,
-        file: mode === 'file' ? file : undefined,
-      })
+      const payload =
+        mode === 'goal'
+          ? { textNote: JSON.stringify({ __type: 'smart_goal', ...smart }) }
+          : mode === 'text'
+          ? { textNote: textNote.trim() }
+          : { file }
+
+      const ev = await addEvidence(submissionId, payload)
       setTextNote('')
       setFile(null)
+      setSmart(EMPTY_SMART)
       onAdded(ev)
     } catch (err) {
       setError(err.message || 'Failed to add evidence.')
@@ -49,23 +74,19 @@ export default function EvidenceForm({ submissionId, onAdded }) {
     <form className={styles.form} onSubmit={handleSubmit}>
       <h4 className={styles.formTitle}>Add Evidence</h4>
       <div className={styles.toggle}>
-        <button
-          type="button"
-          className={`${styles.toggleBtn} ${mode === 'text' ? styles.active : ''}`}
-          onClick={() => setMode('text')}
-        >
-          Text Note
-        </button>
-        <button
-          type="button"
-          className={`${styles.toggleBtn} ${mode === 'file' ? styles.active : ''}`}
-          onClick={() => setMode('file')}
-        >
-          File Upload
-        </button>
+        {['text', 'file', 'goal'].map((m) => (
+          <button
+            key={m}
+            type="button"
+            className={`${styles.toggleBtn} ${mode === m ? styles.active : ''}`}
+            onClick={() => { setMode(m); setError('') }}
+          >
+            {m === 'text' ? 'Text Note' : m === 'file' ? 'File Upload' : 'SMART Goal'}
+          </button>
+        ))}
       </div>
 
-      {mode === 'text' ? (
+      {mode === 'text' && (
         <textarea
           className={styles.textarea}
           placeholder="Describe what you did to complete this requirement…"
@@ -74,7 +95,9 @@ export default function EvidenceForm({ submissionId, onAdded }) {
           rows={4}
           required
         />
-      ) : (
+      )}
+
+      {mode === 'file' && (
         <input
           className={styles.fileInput}
           type="file"
@@ -82,6 +105,40 @@ export default function EvidenceForm({ submissionId, onAdded }) {
           onChange={(e) => setFile(e.target.files[0] || null)}
           required
         />
+      )}
+
+      {mode === 'goal' && (
+        <div className={styles.goalForm}>
+          {SMART_FIELDS.map(({ key, letter, label, prompt }) => (
+            <div key={key} className={styles.goalField}>
+              <label className={styles.goalLabel}>
+                <span className={styles.goalLetter}>{letter}</span>
+                <span className={styles.goalLabelText}>{label}</span>
+                <span className={styles.goalPrompt}>{prompt}</span>
+              </label>
+              <textarea
+                className={styles.goalTextarea}
+                value={smart[key]}
+                onChange={(e) => handleSmartChange(key, e.target.value)}
+                rows={2}
+                placeholder={`Your ${label.toLowerCase()} goal…`}
+              />
+            </div>
+          ))}
+          <div className={styles.goalField}>
+            <label className={styles.goalLabel}>
+              <span className={styles.goalLabelText}>Complete Goal Statement</span>
+              <span className={styles.goalPrompt}>Write your full goal in one clear sentence.</span>
+            </label>
+            <textarea
+              className={styles.goalTextarea}
+              value={smart.goal}
+              onChange={(e) => handleSmartChange('goal', e.target.value)}
+              rows={2}
+              placeholder="My goal is to…"
+            />
+          </div>
+        </div>
       )}
 
       <ErrorMessage message={error} />

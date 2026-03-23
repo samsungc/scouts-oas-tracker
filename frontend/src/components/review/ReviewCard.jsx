@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { approveSubmission } from '../../api/review'
-import { mediaUrl } from '../../api/client'
 import StatusPill from '../ui/StatusPill'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
+import EvidenceList from '../submissions/EvidenceList'
 import styles from './ReviewCard.module.css'
 
 export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove }) {
@@ -62,32 +62,14 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         )}
       </div>
 
-      {submission.evidence && submission.evidence.length > 0 && (
+      {submission.evidence && (
         <div className={styles.evidence}>
           <h4 className={styles.evidenceTitle}>Evidence</h4>
-          <ul className={styles.evidenceList}>
-            {submission.evidence.map((ev) => (
-              <li key={ev.id} className={styles.evidenceItem}>
-                {ev.text_note && (
-                  <p className={styles.textNote}>{ev.text_note}</p>
-                )}
-                {ev.file && (() => {
-                  const url = mediaUrl(ev.file)
-                  const filename = ev.file.split('/').pop()
-                  const isImage = /\.(jpe?g|png|gif|webp|svg)(\?.*)?$/i.test(filename)
-                  return isImage ? (
-                    <a href={url} target="_blank" rel="noopener noreferrer">
-                      <img src={url} alt={filename} className={styles.imagePreview} />
-                    </a>
-                  ) : (
-                    <a href={url} target="_blank" rel="noopener noreferrer" className={styles.fileLink}>
-                      📎 {filename}
-                    </a>
-                  )
-                })()}
-              </li>
-            ))}
-          </ul>
+          <EvidenceList
+            evidence={submission.evidence}
+            isDraft={false}
+            onDeleted={() => {}}
+          />
         </div>
       )}
 

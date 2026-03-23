@@ -17,7 +17,7 @@
   --color-status-draft: #888888;
   --color-status-submitted: #e68a00;
   --color-status-approved: #2a7d2a;
-  --color-status-rejected: #555555;
+  --color-status-rejected: #c62828;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);

@@ -11,6 +11,7 @@ const PAGE_SIZE = 20
 
 export default function PeerReviewPage() {
   const [submissions, setSubmissions] = useState([])
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
@@ -51,38 +52,52 @@ export default function PeerReviewPage() {
         </p>
       </div>
 
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="search"
+          placeholder="Search by scout name…"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+        />
+      </div>
+
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}
 
-      {!loading && !error && (
-        <>
-          {submissions.length === 0 ? (
-            <div className={styles.empty}>
-              <p>No pending submissions to peer review right now.</p>
+      {!loading && !error && (() => {
+        const q = search.trim().toLowerCase()
+        const visible = q
+          ? submissions.filter((s) => s.scout_username?.toLowerCase().includes(q))
+          : submissions
+        const totalPages = Math.ceil(visible.length / PAGE_SIZE)
+        const paginated = visible.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+        return visible.length === 0 ? (
+          <div className={styles.empty}>
+            <p>
+              {q
+                ? `No submissions found for "${search}".`
+                : 'No pending submissions to peer review right now.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className={styles.cards}>
+              {paginated.map((sub) => (
+                <ReviewCard
+                  key={sub.id}
+                  submission={sub}
+                  requirement={sub.requirement_detail}
+                  onApproved={handleApproved}
+                  onRejectClick={setRejectTarget}
+                  onApprove={(id) => peerApproveSubmission(id)}
+                />
+              ))}
             </div>
-          ) : (
-            <>
-              <div className={styles.cards}>
-                {submissions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((sub) => (
-                  <ReviewCard
-                    key={sub.id}
-                    submission={sub}
-                    requirement={sub.requirement_detail}
-                    onApproved={handleApproved}
-                    onRejectClick={setRejectTarget}
-                    onApprove={(id) => peerApproveSubmission(id)}
-                  />
-                ))}
-              </div>
-              <Pagination
-                page={page}
-                totalPages={Math.ceil(submissions.length / PAGE_SIZE)}
-                onPage={setPage}
-              />
-            </>
-          )}
-        </>
-      )}
+            <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+          </>
+        )
+      })()}
 
       {rejectTarget && (
         <RejectModal

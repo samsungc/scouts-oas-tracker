@@ -11,4 +11,4 @@
 .draft    { background: #e8e8e8; color: var(--color-status-draft); }
 .submitted{ background: #fff3dc; color: var(--color-status-submitted); }
 .approved { background: #dff2df; color: var(--color-status-approved); }
-.rejected { background: #e8e8e8; color: var(--color-status-rejected); }
+.rejected { background: #fde8e8; color: var(--color-status-rejected); }
