@@ -12,12 +12,12 @@ from submissions.models import BadgeSubmission
 from badges.models import Badge
 
 RANK_LABELS = [
-    (6767, "OAS Master"),
-    (5000, "Legendary Scout"),
-    (3000, "Good Scout"),
-    (2000, "Scout"),
-    (1000, "Novice"),
-    (0, "Noob"),
+    (6767, "Master"),
+    (5000, "Diamond"),
+    (3000, "Platinum"),
+    (2000, "Gold"),
+    (1000, "Silver"),
+    (0, "Bronze"),
 ]
 
 CATEGORY_LABELS = {
@@ -44,7 +44,7 @@ def get_rank_label(points):
     for threshold, label in RANK_LABELS:
         if points >= threshold:
             return label
-    return "Noob"
+    return "Bronze"
 
 
 def compute_streak(approved_dates):
