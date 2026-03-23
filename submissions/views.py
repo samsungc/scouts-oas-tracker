@@ -23,13 +23,30 @@ class BadgeSubmissionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(scout=self.request.user)
-    
+
+    def create(self, request, *args, **kwargs):
+        requirement_id = request.data.get("requirement")
+        if requirement_id:
+            existing = BadgeSubmission.objects.filter(
+                scout=request.user, requirement_id=requirement_id
+            ).first()
+            if existing:
+                return Response(
+                    {
+                        "detail": "A submission already exists for this requirement.",
+                        "existing_submission_id": existing.id,
+                        "existing_status": existing.status,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return super().create(request, *args, **kwargs)
+
     def partial_update(self, request, *args, **kwargs):
         submission = self.get_object()
 
-        if submission.status != "draft":
+        if submission.status not in ("draft", "rejected"):
             return Response(
-                {"detail": "Only draft submissions can be edited."},
+                {"detail": "Only draft or rejected submissions can be edited."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -50,9 +67,9 @@ class BadgeSubmissionViewSet(viewsets.ModelViewSet):
     def submit(self, request, pk=None):
         submission = self.get_object()
 
-        if submission.status != "draft":
+        if submission.status not in ("draft", "rejected"):
             return Response(
-                {"detail": "Only draft submissions can be submitted."},
+                {"detail": "Only draft or rejected submissions can be submitted."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -70,6 +87,12 @@ class BadgeSubmissionViewSet(viewsets.ModelViewSet):
     )
     def evidence(self, request, pk=None):
         submission = self.get_object()
+
+        if submission.status not in ("draft", "rejected"):
+            return Response(
+                {"detail": "Evidence can only be added to draft or rejected submissions."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = SubmissionEvidenceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -300,5 +323,5 @@ class SubmissionEvidenceViewSet(
         # Only allow users to delete their own evidence
         return SubmissionEvidence.objects.filter(
             requirement_submission__scout=self.request.user,
-            requirement_submission__status="draft",
+            requirement_submission__status__in=("draft", "rejected"),
         )  

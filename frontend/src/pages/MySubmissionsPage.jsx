@@ -47,7 +47,7 @@ export default function MySubmissionsPage() {
   }, [])
 
   const activeSubs = useMemo(
-    () => allSubmissions.filter((s) => s.status === 'submitted'),
+    () => allSubmissions.filter((s) => s.status === 'submitted' || s.status === 'rejected'),
     [allSubmissions],
   )
 
@@ -99,7 +99,7 @@ export default function MySubmissionsPage() {
         <div className={styles.empty}>
           <p>
             {tab === 'active'
-              ? 'No submissions currently pending review.'
+              ? 'No submissions pending review or needing attention.'
               : 'No reviewed submissions in the past 30 days.'}
           </p>
         </div>

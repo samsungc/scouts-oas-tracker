@@ -196,7 +196,7 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
         </div>
         <div className={`${styles.chip} ${styles.chipRejected}`}>
           <span className={styles.chipNum}>{totals.rejected}</span>
-          <span className={styles.chipLbl}>Rejected</span>
+          <span className={styles.chipLbl}>Returned</span>
         </div>
         <div className={`${styles.chip} ${styles.chipDraft}`}>
           <span className={styles.chipNum}>{totals.draft}</span>
@@ -234,7 +234,7 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
               return (
                 <div
                   key={badge.id}
-                  className={`${styles.badgeRow} ${isComplete ? styles.badgeComplete : ''}`}
+                  className={`${styles.badgeRow} ${isComplete ? styles.badgeComplete : submitted > 0 ? styles.badgeSubmitted : ''}`}
                 >
                   <button
                     className={styles.badgeHeader}
@@ -299,6 +299,7 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
                             : null
 
                         const isReviewable = status === 'submitted'
+                        const isClickable = status === 'submitted' || status === 'approved' || status === 'rejected'
                         const rowEl = (
                           <>
                             <span className={styles.reqIcon}>{icons[status]}</span>
@@ -306,21 +307,22 @@ export default function ScoutDetail({ scout, badgeDetails, activeBadgeCount }) {
                             {dateStr && (
                               <span className={styles.reqDate}>{dateStr}</span>
                             )}
+                            {status === 'approved' && sub?.reviewed_by_username && (
+                              <span className={styles.reviewedBy}>by {sub.reviewed_by_username}</span>
+                            )}
                             {isReviewable && (
                               <span className={styles.reviewBadge}>Review</span>
                             )}
                             {sub?.reviewer_notes && (
                               <span
                                 className={styles.notesIcon}
-                                title={`Reviewer: ${sub.reviewer_notes}`}
-                              >
-                                📝
-                              </span>
+                                title={`Reviewer notes: ${sub.reviewer_notes}`}
+                              />
                             )}
                           </>
                         )
 
-                        return isReviewable ? (
+                        return isClickable ? (
                           <button
                             key={req.id}
                             className={`${styles.reqRow} ${styles['req_' + status]} ${styles.reqRowClickable}`}

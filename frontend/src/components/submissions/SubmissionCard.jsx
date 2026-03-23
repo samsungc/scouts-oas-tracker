@@ -13,7 +13,8 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
   const [error, setError] = useState('')
   const [warnNoEvidence, setWarnNoEvidence] = useState(false)
 
-  const isDraft = sub.status === 'draft'
+  const isDraft    = sub.status === 'draft'
+  const isEditable = isDraft || sub.status === 'rejected'
 
   function handleSubmitClick() {
     if (sub.evidence.length === 0) {
@@ -84,12 +85,12 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
         <h4 className={styles.sectionTitle}>Evidence</h4>
         <EvidenceList
           evidence={sub.evidence}
-          isDraft={isDraft}
+          isDraft={isEditable}
           onDeleted={handleEvidenceDeleted}
         />
       </div>
 
-      {isDraft && (
+      {isEditable && (
         <EvidenceForm submissionId={sub.id} onAdded={handleEvidenceAdded} />
       )}
 
@@ -109,7 +110,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
 
       <ErrorMessage message={error} />
 
-      {isDraft && !warnNoEvidence && (
+      {isEditable && !warnNoEvidence && (
         <div className={styles.actions}>
           <Button
             variant="primary"
@@ -117,7 +118,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
             onClick={handleSubmitClick}
             disabled={loading}
           >
-            {loading ? 'Submitting…' : 'Submit for Review'}
+            {loading ? 'Submitting…' : (isDraft ? 'Submit for Review' : 'Re-submit for Review')}
           </Button>
           <Button
             variant="danger"
@@ -125,7 +126,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
             onClick={handleDelete}
             disabled={loading}
           >
-            Delete Draft
+            {isDraft ? 'Delete Draft' : 'Delete Submission'}
           </Button>
         </div>
       )}

@@ -58,3 +58,59 @@
 .fileInput {
   font-size: 0.85rem;
 }
+
+/* ── SMART Goal form ── */
+.goalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goalField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.goalLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.goalLetter {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  min-width: 16px;
+}
+
+.goalLabelText {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.goalPrompt {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.goalTextarea {
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  resize: vertical;
+  outline: none;
+  color: var(--color-text);
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.goalTextarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}

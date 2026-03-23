@@ -74,7 +74,7 @@ export default function SubmitPage() {
     setSubmissions((prev) => prev.filter((s) => s.id !== subId))
   }
 
-  const hasDraft = submissions.some((s) => s.status === 'draft')
+  const hasSubmission = submissions.length > 0
 
   return (
     <div>
@@ -107,7 +107,7 @@ export default function SubmitPage() {
           <div className={styles.submissionsSection}>
             <div className={styles.submissionsHeader}>
               <h2 className={styles.submissionsTitle}>Your Submissions</h2>
-              {!hasDraft && (
+              {!hasSubmission && (
                 <Button
                   variant="secondary"
                   size="sm"

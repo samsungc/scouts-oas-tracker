@@ -1,6 +1,13 @@
 from django.contrib.auth import password_validation
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
+
+
+class CaseInsensitiveTokenSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        attrs[self.username_field] = attrs[self.username_field].lower()
+        return super().validate(attrs)
 
 
 class MeSerializer(serializers.ModelSerializer):

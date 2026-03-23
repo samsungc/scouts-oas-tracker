@@ -33,6 +33,24 @@
   letter-spacing: 0.04em;
 }
 
+/* Rejected badge — red accent when any requirement was rejected */
+.rejected {
+  border-color: #e53935;
+  background: #fff5f5;
+}
+
+.rejectedTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #fde8e8;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* Locked badge — muted with lock indicator */
 .locked {
   opacity: 0.72;

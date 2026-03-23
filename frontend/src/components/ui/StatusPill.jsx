@@ -4,7 +4,7 @@ const LABELS = {
   draft: 'Draft',
   submitted: 'Submitted',
   approved: 'Approved',
-  rejected: 'Rejected',
+  rejected: 'Returned',
 }
 
 export default function StatusPill({ status }) {

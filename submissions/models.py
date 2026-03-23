@@ -40,6 +40,7 @@ class BadgeSubmission(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        unique_together = [("scout", "requirement")]
         indexes = [
             models.Index(fields=["scout", "status"], name="sub_scout_status_idx"),
             models.Index(fields=["scout", "requirement", "status"], name="sub_scout_req_status_idx"),

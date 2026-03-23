@@ -10,6 +10,7 @@ export default function BadgeCard({
   detailCache,
   onDetailLoaded,
   isComplete,
+  isRejected,
   isLocked,
   isSearching,
   filteredRequirements,
@@ -50,6 +51,7 @@ export default function BadgeCard({
     styles.card,
     !badge.is_active ? styles.inactive : '',
     isComplete ? styles.complete : '',
+    isRejected ? styles.rejected : '',
     isLocked ? styles.locked : '',
   ].filter(Boolean).join(' ')
 
@@ -77,6 +79,9 @@ export default function BadgeCard({
           )}
           {badge.is_active && isComplete && (
             <span className={styles.completeTag}>✓ Complete</span>
+          )}
+          {badge.is_active && isRejected && (
+            <span className={styles.rejectedTag}>✗ Returned</span>
           )}
           {badge.is_active && isLocked && !isComplete && (
             <span className={styles.lockedTag}>🔒 Locked</span>

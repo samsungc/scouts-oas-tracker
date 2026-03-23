@@ -19,6 +19,16 @@ function isBadgeComplete(badge, detailCache, submissionsMap) {
   )
 }
 
+/** A badge has a rejection if it isn't complete and at least one requirement has a rejected submission. */
+function isBadgeRejected(badge, detailCache, submissionsMap, isComplete) {
+  if (!badge.is_active || isComplete) return false
+  const detail = detailCache?.get(badge.id)
+  if (!detail || detail.requirements.length === 0) return false
+  return detail.requirements.some(
+    (req) => submissionsMap.get(req.id)?.status === 'rejected',
+  )
+}
+
 export default function BadgeCategoryGroup({
   categoryKey,
   categoryLabel,
@@ -40,6 +50,11 @@ export default function BadgeCategoryGroup({
   // Completion state for each sorted badge
   const completeFlags = sortedBadges.map((b) =>
     isBadgeComplete(b, detailCache, submissionsMap),
+  )
+
+  // Rejection state — true if any requirement has a rejected submission and badge isn't complete
+  const rejectedFlags = sortedBadges.map((b, idx) =>
+    isBadgeRejected(b, detailCache, submissionsMap, completeFlags[idx]),
   )
 
   // A badge is locked for scouts if the immediately preceding badge isn't complete
@@ -80,6 +95,7 @@ export default function BadgeCategoryGroup({
               detailCache={detailCache}
               onDetailLoaded={onDetailLoaded}
               isComplete={completeFlags[idx]}
+              isRejected={rejectedFlags[idx]}
               isLocked={lockedFlags[idx]}
               isSearching={isSearching}
               filteredRequirements={filteredReqsMap?.get(badge.id)}
