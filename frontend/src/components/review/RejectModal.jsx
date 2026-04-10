@@ -3,9 +3,11 @@ import { rejectSubmission } from '../../api/review'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
+import { useToast } from '../../context/ToastContext'
 import styles from './RejectModal.module.css'
 
 export default function RejectModal({ submission, onRejected, onClose, onReject }) {
+  const addToast = useToast()
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,6 +23,7 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
     setError('')
     try {
       const updated = await rejectAction(submission.id, notes.trim())
+      addToast({ message: 'Submission returned', variant: 'info' })
       onRejected(updated)
     } catch (err) {
       setError(err.message || 'Failed to return submission.')
@@ -57,8 +60,8 @@ export default function RejectModal({ submission, onRejected, onClose, onReject 
         <Button variant="ghost" onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button variant="danger" onClick={handleConfirm} disabled={loading}>
-          {loading ? 'Returning…' : 'Confirm Return'}
+        <Button variant="danger" onClick={handleConfirm} loading={loading}>
+          Confirm Return
         </Button>
       </div>
     </Modal>

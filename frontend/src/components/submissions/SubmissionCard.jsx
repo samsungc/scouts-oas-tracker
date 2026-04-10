@@ -5,9 +5,11 @@ import Button from '../ui/Button'
 import EvidenceList from './EvidenceList'
 import EvidenceForm from './EvidenceForm'
 import ErrorMessage from '../ui/ErrorMessage'
+import { useToast } from '../../context/ToastContext'
 import styles from './SubmissionCard.module.css'
 
 export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
+  const addToast = useToast()
   const [sub, setSub] = useState(submission)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +36,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
       const updated = await submitForReview(sub.id)
       setSub(updated)
       if (onUpdated) onUpdated(updated)
+      addToast({ message: 'Submitted for review', variant: 'success' })
     } catch (err) {
       setError(err.message || 'Failed to submit for review.')
     } finally {
@@ -47,6 +50,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
     setError('')
     try {
       await deleteSubmission(sub.id)
+      addToast({ message: 'Draft deleted', variant: 'info' })
       if (onDeleted) onDeleted(sub.id)
     } catch (err) {
       setError(err.message || 'Failed to delete submission.')
@@ -100,8 +104,8 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
         <div className={styles.noEvidenceWarning}>
           <p>You have no evidence attached. Scouters may reject this submission.</p>
           <div className={styles.noEvidenceActions}>
-            <Button variant="primary" size="sm" onClick={doSubmit} disabled={loading}>
-              {loading ? 'Submitting…' : 'Submit Anyway'}
+            <Button variant="primary" size="sm" onClick={doSubmit} loading={loading}>
+              Submit Anyway
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setWarnNoEvidence(false)} disabled={loading}>
               Cancel
@@ -118,15 +122,15 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
             variant="primary"
             size="sm"
             onClick={handleSubmitClick}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Submitting…' : (isDraft ? 'Submit for Review' : 'Re-submit for Review')}
+            {isDraft ? 'Submit for Review' : 'Re-submit for Review'}
           </Button>
           <Button
             variant="danger"
             size="sm"
             onClick={handleDelete}
-            disabled={loading}
+            loading={loading}
           >
             {isDraft ? 'Delete Draft' : 'Delete Submission'}
           </Button>

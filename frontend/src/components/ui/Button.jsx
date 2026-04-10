@@ -1,3 +1,4 @@
+import Spinner from './Spinner'
 import styles from './Button.module.css'
 
 export default function Button({
@@ -5,6 +6,7 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   disabled = false,
+  loading = false,
   type = 'button',
   onClick,
   className = '',
@@ -14,10 +16,12 @@ export default function Button({
     <button
       type={type}
       className={`${styles.btn} ${styles[variant]} ${styles[size]} ${className}`}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       onClick={onClick}
       {...rest}
     >
+      {loading && <Spinner size="sm" />}
       {children}
     </button>
   )
