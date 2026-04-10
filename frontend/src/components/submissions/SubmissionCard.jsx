@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { submitForReview, deleteSubmission } from '../../api/submissions'
 import StatusPill from '../ui/StatusPill'
 import Button from '../ui/Button'
@@ -12,12 +12,14 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [warnNoEvidence, setWarnNoEvidence] = useState(false)
+  const evidenceFormRef = useRef(null)
 
   const isDraft    = sub.status === 'draft'
   const isEditable = isDraft || sub.status === 'rejected'
 
-  function handleSubmitClick() {
-    if (sub.evidence.length === 0) {
+  async function handleSubmitClick() {
+    const addedEvidence = await evidenceFormRef.current?.submitIfDirty()
+    if (sub.evidence.length === 0 && !addedEvidence) {
       setWarnNoEvidence(true)
     } else {
       doSubmit()
@@ -91,7 +93,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
       </div>
 
       {isEditable && (
-        <EvidenceForm submissionId={sub.id} onAdded={handleEvidenceAdded} />
+        <EvidenceForm ref={evidenceFormRef} submissionId={sub.id} onAdded={handleEvidenceAdded} />
       )}
 
       {warnNoEvidence && (

@@ -40,6 +40,7 @@ export default function BadgeCategoryGroup({
   isSearching,
   filteredReqsMap,
   onBatchReview,
+  expandDetails,
 }) {
   const [open, setOpen] = useState(true)
   const isOpen = isSearching || open
@@ -100,6 +101,7 @@ export default function BadgeCategoryGroup({
               isSearching={isSearching}
               filteredRequirements={filteredReqsMap?.get(badge.id)}
               onBatchReview={onBatchReview}
+              expandDetails={expandDetails}
             />
           ))}
         </div>
