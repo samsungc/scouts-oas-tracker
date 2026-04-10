@@ -4,24 +4,39 @@ import { useAuth } from '../../context/AuthContext'
 import StatusPill from '../ui/StatusPill'
 import styles from './RequirementRow.module.css'
 
-export default function RequirementRow({ requirement, badgeId, submissionsMap, badgeLocked, onBatchReview }) {
+export default function RequirementRow({ requirement, badgeId, submissionsMap, badgeLocked, onBatchReview, expandDetails = true }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const submission = submissionsMap?.get(requirement.id)
   const isScout = user?.role === 'scout'
   const isScouter = user?.role === 'scouter' || user?.role === 'admin'
   const [hintOpen, setHintOpen] = useState(false)
+  const [rowOpen, setRowOpen] = useState(false)
+
+  const hasDetails = requirement.description || requirement.hint
+  const showDetails = expandDetails || rowOpen
 
   return (
     <div className={styles.row}>
       <div className={styles.info}>
         <span className={styles.order}>{requirement.order}.</span>
         <div className={styles.content}>
-          <p className={styles.title}>{requirement.title}</p>
-          {requirement.description && (
+          <div className={styles.titleRow}>
+            <p className={styles.title}>{requirement.title}</p>
+            {!expandDetails && hasDetails && (
+              <button
+                className={styles.rowExpandBtn}
+                onClick={() => setRowOpen((v) => !v)}
+                aria-expanded={rowOpen}
+              >
+                <span className={`${styles.hintChevron} ${rowOpen ? styles.hintChevronUp : ''}`}>▾</span>
+              </button>
+            )}
+          </div>
+          {showDetails && requirement.description && (
             <p className={styles.description}>{requirement.description}</p>
           )}
-          {requirement.hint && (
+          {showDetails && requirement.hint && (
             <div className={styles.hintBlock}>
               <button
                 className={styles.hintToggle}

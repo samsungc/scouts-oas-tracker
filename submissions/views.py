@@ -314,7 +314,7 @@ class PeerReviewViewSet(
 class BadgeHandoutViewSet(viewsets.ModelViewSet):
     serializer_class = BadgeHandoutSerializer
     permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
-    http_method_names = ["get", "patch", "delete", "head", "options"]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
         return BadgeHandout.objects.select_related("scout", "badge").order_by("-completed_at")

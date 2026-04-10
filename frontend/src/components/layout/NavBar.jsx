@@ -8,9 +8,13 @@ export default function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showProfile, setShowProfile] = useState(false)
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem('oas_theme') || 'light'
-  )
+  const [theme, setTheme] = useState(() => {
+    if (window.innerWidth <= 640) {
+      document.documentElement.setAttribute('data-theme', '')
+      return 'light'
+    }
+    return localStorage.getItem('oas_theme') || 'light'
+  })
 
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'

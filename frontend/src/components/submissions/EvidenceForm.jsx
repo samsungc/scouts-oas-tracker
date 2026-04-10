@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, forwardRef, useImperativeHandle } from 'react'
 import { addEvidence } from '../../api/submissions'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
@@ -12,9 +12,9 @@ const SMART_FIELDS = [
   { key: 't', letter: 'T', label: 'Time-Bound',  prompt: 'When will I accomplish my goal? How long will I give myself?' },
 ]
 
-const EMPTY_SMART = { s: '', m: '', a: '', r: '', t: '', goal: '' }
+const EMPTY_SMART = { category: '', s: '', m: '', a: '', r: '', t: '', goal: '' }
 
-export default function EvidenceForm({ submissionId, onAdded }) {
+const EvidenceForm = forwardRef(function EvidenceForm({ submissionId, onAdded }, ref) {
   const [mode, setMode] = useState('text') // 'text' | 'file' | 'goal'
   const [textNote, setTextNote] = useState('')
   const [file, setFile] = useState(null)
@@ -29,22 +29,21 @@ export default function EvidenceForm({ submissionId, onAdded }) {
     setSmart((prev) => ({ ...prev, [key]: value }))
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    if (mode === 'text' && !textNote.trim()) return
-    if (mode === 'file' && !file) return
+  async function doAddEvidence() {
+    if (mode === 'text' && !textNote.trim()) return false
+    if (mode === 'file' && !file) return false
     if (mode === 'goal') {
       const missing = SMART_FIELDS.some((f) => !smart[f.key].trim())
-      if (missing || !smart.goal.trim()) {
+      if (!smart.category.trim() || missing || !smart.goal.trim()) {
         setError('Please fill in all SMART goal fields.')
-        return
+        return false
       }
     }
     if (mode === 'file') {
-      if (file.size > MAX_SIZE) { setError('File must be 10 MB or smaller.'); return }
+      if (file.size > MAX_SIZE) { setError('File must be 10 MB or smaller.'); return false }
       if (!ALLOWED_TYPES.some((t) => file.type.startsWith(t))) {
         setError('Only photos, videos, and PDFs are allowed.')
-        return
+        return false
       }
     }
 
@@ -63,11 +62,29 @@ export default function EvidenceForm({ submissionId, onAdded }) {
       setFile(null)
       setSmart(EMPTY_SMART)
       onAdded(ev)
+      return true
     } catch (err) {
       setError(err.message || 'Failed to add evidence.')
+      return false
     } finally {
       setLoading(false)
     }
+  }
+
+  useImperativeHandle(ref, () => ({
+    submitIfDirty: async () => {
+      const isDirty =
+        (mode === 'text' && textNote.trim() !== '') ||
+        (mode === 'file' && file !== null) ||
+        (mode === 'goal' && (smart.category.trim() !== '' || SMART_FIELDS.some((f) => smart[f.key].trim()) || smart.goal.trim() !== ''))
+      if (!isDirty) return false
+      return doAddEvidence()
+    },
+  }))
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    await doAddEvidence()
   }
 
   return (
@@ -109,6 +126,19 @@ export default function EvidenceForm({ submissionId, onAdded }) {
 
       {mode === 'goal' && (
         <div className={styles.goalForm}>
+          <div className={styles.goalField}>
+            <label className={styles.goalLabel}>
+              <span className={styles.goalLabelText}>Category</span>
+              <span className={styles.goalPrompt}>What area does this goal relate to?</span>
+            </label>
+            <textarea
+              className={styles.goalTextarea}
+              value={smart.category}
+              onChange={(e) => handleSmartChange('category', e.target.value)}
+              rows={1}
+              placeholder="e.g. Outdoor & Environment, Creative Expression, Citizenship, Active & Healthy Living, Leadership, Belief & Values…"
+            />
+          </div>
           {SMART_FIELDS.map(({ key, letter, label, prompt }) => (
             <div key={key} className={styles.goalField}>
               <label className={styles.goalLabel}>
@@ -148,4 +178,6 @@ export default function EvidenceForm({ submissionId, onAdded }) {
       </Button>
     </form>
   )
-}
+})
+
+export default EvidenceForm

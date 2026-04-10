@@ -62,6 +62,16 @@ export default function BadgesPage() {
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 200)
   const [batchReviewReq, setBatchReviewReq] = useState(null)
+  const [expandDetails, setExpandDetails] = useState(
+    () => localStorage.getItem('badges_expandDetails') !== 'false'
+  )
+
+  function toggleExpandDetails() {
+    setExpandDetails((v) => {
+      localStorage.setItem('badges_expandDetails', String(!v))
+      return !v
+    })
+  }
 
   useEffect(() => {
     async function load() {
@@ -175,14 +185,23 @@ export default function BadgesPage() {
         )}
       </div>
 
-      <div className={styles.searchBar}>
-        <input
-          type="search"
-          className={styles.searchInput}
-          placeholder="Search requirements…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className={styles.controls}>
+        <div className={styles.searchBar}>
+          <input
+            type="search"
+            className={styles.searchInput}
+            placeholder="Search requirements…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <button
+          className={`${styles.expandToggle} ${expandDetails ? styles.expandToggleOn : ''}`}
+          onClick={toggleExpandDetails}
+          title={expandDetails ? 'Switch to compact view' : 'Switch to expanded view'}
+        >
+          {expandDetails ? '▾ Expanded' : '▸ Compact'}
+        </button>
       </div>
 
       {loading && <Spinner centered />}
@@ -206,6 +225,7 @@ export default function BadgesPage() {
                 isSearching={isSearching}
                 filteredReqsMap={filteredReqsMap}
                 onBatchReview={isScouter ? setBatchReviewReq : undefined}
+                expandDetails={expandDetails}
               />
             ))
           )}
