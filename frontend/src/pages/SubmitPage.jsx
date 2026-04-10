@@ -112,9 +112,9 @@ export default function SubmitPage() {
                   variant="secondary"
                   size="sm"
                   onClick={handleCreate}
-                  disabled={creating}
+                  loading={creating}
                 >
-                  {creating ? 'Creating…' : '+ New Submission'}
+                  + New Submission
                 </Button>
               )}
             </div>
@@ -125,9 +125,9 @@ export default function SubmitPage() {
                 <Button
                   variant="primary"
                   onClick={handleCreate}
-                  disabled={creating}
+                  loading={creating}
                 >
-                  {creating ? 'Creating…' : 'Start Submission'}
+                  Start Submission
                 </Button>
               </div>
             ) : (

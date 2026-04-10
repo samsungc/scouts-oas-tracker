@@ -2,6 +2,7 @@ import { useState, forwardRef, useImperativeHandle } from 'react'
 import { addEvidence } from '../../api/submissions'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
+import { useToast } from '../../context/ToastContext'
 import styles from './EvidenceForm.module.css'
 
 const SMART_FIELDS = [
@@ -15,6 +16,7 @@ const SMART_FIELDS = [
 const EMPTY_SMART = { category: '', s: '', m: '', a: '', r: '', t: '', goal: '' }
 
 const EvidenceForm = forwardRef(function EvidenceForm({ submissionId, onAdded }, ref) {
+  const addToast = useToast()
   const [mode, setMode] = useState('text') // 'text' | 'file' | 'goal'
   const [textNote, setTextNote] = useState('')
   const [file, setFile] = useState(null)
@@ -62,6 +64,7 @@ const EvidenceForm = forwardRef(function EvidenceForm({ submissionId, onAdded },
       setFile(null)
       setSmart(EMPTY_SMART)
       onAdded(ev)
+      addToast({ message: 'Evidence added', variant: 'success' })
       return true
     } catch (err) {
       setError(err.message || 'Failed to add evidence.')
@@ -173,8 +176,8 @@ const EvidenceForm = forwardRef(function EvidenceForm({ submissionId, onAdded },
 
       <ErrorMessage message={error} />
 
-      <Button type="submit" variant="secondary" disabled={loading} size="sm">
-        {loading ? 'Adding…' : 'Add Evidence'}
+      <Button type="submit" variant="secondary" loading={loading} size="sm">
+        Add Evidence
       </Button>
     </form>
   )

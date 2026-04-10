@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { getSubmissions } from '../api/submissions'
 import StatusPill from '../components/ui/StatusPill'
 import Spinner from '../components/ui/Spinner'
@@ -99,7 +99,7 @@ export default function MySubmissionsPage() {
         <div className={styles.empty}>
           <p>
             {tab === 'active'
-              ? 'No submissions pending review or needing attention.'
+              ? <><Link to="/badges">Browse badges</Link> to start a submission.</>
               : 'No reviewed submissions in the past 30 days.'}
           </p>
         </div>

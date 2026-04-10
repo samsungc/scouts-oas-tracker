@@ -3,6 +3,7 @@ import Modal from '../ui/Modal'
 import ErrorMessage from '../ui/ErrorMessage'
 import { useAuth } from '../../context/AuthContext'
 import { createUser } from '../../api/users'
+import { useToast } from '../../context/ToastContext'
 import styles from './CreateUserModal.module.css'
 
 const ROLE_OPTIONS = {
@@ -29,6 +30,7 @@ function parseCreateError(err) {
 }
 
 export default function CreateUserModal({ onClose, onCreated }) {
+  const addToast = useToast()
   const { user } = useAuth()
   const roleOptions = ROLE_OPTIONS[user?.role] ?? ROLE_OPTIONS.scouter
 
@@ -49,6 +51,7 @@ export default function CreateUserModal({ onClose, onCreated }) {
       const created = await createUser(form)
       onCreated()
       setCreatedUser(created)
+      addToast({ message: 'User created successfully', variant: 'success' })
     } catch (err) {
       setError(parseCreateError(err))
     } finally {

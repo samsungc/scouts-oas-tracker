@@ -4,9 +4,11 @@ import StatusPill from '../ui/StatusPill'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
 import EvidenceList from '../submissions/EvidenceList'
+import { useToast } from '../../context/ToastContext'
 import styles from './ReviewCard.module.css'
 
 export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove }) {
+  const addToast = useToast()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -17,6 +19,7 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
     setError('')
     try {
       const updated = await approveAction(submission.id)
+      addToast({ message: 'Submission approved', variant: 'success' })
       onApproved(updated)
     } catch (err) {
       setError(err.message || 'Failed to approve.')
@@ -81,9 +84,9 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
             variant="primary"
             size="sm"
             onClick={handleApprove}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Approving…' : '✓ Approve'}
+            ✓ Approve
           </Button>
           <Button
             variant="danger"

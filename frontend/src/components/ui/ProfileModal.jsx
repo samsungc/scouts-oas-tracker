@@ -39,9 +39,13 @@ export default function ProfileModal({ onClose }) {
   // Change password state
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
-  const [pwError, setPwError] = useState('')
+  const [pwFieldErrors, setPwFieldErrors] = useState({ current: '', next: '', confirm: '', general: '' })
   const [pwSuccess, setPwSuccess] = useState(false)
   const [pwShow, setPwShow] = useState({ current: false, next: false, confirm: false })
+
+  function clearPwErrors() {
+    setPwFieldErrors({ current: '', next: '', confirm: '', general: '' })
+  }
 
   async function handleProfileSave(e) {
     e.preventDefault()
@@ -61,22 +65,37 @@ export default function ProfileModal({ onClose }) {
 
   async function handlePasswordChange(e) {
     e.preventDefault()
-    setPwError('')
+    clearPwErrors()
     setPwSuccess(false)
-    if (pwForm.next !== pwForm.confirm) {
-      setPwError('New passwords do not match.')
+
+    // Client-side validation
+    const fieldErrs = { current: '', next: '', confirm: '', general: '' }
+    if (!pwForm.current) fieldErrs.current = 'Required'
+    if (!pwForm.next) fieldErrs.next = 'Required'
+    if (!pwForm.confirm) fieldErrs.confirm = 'Required'
+    if (pwForm.next && pwForm.confirm && pwForm.next !== pwForm.confirm) {
+      fieldErrs.confirm = 'Passwords do not match'
+    }
+    if (fieldErrs.current || fieldErrs.next || fieldErrs.confirm) {
+      setPwFieldErrors(fieldErrs)
       return
     }
+
     setPwSaving(true)
     try {
       await changePassword(pwForm.current, pwForm.next)
       setPwSuccess(true)
       setPwForm({ current: '', next: '', confirm: '' })
     } catch (err) {
-      const msgs = err.raw && typeof err.raw === 'object'
-        ? Object.values(err.raw).flatMap((v) => Array.isArray(v) ? v : [v])
-        : []
-      setPwError(msgs.length ? msgs.join(' ') : (err.detail && !err.detail.startsWith('HTTP ') ? err.detail : 'Failed to change password.'))
+      const raw = err.raw && typeof err.raw === 'object' ? err.raw : {}
+      setPwFieldErrors({
+        current: raw.current_password ? [].concat(raw.current_password)[0] : '',
+        next:    raw.new_password     ? [].concat(raw.new_password)[0]     : '',
+        confirm: '',
+        general: (!raw.current_password && !raw.new_password)
+          ? (err.detail && !err.detail.startsWith('HTTP ') ? err.detail : 'Failed to change password.')
+          : '',
+      })
     } finally {
       setPwSaving(false)
     }
@@ -133,42 +152,45 @@ export default function ProfileModal({ onClose }) {
           <div className={styles.pwWrapper}>
             <input
               type={pwShow.current ? 'text' : 'password'}
-              className={styles.input}
+              className={`${styles.input} ${pwFieldErrors.current ? styles.inputError : ''}`}
               value={pwForm.current}
-              onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
+              onChange={(e) => { setPwForm((f) => ({ ...f, current: e.target.value })); setPwFieldErrors((fe) => ({ ...fe, current: '' })) }}
               autoComplete="current-password"
             />
             <button type="button" className={styles.eyeBtn} onClick={() => setPwShow((s) => ({ ...s, current: !s.current }))}>
               {pwShow.current ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
+          {pwFieldErrors.current && <span className={styles.fieldError}>{pwFieldErrors.current}</span>}
           <label className={styles.fieldLabel}>New Password</label>
           <div className={styles.pwWrapper}>
             <input
               type={pwShow.next ? 'text' : 'password'}
-              className={styles.input}
+              className={`${styles.input} ${pwFieldErrors.next ? styles.inputError : ''}`}
               value={pwForm.next}
-              onChange={(e) => setPwForm((f) => ({ ...f, next: e.target.value }))}
+              onChange={(e) => { setPwForm((f) => ({ ...f, next: e.target.value })); setPwFieldErrors((fe) => ({ ...fe, next: '' })) }}
               autoComplete="new-password"
             />
             <button type="button" className={styles.eyeBtn} onClick={() => setPwShow((s) => ({ ...s, next: !s.next }))}>
               {pwShow.next ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
+          {pwFieldErrors.next && <span className={styles.fieldError}>{pwFieldErrors.next}</span>}
           <label className={styles.fieldLabel}>Confirm New Password</label>
           <div className={styles.pwWrapper}>
             <input
               type={pwShow.confirm ? 'text' : 'password'}
-              className={styles.input}
+              className={`${styles.input} ${pwFieldErrors.confirm ? styles.inputError : ''}`}
               value={pwForm.confirm}
-              onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))}
+              onChange={(e) => { setPwForm((f) => ({ ...f, confirm: e.target.value })); setPwFieldErrors((fe) => ({ ...fe, confirm: '' })) }}
               autoComplete="new-password"
             />
             <button type="button" className={styles.eyeBtn} onClick={() => setPwShow((s) => ({ ...s, confirm: !s.confirm }))}>
               {pwShow.confirm ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
-          {pwError && <ErrorMessage message={pwError} />}
+          {pwFieldErrors.confirm && <span className={styles.fieldError}>{pwFieldErrors.confirm}</span>}
+          {pwFieldErrors.general && <ErrorMessage message={pwFieldErrors.general} />}
           {pwSuccess && <p className={styles.success}>Password changed successfully.</p>}
           <button type="submit" className={styles.saveBtn} disabled={pwSaving}>
             {pwSaving ? 'Changing…' : 'Change Password'}

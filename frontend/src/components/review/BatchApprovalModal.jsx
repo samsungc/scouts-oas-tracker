@@ -5,9 +5,11 @@ import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Spinner from '../ui/Spinner'
 import ErrorMessage from '../ui/ErrorMessage'
+import { useToast } from '../../context/ToastContext'
 import styles from './BatchApprovalModal.module.css'
 
 export default function BatchApprovalModal({ requirement, onClose }) {
+  const addToast = useToast()
   const [scouts, setScouts] = useState([])
   const [alreadyApprovedIds, setAlreadyApprovedIds] = useState(new Set())
   const [selected, setSelected] = useState(new Set())
@@ -16,7 +18,6 @@ export default function BatchApprovalModal({ requirement, onClose }) {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [successMsg, setSuccessMsg] = useState('')
   const [lastSelection, setLastSelection] = useState(null)
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function BatchApprovalModal({ requirement, onClose }) {
       localStorage.setItem('batch_approve_last_selection', JSON.stringify(approvedIds))
       setLastSelection(approvedIds)
       const result = await batchDirectApprove(requirement.id, approvedIds, notes.trim())
-      setSuccessMsg(`${result.approved_count} scout${result.approved_count !== 1 ? 's' : ''} approved.`)
+      addToast({ message: `${result.approved_count} scout${result.approved_count !== 1 ? 's' : ''} approved`, variant: 'success' })
       setSelected(new Set())
       // Refresh approved set
       const approvedSubs = await getReviewSubmissions({ requirement_id: requirement.id, status: 'approved' })
@@ -109,8 +110,6 @@ export default function BatchApprovalModal({ requirement, onClose }) {
             <p className={styles.empty}>No scouts found.</p>
           ) : (
             <>
-              {successMsg && <p className={styles.success}>{successMsg}</p>}
-
               <input
                 type="search"
                 className={styles.searchInput}
@@ -188,9 +187,10 @@ export default function BatchApprovalModal({ requirement, onClose }) {
                 <Button
                   variant="primary"
                   onClick={handleApprove}
-                  disabled={selected.size === 0 || submitting}
+                  disabled={selected.size === 0}
+                  loading={submitting}
                 >
-                  {submitting ? 'Approving…' : `Approve Selected (${selected.size})`}
+                  {`Approve Selected (${selected.size})`}
                 </Button>
               </div>
             </>
