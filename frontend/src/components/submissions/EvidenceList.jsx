@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, forwardRef, useImperativeHandle } from 'react'
 import { deleteEvidence, updateEvidence } from '../../api/submissions'
 import { mediaUrl } from '../../api/client'
 import { useToast } from '../../context/ToastContext'
@@ -60,13 +60,21 @@ function parseSmartGoal(text) {
   }
 }
 
-export default function EvidenceList({ evidence, isDraft, onDeleted, onUpdated }) {
+const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDeleted, onUpdated }, ref) {
   const addToast = useToast()
   const [confirmId, setConfirmId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState('')
   const [editSmart, setEditSmart] = useState(null)
   const [saving, setSaving] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    saveIfEditing: async () => {
+      if (!editingId) return
+      const ev = evidence.find((e) => e.id === editingId)
+      if (ev) await handleSave(ev)
+    },
+  }))
 
   async function handleDelete(evidenceId) {
     await deleteEvidence(evidenceId)
@@ -252,4 +260,6 @@ export default function EvidenceList({ evidence, isDraft, onDeleted, onUpdated }
       })}
     </ul>
   )
-}
+})
+
+export default EvidenceList

@@ -15,11 +15,13 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
   const [error, setError] = useState('')
   const [warnNoEvidence, setWarnNoEvidence] = useState(false)
   const evidenceFormRef = useRef(null)
+  const evidenceListRef = useRef(null)
 
   const isDraft    = sub.status === 'draft'
   const isEditable = isDraft || sub.status === 'rejected'
 
   async function handleSubmitClick() {
+    await evidenceListRef.current?.saveIfEditing()
     const addedEvidence = await evidenceFormRef.current?.submitIfDirty()
     if (sub.evidence.length === 0 && !addedEvidence) {
       setWarnNoEvidence(true)
@@ -98,6 +100,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
         <h4 className={styles.sectionTitle}>Evidence</h4>
         <EvidenceList
           evidence={sub.evidence}
+          ref={evidenceListRef}
           isDraft={isEditable}
           onDeleted={handleEvidenceDeleted}
           onUpdated={handleEvidenceUpdated}
