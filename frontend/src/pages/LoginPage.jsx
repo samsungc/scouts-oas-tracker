@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../api/client'
 import styles from './LoginPage.module.css'
@@ -96,6 +96,9 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <p className={styles.hint}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
         <p className={styles.hint}>
           Accounts are created by your Scouter. Contact them if you need access.
         </p>

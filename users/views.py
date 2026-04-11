@@ -1,12 +1,24 @@
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
+from django.contrib.auth import password_validation
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import MeSerializer, ChangePasswordSerializer, CreateUserSerializer, CaseInsensitiveTokenSerializer
+from .serializers import (
+    MeSerializer,
+    ChangePasswordSerializer,
+    CreateUserSerializer,
+    CaseInsensitiveTokenSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+)
 
 
 class CaseInsensitiveTokenView(TokenObtainPairView):
@@ -272,3 +284,83 @@ class DeactivateUserView(APIView):
         user.is_active = False
         user.save(update_fields=["is_active"])
         return Response({"detail": "User deactivated successfully."}, status=status.HTTP_200_OK)
+
+
+class PasswordResetRateThrottle(AnonRateThrottle):
+    scope = "password_reset"
+
+
+_RESET_SENT_MSG = "If that email address is registered, a reset link has been sent."
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetRateThrottle]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
+
+        from .models import User
+        from .emails import send_password_reset_email
+        from .models import PasswordResetToken
+
+        email = serializer.validated_data["email"]
+        try:
+            user = User.objects.get(email__iexact=email, is_active=True)
+        except User.DoesNotExist:
+            return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
+
+        raw_token, token_hash = PasswordResetToken.make_token()
+        PasswordResetToken.objects.create(user=user, token_hash=token_hash)
+        send_password_reset_email(user, raw_token)
+
+        return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        raw_token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+
+        from .models import PasswordResetToken
+
+        token_hash = PasswordResetToken.hash_token(raw_token)
+        _invalid_msg = "This reset link has expired or has already been used."
+
+        try:
+            with transaction.atomic():
+                token_obj = PasswordResetToken.objects.select_for_update().get(
+                    token_hash=token_hash
+                )
+                if not token_obj.is_valid():
+                    return Response({"detail": _invalid_msg}, status=status.HTTP_400_BAD_REQUEST)
+
+                user = token_obj.user
+                try:
+                    password_validation.validate_password(new_password, user=user)
+                except DjangoValidationError as e:
+                    return Response(
+                        {"new_password": list(e.messages)},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                user.set_password(new_password)
+                user.save(update_fields=["password"])
+                token_obj.used = True
+                token_obj.save(update_fields=["used"])
+
+        except PasswordResetToken.DoesNotExist:
+            return Response({"detail": _invalid_msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {"detail": "Password reset successful. You can now sign in."},
+            status=status.HTTP_200_OK,
+        )
