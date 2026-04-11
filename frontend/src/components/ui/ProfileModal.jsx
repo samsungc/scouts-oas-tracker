@@ -26,6 +26,23 @@ import styles from './ProfileModal.module.css'
 export default function ProfileModal({ onClose }) {
   const { user, refreshUser } = useAuth()
 
+  // Notifications state
+  const [notifEnabled, setNotifEnabled] = useState(user?.email_notifications ?? true)
+  const [notifSaving, setNotifSaving] = useState(false)
+
+  async function handleNotifToggle(e) {
+    const newValue = e.target.checked
+    setNotifEnabled(newValue)
+    setNotifSaving(true)
+    try {
+      await updateMe({ email_notifications: newValue })
+    } catch {
+      setNotifEnabled(!newValue)
+    } finally {
+      setNotifSaving(false)
+    }
+  }
+
   // Edit profile state
   const [profileForm, setProfileForm] = useState({
     first_name: user?.first_name ?? '',
@@ -113,6 +130,21 @@ export default function ProfileModal({ onClose }) {
           <span className={styles.label}>Role</span>
           <span className={styles.value}>{user?.role}</span>
         </div>
+      </section>
+
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>Notifications</h3>
+        <label className={styles.toggleRow}>
+          <input
+            type="checkbox"
+            checked={notifEnabled}
+            onChange={handleNotifToggle}
+            disabled={notifSaving}
+          />
+          <span className={styles.toggleLabel}>
+            Email notifications{notifSaving ? ' (saving\u2026)' : ''}
+          </span>
+        </label>
       </section>
 
       <section className={styles.section}>

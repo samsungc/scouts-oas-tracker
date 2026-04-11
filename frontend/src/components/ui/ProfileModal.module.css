@@ -126,3 +126,15 @@
   font-weight: 500;
   margin: 4px 0 0;
 }
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.toggleLabel {
+  color: var(--color-text);
+}

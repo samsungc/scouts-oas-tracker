@@ -193,4 +193,14 @@ LOGGING = {
         "handlers": ["console"],
         "level": "ERROR",
     },
+    "loggers": {
+        "submissions.emails": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
 }
+
+SES_FROM_EMAIL = os.environ.get("SES_FROM_EMAIL", "noreply@mail.6rhventurers.ca")
+SES_REGION = os.environ.get("SES_REGION", "us-east-2")
