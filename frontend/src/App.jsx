@@ -12,6 +12,8 @@ import MySubmissionsPage from './pages/MySubmissionsPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ImportPage from './pages/ImportPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -138,6 +140,9 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
