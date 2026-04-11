@@ -26,3 +26,7 @@ export function addEvidence(submissionId, { textNote, file }) {
 export function deleteEvidence(evidenceId) {
   return api.delete(`/evidence/${evidenceId}/`)
 }
+
+export function updateEvidence(evidenceId, textNote) {
+  return api.patch(`/evidence/${evidenceId}/`, { text_note: textNote })
+}
