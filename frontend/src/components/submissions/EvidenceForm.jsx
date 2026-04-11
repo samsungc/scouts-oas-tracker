@@ -60,9 +60,9 @@ const EvidenceForm = forwardRef(function EvidenceForm({ submissionId, onAdded },
           : { file }
 
       const ev = await addEvidence(submissionId, payload)
-      setTextNote('')
-      setFile(null)
-      setSmart(EMPTY_SMART)
+      if (mode === 'text') setTextNote('')
+      if (mode === 'file') setFile(null)
+      if (mode === 'goal') setSmart(EMPTY_SMART)
       onAdded(ev)
       addToast({ message: 'Evidence added', variant: 'success' })
       return true

@@ -7,7 +7,6 @@ from django.db import transaction
 
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -286,16 +285,11 @@ class DeactivateUserView(APIView):
         return Response({"detail": "User deactivated successfully."}, status=status.HTTP_200_OK)
 
 
-class PasswordResetRateThrottle(AnonRateThrottle):
-    scope = "password_reset"
-
-
 _RESET_SENT_MSG = "If that email address is registered, a reset link has been sent."
 
 
 class PasswordResetRequestView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [PasswordResetRateThrottle]
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -310,6 +304,10 @@ class PasswordResetRequestView(APIView):
         try:
             user = User.objects.get(email__iexact=email, is_active=True)
         except User.DoesNotExist:
+            return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
+
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(hours=24)
+        if PasswordResetToken.objects.filter(user=user, created_at__gte=cutoff).count() >= 5:
             return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
 
         raw_token, token_hash = PasswordResetToken.make_token()
