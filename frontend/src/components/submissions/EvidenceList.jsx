@@ -142,7 +142,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                 editSmart ? (
                   <div className={styles.editForm}>
                     <div className={styles.editField}>
-                      <label className={styles.editLabel}>Category</label>
+                      <label className={styles.editLabel}><span className={styles.editLabelText}>Category</span></label>
                       <textarea
                         className={styles.editTextarea}
                         value={editSmart.category}
@@ -153,7 +153,8 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                     {SMART_FIELDS.map(({ key, letter, label, prompt }) => (
                       <div key={key} className={styles.editField}>
                         <label className={styles.editLabel}>
-                          <span className={styles.editSmartLetter}>{letter}</span> {label}
+                          <span className={styles.editSmartLetter}>{letter}</span>
+                          <span className={styles.editLabelText}>{label}</span>
                           <span className={styles.editPrompt}>{prompt}</span>
                         </label>
                         <textarea
@@ -165,7 +166,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                       </div>
                     ))}
                     <div className={styles.editField}>
-                      <label className={styles.editLabel}>Goal Statement</label>
+                      <label className={styles.editLabel}><span className={styles.editLabelText}>Goal Statement</span></label>
                       <textarea
                         className={styles.editTextarea}
                         value={editSmart.goal}
