@@ -24,6 +24,7 @@ class MeSerializer(serializers.ModelSerializer):
             "role",
             "last_login",
             "peer_review_eligible",
+            "email_notifications",
         ]
         read_only_fields = ["id", "username", "role", "last_login"]
 

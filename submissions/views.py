@@ -10,6 +10,7 @@ from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
 from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer, BadgeHandoutSerializer
 from .permissions import IsScouterOrAdmin
 from .utils import get_peer_reviewable_requirement_ids
+from .emails import notify_submission_received, notify_submission_reviewed
 
 
 class BadgeSubmissionViewSet(viewsets.ModelViewSet):
@@ -76,6 +77,7 @@ class BadgeSubmissionViewSet(viewsets.ModelViewSet):
         submission.status = "submitted"
         submission.submitted_at = timezone.now()
         submission.save()
+        notify_submission_received(submission)
 
         serializer = self.get_serializer(submission)
         return Response(serializer.data)
@@ -157,6 +159,7 @@ class ReviewSubmissionViewSet(
         submission.reviewed_by = request.user
         submission.reviewer_notes = request.data.get("reviewer_notes", "")
         submission.save()
+        notify_submission_reviewed(submission)
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -180,7 +183,7 @@ class ReviewSubmissionViewSet(
             ).first()
 
             if submission is None:
-                BadgeSubmission.objects.create(
+                submission = BadgeSubmission.objects.create(
                     scout_id=scout_id,
                     requirement_id=requirement_id,
                     status="approved",
@@ -189,6 +192,7 @@ class ReviewSubmissionViewSet(
                     reviewed_by=request.user,
                     reviewer_notes=reviewer_notes,
                 )
+                notify_submission_reviewed(submission)
                 approved_count += 1
             elif submission.status == "approved":
                 already_approved_count += 1
@@ -199,6 +203,7 @@ class ReviewSubmissionViewSet(
                 submission.reviewed_by = request.user
                 submission.reviewer_notes = reviewer_notes
                 submission.save()
+                notify_submission_reviewed(submission)
                 approved_count += 1
 
         return Response(
@@ -224,10 +229,11 @@ class ReviewSubmissionViewSet(
         submission.reviewed_by = request.user
         submission.reviewer_notes = action_serializer.validated_data["reviewer_notes"]
         submission.save()
+        notify_submission_reviewed(submission)
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class PeerReviewViewSet(
     mixins.ListModelMixin,
@@ -284,6 +290,7 @@ class PeerReviewViewSet(
         submission.reviewed_by = request.user
         submission.reviewer_notes = request.data.get("reviewer_notes", "")
         submission.save()
+        notify_submission_reviewed(submission)
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -306,6 +313,7 @@ class PeerReviewViewSet(
         submission.reviewed_by = request.user
         submission.reviewer_notes = action_serializer.validated_data["reviewer_notes"]
         submission.save()
+        notify_submission_reviewed(submission)
 
         serializer = self.get_serializer(submission, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
