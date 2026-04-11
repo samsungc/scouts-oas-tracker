@@ -168,6 +168,8 @@ SIMPLE_JWT = {
 _cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173')
 CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
 
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
 USE_S3 = os.environ.get("USE_S3", "False") == "True"
 
 if USE_S3:
