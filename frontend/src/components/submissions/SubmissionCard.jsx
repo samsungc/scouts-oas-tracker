@@ -72,6 +72,13 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
     }))
   }
 
+  function handleEvidenceUpdated(updatedEvidence) {
+    setSub((prev) => ({
+      ...prev,
+      evidence: prev.evidence.map((e) => e.id === updatedEvidence.id ? updatedEvidence : e),
+    }))
+  }
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
@@ -93,6 +100,7 @@ export default function SubmissionCard({ submission, onUpdated, onDeleted }) {
           evidence={sub.evidence}
           isDraft={isEditable}
           onDeleted={handleEvidenceDeleted}
+          onUpdated={handleEvidenceUpdated}
         />
       </div>
 

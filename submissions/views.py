@@ -346,6 +346,7 @@ class BadgeHandoutViewSet(viewsets.ModelViewSet):
 
 
 class SubmissionEvidenceViewSet(
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -354,8 +355,17 @@ class SubmissionEvidenceViewSet(
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Only allow users to delete their own evidence
+        # Only allow users to modify their own evidence in draft/rejected submissions
         return SubmissionEvidence.objects.filter(
             requirement_submission__scout=self.request.user,
             requirement_submission__status__in=("draft", "rejected"),
-        )  
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        if "file" in request.data:
+            return Response(
+                {"detail": "File evidence cannot be edited."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        kwargs["partial"] = True
+        return super().partial_update(request, *args, **kwargs)
