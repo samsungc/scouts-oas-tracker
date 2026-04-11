@@ -16,6 +16,12 @@ function SmartGoalDisplay({ data }) {
   return (
     <div className={styles.smartGoal}>
       <span className={styles.smartTitle}>SMART Goal</span>
+      {data.category && (
+        <div className={styles.goalStatement}>
+          <span className={styles.goalStatementLabel}>Category</span>
+          <span className={styles.goalStatementText}>{data.category}</span>
+        </div>
+      )}
       {Object.entries(SMART_LABELS).map(([key, { letter, label }]) =>
         data[key] ? (
           <div key={key} className={styles.smartRow}>
