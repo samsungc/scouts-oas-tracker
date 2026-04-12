@@ -15,3 +15,11 @@ export function getMyStats() {
 export function getStreakLeaderboard() {
   return api.get('/leaderboard/streaks/')
 }
+
+export function getPointsLeaderboard() {
+  return api.get('/leaderboard/points/')
+}
+
+export function getMyAchievements() {
+  return api.get('/leaderboard/my-achievements/')
+}

@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     path('activity/', views.ActivityLeaderboardView.as_view(), name='leaderboard-activity'),
     path('category-champions/', views.CategoryChampionsView.as_view(), name='leaderboard-champions'),
+    path('my-achievements/', views.MyAchievementsView.as_view(), name='leaderboard-my-achievements'),
     path('my-stats/', views.MyStatsView.as_view(), name='leaderboard-my-stats'),
+    path('points/', views.PointsLeaderboardView.as_view(), name='leaderboard-points'),
     path('streaks/', views.StreakLeaderboardView.as_view(), name='leaderboard-streaks'),
 ]

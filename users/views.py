@@ -314,6 +314,9 @@ class PasswordResetRequestView(APIView):
         PasswordResetToken.objects.create(user=user, token_hash=token_hash)
         send_password_reset_email(user, raw_token)
 
+        from leaderboard.models import PasswordResetLog
+        PasswordResetLog.objects.get_or_create(user=user, date=timezone.now().date())
+
         return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
 
 
