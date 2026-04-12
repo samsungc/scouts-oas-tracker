@@ -206,3 +206,8 @@ LOGGING = {
 
 SES_FROM_EMAIL = os.environ.get("SES_FROM_EMAIL", "noreply@mail.6rhventurers.ca")
 SES_REGION = os.environ.get("SES_REGION", "us-east-2")
+
+# Email provider: "ses" (default) or "resend" (while awaiting SES sandbox approval)
+EMAIL_PROVIDER = os.environ.get("EMAIL_PROVIDER", "ses")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM_EMAIL = os.environ.get("RESEND_FROM_EMAIL", "noreply@mail.6rhventurers.ca")

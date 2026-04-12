@@ -25,6 +25,35 @@ def _is_suppressed(email):
 
 
 def _send_ses(to_addresses, subject, body_text):
+    try:
+        client = boto3.client("ses", region_name=settings.SES_REGION)
+        client.send_email(
+            Source=settings.SES_FROM_EMAIL,
+            Destination={"ToAddresses": to_addresses},
+            Message={
+                "Subject": {"Data": subject},
+                "Body": {"Text": {"Data": body_text}},
+            },
+        )
+    except (BotoCoreError, ClientError, Exception):
+        logger.error("Failed to send email via SES to %s — subject: %s", to_addresses, subject, exc_info=True)
+
+
+def _send_resend(to_addresses, subject, body_text):
+    import resend
+    resend.api_key = settings.RESEND_API_KEY
+    try:
+        resend.Emails.send({
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": to_addresses,
+            "subject": subject,
+            "text": body_text,
+        })
+    except Exception:
+        logger.error("Failed to send email via Resend to %s — subject: %s", to_addresses, subject, exc_info=True)
+
+
+def _send_email(to_addresses, subject, body_text):
     if not to_addresses:
         return
 
@@ -37,18 +66,10 @@ def _send_ses(to_addresses, subject, body_text):
     if not active:
         return
 
-    try:
-        client = boto3.client("ses", region_name=settings.SES_REGION)
-        client.send_email(
-            Source=settings.SES_FROM_EMAIL,
-            Destination={"ToAddresses": active},
-            Message={
-                "Subject": {"Data": subject},
-                "Body": {"Text": {"Data": body_text}},
-            },
-        )
-    except (BotoCoreError, ClientError, Exception):
-        logger.error("Failed to send email to %s — subject: %s", active, subject, exc_info=True)
+    if getattr(settings, "EMAIL_PROVIDER", "ses") == "resend":
+        _send_resend(active, subject, body_text)
+    else:
+        _send_ses(active, subject, body_text)
 
 
 def _send_submission_notification(email, submission):
@@ -67,7 +88,7 @@ def _send_submission_notification(email, submission):
         f"Log in to review it at https://6rhventurers.ca"
         f"{_build_unsubscribe_footer_for_email(email)}"
     )
-    _send_ses([email], subject, body)
+    _send_email([email], subject, body)
 
 
 def _build_unsubscribe_footer_for_email(email):
@@ -104,7 +125,7 @@ def _send_batch_summary(email, submissions):
         + f"\n\nLog in to review them at https://6rhventurers.ca"
         f"{_build_unsubscribe_footer_for_email(email)}"
     )
-    _send_ses([email], subject, body)
+    _send_email([email], subject, body)
 
 
 def notify_submission_received(submission):
@@ -214,4 +235,4 @@ def notify_submission_reviewed(submission):
     else:
         return
 
-    _send_ses([scout.email], subject, body)
+    _send_email([scout.email], subject, body)
