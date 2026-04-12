@@ -2,7 +2,7 @@ import logging
 
 from django.conf import settings
 
-from submissions.emails import _send_ses
+from submissions.emails import _send_email
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,6 @@ def send_password_reset_email(user, raw_token):
         f"\n\n---\nTo stop receiving these emails: {unsubscribe_url}"
     )
     try:
-        _send_ses([user.email], subject, body)
+        _send_email([user.email], subject, body)
     except Exception:
         logger.exception("Failed to send password reset email to user %s", user.id)
