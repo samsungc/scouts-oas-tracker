@@ -82,22 +82,22 @@ ACHIEVEMENTS = [
         'check': lambda ctx: ctx['longest_streak'] >= 7,
     },
     {
-        'id': 'burst_10',
-        'name': 'Productive Day',
-        'description': 'Submit 10 requirements in a single day that later get approved',
-        'check': lambda ctx: ctx['max_approved_in_day'] >= 10,
-    },
-    {
         'id': 'burst_25',
-        'name': 'Power Day',
+        'name': 'Productive Day',
         'description': 'Submit 25 requirements in a single day that later get approved',
         'check': lambda ctx: ctx['max_approved_in_day'] >= 25,
     },
     {
         'id': 'burst_50',
-        'name': 'Legendary Day',
+        'name': 'Power Day',
         'description': 'Submit 50 requirements in a single day that later get approved',
         'check': lambda ctx: ctx['max_approved_in_day'] >= 50,
+    },
+    {
+        'id': 'burst_100',
+        'name': 'Legendary Day',
+        'description': 'Submit 100 requirements in a single day that later get approved',
+        'check': lambda ctx: ctx['max_approved_in_day'] >= 100,
     },
     {
         'id': 'month_of_hustle',
