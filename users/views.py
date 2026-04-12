@@ -30,19 +30,29 @@ from .serializers import (
 def _reset_notification_state_on_login(user):
     """Reset burst-protection state and drop pending notifications on login.
 
-    After calling this, the next new-submission notification will be sent immediately
+    After calling this, the next notification will be sent immediately
     (as if it were the first of the day), and any previously queued notifications
     are discarded.
     """
-    if user.role not in ("scouter", "admin") or not user.email:
-        return
     from django.utils import timezone
-    from submissions.models import PendingNotification, ScouterNotificationState
-    PendingNotification.objects.filter(recipient_email=user.email, sent=False).delete()
-    ScouterNotificationState.objects.filter(email=user.email).update(
-        first_sent_today=False,
-        state_date=timezone.localdate(),
-    )
+
+    if not user.email:
+        return
+
+    if user.role in ("scouter", "admin"):
+        from submissions.models import PendingNotification, ScouterNotificationState
+        PendingNotification.objects.filter(recipient_email=user.email, sent=False).delete()
+        ScouterNotificationState.objects.filter(email=user.email).update(
+            first_sent_today=False,
+            state_date=timezone.localdate(),
+        )
+    elif user.role == "scout":
+        from submissions.models import PendingScoutNotification, ScoutNotificationState
+        PendingScoutNotification.objects.filter(recipient_email=user.email, sent=False).delete()
+        ScoutNotificationState.objects.filter(email=user.email).update(
+            first_sent_today=False,
+            state_date=timezone.localdate(),
+        )
 
 
 class CaseInsensitiveTokenView(TokenObtainPairView):

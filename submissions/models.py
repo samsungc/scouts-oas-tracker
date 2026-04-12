@@ -121,3 +121,35 @@ class PendingNotification(models.Model):
 
     def __str__(self):
         return f"Pending for {self.recipient_email} — submission {self.submission_id}"
+
+
+class ScoutNotificationState(models.Model):
+    """Tracks per-day burst-protection state for each scout email address."""
+    email = models.EmailField(unique=True, db_index=True)
+    state_date = models.DateField()
+    first_sent_today = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.email} ({self.state_date}, first_sent={self.first_sent_today})"
+
+
+class PendingScoutNotification(models.Model):
+    """Queued review notifications for scouts waiting to be included in the next batch."""
+    submission = models.ForeignKey(
+        BadgeSubmission,
+        on_delete=models.CASCADE,
+        related_name="pending_scout_notifications",
+    )
+    recipient_email = models.EmailField(db_index=True)
+    status_at_queue = models.CharField(max_length=20)  # "approved" or "rejected"
+    queued_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False, db_index=True)
+
+    class Meta:
+        unique_together = [("submission", "recipient_email")]
+        indexes = [
+            models.Index(fields=["recipient_email", "sent"], name="psn_email_sent_idx"),
+        ]
+
+    def __str__(self):
+        return f"Pending scout notif for {self.recipient_email} — submission {self.submission_id}"

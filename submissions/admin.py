@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout, ScouterNotificationState, PendingNotification
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout, ScouterNotificationState, PendingNotification, ScoutNotificationState, PendingScoutNotification
 
 
 @admin.register(BadgeSubmission)
@@ -43,5 +43,19 @@ class ScouterNotificationStateAdmin(admin.ModelAdmin):
 class PendingNotificationAdmin(admin.ModelAdmin):
     list_display = ("recipient_email", "submission", "queued_at", "sent")
     list_filter = ("sent",)
+    search_fields = ("recipient_email",)
+    readonly_fields = ("queued_at",)
+
+
+@admin.register(ScoutNotificationState)
+class ScoutNotificationStateAdmin(admin.ModelAdmin):
+    list_display = ("email", "state_date", "first_sent_today")
+    search_fields = ("email",)
+
+
+@admin.register(PendingScoutNotification)
+class PendingScoutNotificationAdmin(admin.ModelAdmin):
+    list_display = ("recipient_email", "submission", "status_at_queue", "queued_at", "sent")
+    list_filter = ("sent", "status_at_queue")
     search_fields = ("recipient_email",)
     readonly_fields = ("queued_at",)
