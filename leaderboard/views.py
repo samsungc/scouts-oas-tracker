@@ -584,6 +584,115 @@ class MyAchievementsView(APIView):
         return Response({'achievements': achievements})
 
 
+class AchievementScoutsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, achievement_id):
+        achievement = next((a for a in ACHIEVEMENTS if a['id'] == achievement_id), None)
+        if achievement is None:
+            return Response({'detail': 'Achievement not found.'}, status=404)
+
+        # Bulk queries for all active scouts
+        scouts_qs = list(
+            User.objects.filter(role='scout', is_active=True).only('id', 'first_name', 'last_name')
+        )
+        scout_ids = [s.id for s in scouts_qs]
+
+        submitted_by_scout = defaultdict(int)
+        for r in BadgeSubmission.objects.filter(scout_id__in=scout_ids).values('scout_id').annotate(c=Count('id')):
+            submitted_by_scout[r['scout_id']] = r['c']
+
+        approved_by_scout = defaultdict(int)
+        for r in BadgeSubmission.objects.filter(scout_id__in=scout_ids, status='approved').values('scout_id').annotate(c=Count('id')):
+            approved_by_scout[r['scout_id']] = r['c']
+
+        max_in_day_by_scout = defaultdict(int)
+        for r in (
+            BadgeSubmission.objects
+            .filter(scout_id__in=scout_ids, status='approved', submitted_at__isnull=False)
+            .values('scout_id', 'submitted_at__date')
+            .annotate(c=Count('id'))
+        ):
+            sid = r['scout_id']
+            if r['c'] > max_in_day_by_scout[sid]:
+                max_in_day_by_scout[sid] = r['c']
+
+        date_rows = (
+            BadgeSubmission.objects
+            .filter(scout_id__in=scout_ids, submitted_at__isnull=False)
+            .values('scout_id', 'submitted_at__date')
+            .distinct()
+        )
+        dates_by_scout = defaultdict(set)
+        for row in date_rows:
+            dates_by_scout[row['scout_id']].add(row['submitted_at__date'])
+        longest_streak_by_scout = {
+            sid: compute_streak(dates_by_scout.get(sid, set()))[1]
+            for sid in scout_ids
+        }
+
+        oas_badges = list(
+            Badge.objects
+            .filter(is_active=True, level__isnull=False, category__in=OAS_CATEGORIES)
+            .prefetch_related('requirements')
+        )
+        scout_badge_approved = {
+            (r['scout_id'], r['requirement__badge_id']): r['c']
+            for r in BadgeSubmission.objects.filter(
+                scout_id__in=scout_ids,
+                status='approved',
+                requirement__badge__category__in=OAS_CATEGORIES,
+                requirement__badge__is_active=True,
+            ).values('scout_id', 'requirement__badge_id').annotate(c=Count('id', distinct=True))
+        }
+        oas_badge_req_counts = {b.id: b.requirements.count() for b in oas_badges}
+        highest_level_by_scout = defaultdict(lambda: defaultdict(int))
+        for badge in oas_badges:
+            total_reqs = oas_badge_req_counts[badge.id]
+            if total_reqs == 0:
+                continue
+            for sid in scout_ids:
+                if scout_badge_approved.get((sid, badge.id), 0) >= total_reqs:
+                    if badge.level > highest_level_by_scout[sid][badge.category]:
+                        highest_level_by_scout[sid][badge.category] = badge.level
+
+        special_ids_by_scout = defaultdict(set)
+        for r in UserSpecialAchievement.objects.filter(user_id__in=scout_ids).values('user_id', 'achievement_id'):
+            special_ids_by_scout[r['user_id']].add(r['achievement_id'])
+
+        reset_dates_by_scout = defaultdict(set)
+        for r in PasswordResetLog.objects.filter(user_id__in=scout_ids).values('user_id', 'date'):
+            reset_dates_by_scout[r['user_id']].add(r['date'])
+
+        scout_name_map = {s.id: s.get_full_name().strip().lower() for s in scouts_qs}
+
+        def scout_ctx(sid):
+            return {
+                'total_submitted': submitted_by_scout[sid],
+                'total_approved': approved_by_scout[sid],
+                'max_approved_in_day': max_in_day_by_scout[sid],
+                'longest_streak': longest_streak_by_scout.get(sid, 0),
+                'highest_level_by_category': highest_level_by_scout[sid],
+                'special_achievement_ids': special_ids_by_scout[sid],
+                'reset_dates': reset_dates_by_scout[sid],
+                'is_baden_powell': scout_name_map.get(sid, '') == 'baden powell',
+            }
+
+        scout_obj_map = {s.id: s for s in scouts_qs}
+        earners = sorted(
+            [scout_obj_map[sid] for sid in scout_ids if achievement['check'](scout_ctx(sid))],
+            key=lambda s: (s.first_name.lower(), s.last_name.lower()),
+        )
+
+        return Response({
+            'achievement_name': achievement['name'],
+            'scouts': [
+                {'id': s.id, 'first_name': s.first_name, 'last_name': s.last_name}
+                for s in earners
+            ],
+        })
+
+
 class MyStatsView(APIView):
     permission_classes = [IsAuthenticated]
 

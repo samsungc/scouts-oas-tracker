@@ -23,3 +23,7 @@ export function getPointsLeaderboard() {
 export function getMyAchievements() {
   return api.get('/leaderboard/my-achievements/')
 }
+
+export function getAchievementScouts(achievementId) {
+  return api.get(`/leaderboard/achievements/${achievementId}/scouts/`)
+}
