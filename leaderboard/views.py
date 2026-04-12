@@ -82,22 +82,22 @@ ACHIEVEMENTS = [
         'check': lambda ctx: ctx['longest_streak'] >= 7,
     },
     {
-        'id': 'burst_5',
-        'name': 'Productive Day',
-        'description': 'Submit 5 requirements in a single day that later get approved',
-        'check': lambda ctx: ctx['max_approved_in_day'] >= 5,
-    },
-    {
         'id': 'burst_10',
-        'name': 'Power Day',
+        'name': 'Productive Day',
         'description': 'Submit 10 requirements in a single day that later get approved',
         'check': lambda ctx: ctx['max_approved_in_day'] >= 10,
     },
     {
-        'id': 'burst_15',
+        'id': 'burst_25',
+        'name': 'Power Day',
+        'description': 'Submit 25 requirements in a single day that later get approved',
+        'check': lambda ctx: ctx['max_approved_in_day'] >= 25,
+    },
+    {
+        'id': 'burst_50',
         'name': 'Legendary Day',
-        'description': 'Submit 15 requirements in a single day that later get approved',
-        'check': lambda ctx: ctx['max_approved_in_day'] >= 15,
+        'description': 'Submit 50 requirements in a single day that later get approved',
+        'check': lambda ctx: ctx['max_approved_in_day'] >= 50,
     },
     {
         'id': 'month_of_hustle',
@@ -427,6 +427,7 @@ class MyAchievementsView(APIView):
         daily = (
             BadgeSubmission.objects
             .filter(scout=user, status='approved', submitted_at__isnull=False)
+            .exclude(requirement__badge__category='personal_progression')
             .values('submitted_at__date')
             .annotate(count=Count('id'))
         )
