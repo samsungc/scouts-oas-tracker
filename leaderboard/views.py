@@ -129,7 +129,7 @@ ACHIEVEMENTS = [
         'name': '???',
         'description': '???',
         'mystery': True,
-        'check': lambda ctx: ctx['is_baden_powell'],
+        'check': lambda ctx: ctx['is_baden_powell'] or 'mystery_2' in ctx['special_achievement_ids'],
     },
     {
         'id': 'mystery_3',
@@ -483,6 +483,10 @@ class MyAchievementsView(APIView):
             'reset_dates': reset_dates,
             'is_baden_powell': user.get_full_name().strip().lower() == 'baden powell',
         }
+
+        if my_ctx['is_baden_powell']:
+            UserSpecialAchievement.objects.get_or_create(user=user, achievement_id='mystery_2')
+            special_achievement_ids.add('mystery_2')
 
         # --- All-scouts context (bulk queries for percent_holding) ---
         scout_ids = list(User.objects.filter(role='scout', is_active=True).values_list('id', flat=True))
