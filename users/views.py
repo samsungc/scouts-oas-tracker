@@ -308,6 +308,7 @@ class PasswordResetRequestView(APIView):
 
         cutoff = datetime.now(tz=timezone.utc) - timedelta(hours=24)
         if PasswordResetToken.objects.filter(user=user, created_at__gte=cutoff).count() >= 5:
+            print(f"[password-reset] rate limit hit for user '{user.username}' — request blocked")
             return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
 
         raw_token, token_hash = PasswordResetToken.make_token()
@@ -315,7 +316,7 @@ class PasswordResetRequestView(APIView):
         send_password_reset_email(user, raw_token)
 
         from leaderboard.models import PasswordResetLog
-        PasswordResetLog.objects.get_or_create(user=user, date=timezone.now().date())
+        PasswordResetLog.objects.get_or_create(user=user, date=datetime.now(timezone.utc).date())
 
         return Response({"detail": _RESET_SENT_MSG}, status=status.HTTP_200_OK)
 
