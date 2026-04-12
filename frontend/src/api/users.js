@@ -37,3 +37,13 @@ export function createUser(data) {
 export function deactivateUser(id) {
   return api.patch(`/users/${id}/deactivate/`)
 }
+
+/** Get site-wide settings. Admin only. */
+export function getEmailSettings() {
+  return api.get('/users/settings/')
+}
+
+/** Update site-wide settings. Admin only. */
+export function updateEmailSettings(data) {
+  return api.patch('/users/settings/', data)
+}

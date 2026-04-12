@@ -1,14 +1,21 @@
+import json
+import logging
+import urllib.request
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
 from django.contrib.auth import password_validation
+from django.core import signing
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+logger = logging.getLogger(__name__)
 
 from .serializers import (
     MeSerializer,
@@ -20,8 +27,39 @@ from .serializers import (
 )
 
 
+def _reset_notification_state_on_login(user):
+    """Reset burst-protection state and drop pending notifications on login.
+
+    After calling this, the next new-submission notification will be sent immediately
+    (as if it were the first of the day), and any previously queued notifications
+    are discarded.
+    """
+    if user.role not in ("scouter", "admin") or not user.email:
+        return
+    from django.utils import timezone
+    from submissions.models import PendingNotification, ScouterNotificationState
+    PendingNotification.objects.filter(recipient_email=user.email, sent=False).delete()
+    ScouterNotificationState.objects.filter(email=user.email).update(
+        first_sent_today=False,
+        state_date=timezone.localdate(),
+    )
+
+
 class CaseInsensitiveTokenView(TokenObtainPairView):
     serializer_class = CaseInsensitiveTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            username = request.data.get("username", "")
+            if username:
+                from .models import User
+                try:
+                    user = User.objects.get(username__iexact=username, is_active=True)
+                    _reset_notification_state_on_login(user)
+                except User.DoesNotExist:
+                    pass
+        return response
 
 
 class MeView(generics.RetrieveUpdateAPIView):
@@ -366,3 +404,115 @@ class PasswordResetConfirmView(APIView):
             {"detail": "Password reset successful. You can now sign in."},
             status=status.HTTP_200_OK,
         )
+
+
+class UnsubscribeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get("token", "")
+        if not token:
+            return Response({"detail": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_pk = signing.loads(token, salt="unsubscribe", max_age=None)
+        except (BadSignature, SignatureExpired):
+            return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .models import User
+        try:
+            user = User.objects.get(pk=user_pk)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user.email_notifications = False
+        user.save(update_fields=["email_notifications"])
+        return Response({"detail": "You have been unsubscribed successfully."}, status=status.HTTP_200_OK)
+
+
+class SESWebhookView(APIView):
+    """Receives AWS SNS bounce/complaint notifications from SES."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        try:
+            if isinstance(request.data, dict):
+                payload = request.data
+            else:
+                payload = json.loads(request.body)
+        except (json.JSONDecodeError, Exception):
+            return Response({"detail": "Invalid JSON."}, status=status.HTTP_400_BAD_REQUEST)
+
+        msg_type = payload.get("Type", "")
+
+        if msg_type == "SubscriptionConfirmation":
+            subscribe_url = payload.get("SubscribeURL", "")
+            if subscribe_url:
+                try:
+                    urllib.request.urlopen(subscribe_url, timeout=10)
+                except Exception:
+                    logger.error("Failed to confirm SNS subscription: %s", subscribe_url)
+            return Response({"detail": "Subscription confirmed."}, status=status.HTTP_200_OK)
+
+        if msg_type == "Notification":
+            try:
+                message = json.loads(payload.get("Message", "{}"))
+            except json.JSONDecodeError:
+                return Response({"detail": "Bad message."}, status=status.HTTP_400_BAD_REQUEST)
+
+            notification_type = message.get("notificationType", "")
+            from .models import EmailSuppression
+
+            if notification_type == "Bounce":
+                bounce_type = message.get("bounce", {}).get("bounceType", "")
+                if bounce_type == "Permanent":
+                    for recipient in message.get("bounce", {}).get("bouncedRecipients", []):
+                        email = recipient.get("emailAddress", "").lower()
+                        if email:
+                            EmailSuppression.objects.get_or_create(
+                                email=email,
+                                defaults={"reason": "bounce"},
+                            )
+
+            elif notification_type == "Complaint":
+                for recipient in message.get("complaint", {}).get("complainedRecipients", []):
+                    email = recipient.get("emailAddress", "").lower()
+                    if email:
+                        EmailSuppression.objects.get_or_create(
+                            email=email,
+                            defaults={"reason": "complaint"},
+                        )
+
+            return Response({"detail": "Processed."}, status=status.HTTP_200_OK)
+
+        return Response({"detail": "OK."}, status=status.HTTP_200_OK)
+
+
+class SiteSettingsView(APIView):
+    """GET/PATCH site-wide settings. Admin only."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _check_admin(self, request):
+        if request.user.role != "admin":
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Admin access required.")
+
+    def get(self, request):
+        self._check_admin(request)
+        from .models import SiteSettings
+        obj = SiteSettings.get()
+        return Response({"emails_paused": obj.emails_paused})
+
+    def patch(self, request):
+        self._check_admin(request)
+        emails_paused = request.data.get("emails_paused")
+        if not isinstance(emails_paused, bool):
+            return Response(
+                {"detail": "emails_paused must be a boolean."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from .models import SiteSettings
+        obj = SiteSettings.get()
+        obj.emails_paused = emails_paused
+        obj.save(update_fields=["emails_paused"])
+        return Response({"emails_paused": obj.emails_paused})

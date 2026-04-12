@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
-import { getScoutStats } from '../api/users'
+import { getScoutStats, getEmailSettings, updateEmailSettings } from '../api/users'
+import { useAuth } from '../context/AuthContext'
 import { getHandouts } from '../api/handouts'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import CreateUserModal from '../components/scouts/CreateUserModal'
@@ -92,6 +93,7 @@ const PP_LEVEL_LABELS = { 0: 'N/A', 1: 'Trailhead', 2: 'Tree Line', 3: 'Snow Lin
 // ─── component ──────────────────────────────────────────────────────────────
 
 export default function ScoutsPage() {
+  const { user } = useAuth()
   const [scouts, setScouts] = useState([])        // from /api/users/scouts/stats/
   const [summary, setSummary] = useState(null)    // aggregate counts from stats endpoint
   const [badgeDetails, setBadgeDetails] = useState([])
@@ -109,24 +111,30 @@ export default function ScoutsPage() {
   const [todoItems, setTodoItems] = useState([])
   const [sortKey, setSortKey] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
+  const [emailsPaused, setEmailsPaused] = useState(null)
+  const [pauseLoading, setPauseLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const [statsRes, badgeList] = await Promise.all([
-        getScoutStats(),
-        getBadges(),
-      ])
-      setScouts(statsRes.scouts)
-      setSummary(statsRes.summary)
-      setBadgeDetails(badgeList)
+      const promises = [getScoutStats(), getBadges()]
+      if (user?.role === 'admin') {
+        promises.push(getEmailSettings())
+      }
+      const results = await Promise.all(promises)
+      setScouts(results[0].scouts)
+      setSummary(results[0].summary)
+      setBadgeDetails(results[1])
+      if (user?.role === 'admin' && results[2]) {
+        setEmailsPaused(results[2].emails_paused)
+      }
       setLoading(false)
     } catch {
       setLoading(false)
       setError('Failed to load scout data. Please try refreshing.')
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     load()
@@ -213,6 +221,19 @@ export default function ScoutsPage() {
   const totalPages = Math.ceil(filteredScouts.length / PAGE_SIZE)
   const paginatedScouts = filteredScouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
+  async function handlePauseToggle() {
+    if (emailsPaused === null) return
+    setPauseLoading(true)
+    try {
+      const updated = await updateEmailSettings({ emails_paused: !emailsPaused })
+      setEmailsPaused(updated.emails_paused)
+    } catch {
+      // ignore
+    } finally {
+      setPauseLoading(false)
+    }
+  }
+
   // ── Scout detail view ──
   if (selectedScout) {
     return (
@@ -244,6 +265,15 @@ export default function ScoutsPage() {
           </p>
         </div>
         <div className={styles.headerActions}>
+          {user?.role === 'admin' && emailsPaused !== null && (
+            <button
+              className={`${styles.emailPauseBtn} ${emailsPaused ? styles.emailPausedActive : styles.emailPauseInactive}`}
+              onClick={handlePauseToggle}
+              disabled={pauseLoading}
+            >
+              {pauseLoading ? 'Updating...' : emailsPaused ? 'Emails: OFF' : 'Emails: ON'}
+            </button>
+          )}
           {(() => {
             const pendingCount = todoItems.filter((i) => !i.handed_out).length
             return (

@@ -8,6 +8,9 @@ from .views import (
     DeactivateUserView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    UnsubscribeView,
+    SESWebhookView,
+    SiteSettingsView,
 )
 
 urlpatterns = [
@@ -19,4 +22,7 @@ urlpatterns = [
     path("<int:user_id>/deactivate/", DeactivateUserView.as_view(), name="deactivate-user"),
     path("password-reset/", PasswordResetRequestView.as_view(), name="password-reset"),
     path("password-reset/confirm/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
+    path("unsubscribe/", UnsubscribeView.as_view(), name="unsubscribe"),
+    path("ses-webhook/", SESWebhookView.as_view(), name="ses-webhook"),
+    path("settings/", SiteSettingsView.as_view(), name="site-settings"),
 ]

@@ -90,3 +90,34 @@ class BadgeHandout(models.Model):
     def __str__(self):
         status = "handed out" if self.handed_out else "pending"
         return f"{self.scout.username} - {self.badge.name} ({status})"
+
+
+class ScouterNotificationState(models.Model):
+    """Tracks per-day burst-protection state for each scouter/admin email address."""
+    email = models.EmailField(unique=True, db_index=True)
+    state_date = models.DateField()
+    first_sent_today = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.email} ({self.state_date}, first_sent={self.first_sent_today})"
+
+
+class PendingNotification(models.Model):
+    """Queued new-submission notifications waiting to be included in the next batch."""
+    submission = models.ForeignKey(
+        BadgeSubmission,
+        on_delete=models.CASCADE,
+        related_name="pending_notifications",
+    )
+    recipient_email = models.EmailField(db_index=True)
+    queued_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False, db_index=True)
+
+    class Meta:
+        unique_together = [("submission", "recipient_email")]
+        indexes = [
+            models.Index(fields=["recipient_email", "sent"], name="pn_email_sent_idx"),
+        ]
+
+    def __str__(self):
+        return f"Pending for {self.recipient_email} — submission {self.submission_id}"
