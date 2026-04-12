@@ -191,14 +191,8 @@ def notify_submission_received(submission):
                 pending_qs.update(sent=True)
 
 
-def notify_submission_reviewed(submission):
-    """Notify the scout when their submission is approved or rejected."""
-    scout = submission.scout
-    if not scout.email_notifications or not scout.email:
-        return
-    if _is_suppressed(scout.email):
-        return
-
+def _send_scout_review_single(scout, submission):
+    """Send an immediate single review notification to a scout."""
     requirement_title = submission.requirement.title
     badge_name = submission.requirement.badge.name
     scout_first = scout.first_name or scout.username
@@ -207,7 +201,6 @@ def notify_submission_reviewed(submission):
         f"{reviewer.first_name} {reviewer.last_name}".strip() or reviewer.username
         if reviewer else "a scouter"
     )
-
     footer = _build_unsubscribe_footer(scout.pk)
 
     if submission.status == "approved":
@@ -236,3 +229,94 @@ def notify_submission_reviewed(submission):
         return
 
     _send_email([scout.email], subject, body)
+
+
+def _send_scout_batch_summary(scout, pending_notifications):
+    """Send a grouped batch summary email to a scout for multiple reviewed submissions."""
+    if len(pending_notifications) == 1:
+        _send_scout_review_single(scout, pending_notifications[0].submission)
+        return
+
+    approved = [pn for pn in pending_notifications if pn.status_at_queue == "approved"]
+    rejected = [pn for pn in pending_notifications if pn.status_at_queue == "rejected"]
+
+    scout_first = scout.first_name or scout.username
+    sections = []
+
+    if approved:
+        lines = [f"  - {pn.submission.requirement.title} ({pn.submission.requirement.badge.name})" for pn in approved]
+        sections.append(f"Approved ({len(approved)}):\n" + "\n".join(lines))
+
+    if rejected:
+        lines = []
+        for pn in rejected:
+            line = f"  - {pn.submission.requirement.title} ({pn.submission.requirement.badge.name})"
+            if pn.submission.reviewer_notes:
+                line += f" — Reviewer notes: {pn.submission.reviewer_notes}"
+            lines.append(line)
+        sections.append(f"Returned for revision ({len(rejected)}):\n" + "\n".join(lines))
+
+    subject = f"Summary of your recent submission reviews ({len(pending_notifications)} updates)"
+    body = (
+        f"Hi {scout_first},\n\n"
+        f"Here's a summary of your recent submission reviews:\n\n"
+        + "\n\n".join(sections)
+        + f"\n\nLog in to view your progress at https://6rhventurers.ca"
+        f"{_build_unsubscribe_footer(scout.pk)}"
+    )
+    _send_email([scout.email], subject, body)
+
+
+def notify_submission_reviewed(submission):
+    """Notify the scout when their submission is approved or rejected.
+
+    Uses daily burst protection per scout:
+    - First notification of the day is sent immediately.
+    - Subsequent ones are queued; a batch summary is sent every BATCH_SIZE notifications.
+    - State resets at midnight and on login (see users/views.py).
+    """
+    from .models import ScoutNotificationState, PendingScoutNotification
+
+    scout = submission.scout
+    if not scout.email_notifications or not scout.email:
+        return
+    if _is_suppressed(scout.email):
+        return
+    if submission.status not in ("approved", "rejected"):
+        return
+
+    today = timezone.localdate()
+
+    state, _ = ScoutNotificationState.objects.get_or_create(
+        email=scout.email,
+        defaults={"state_date": today, "first_sent_today": False},
+    )
+
+    # New day — discard stale pending and reset
+    if state.state_date != today:
+        PendingScoutNotification.objects.filter(recipient_email=scout.email, sent=False).delete()
+        state.state_date = today
+        state.first_sent_today = False
+        state.save(update_fields=["state_date", "first_sent_today"])
+
+    if not state.first_sent_today:
+        _send_scout_review_single(scout, submission)
+        state.first_sent_today = True
+        state.save(update_fields=["first_sent_today"])
+    else:
+        PendingScoutNotification.objects.get_or_create(
+            submission=submission,
+            recipient_email=scout.email,
+            defaults={"sent": False, "status_at_queue": submission.status},
+        )
+
+        pending_qs = PendingScoutNotification.objects.filter(
+            recipient_email=scout.email,
+            sent=False,
+        ).select_related(
+            "submission__requirement__badge",
+        ).order_by("queued_at")
+
+        if pending_qs.count() >= BATCH_SIZE:
+            _send_scout_batch_summary(scout, list(pending_qs))
+            pending_qs.update(sent=True)
