@@ -436,10 +436,7 @@ class SESWebhookView(APIView):
 
     def post(self, request):
         try:
-            if isinstance(request.data, dict):
-                payload = request.data
-            else:
-                payload = json.loads(request.body)
+            payload = json.loads(request.body)
         except (json.JSONDecodeError, Exception):
             return Response({"detail": "Invalid JSON."}, status=status.HTTP_400_BAD_REQUEST)
 
