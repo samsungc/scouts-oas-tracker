@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getMyAchievements } from '../../api/leaderboard'
+import AchievementsGrid from './AchievementsGrid'
 import styles from './PersonalStatsPanel.module.css'
 
 const RANK_LEVELS = [
@@ -10,22 +12,16 @@ const RANK_LEVELS = [
   { threshold: 6767, label: 'Master' },
 ]
 
-const CATEGORY_LABELS = {
-  awards: 'Awards',
-  personal_progression: 'Personal Progression',
-  vertical_skills: 'Vertical Skills',
-  sailing_skills: 'Sailing Skills',
-  scoutcraft_skills: 'Scoutcraft Skills',
-  camping_skills: 'Camping Skills',
-  trail_skills: 'Trail Skills',
-  winter_skills: 'Winter Skills',
-  paddling_skills: 'Paddling Skills',
-  aquatic_skills: 'Aquatic Skills',
-  emergency_skills: 'Emergency Skills',
-}
-
 export default function PersonalStatsPanel({ stats }) {
-  const [categoryOpen, setCategoryOpen] = useState(false)
+  const [achievementsOpen, setAchievementsOpen] = useState(true)
+  const [achievements, setAchievements] = useState(null)
+
+  useEffect(() => {
+    getMyAchievements()
+      .then((data) => setAchievements(data.achievements))
+      .catch(() => {})
+  }, [])
+
   const {
     total_approved,
     total_submitted,
@@ -34,11 +30,7 @@ export default function PersonalStatsPanel({ stats }) {
     rank_label,
     current_streak_days,
     longest_streak_days,
-    approved_by_category,
   } = stats
-
-  const categoryEntries = Object.entries(approved_by_category)
-  const maxCategoryCount = Math.max(1, ...categoryEntries.map(([, v]) => v))
 
   return (
     <div className={styles.panel}>
@@ -100,32 +92,19 @@ export default function PersonalStatsPanel({ stats }) {
         </div>
       </div>
 
-      {categoryEntries.length > 0 && (
+      {achievements && achievements.length > 0 && (
         <div className={styles.categoryBars}>
           <button
             className={styles.barsTitleBtn}
-            onClick={() => setCategoryOpen((v) => !v)}
+            onClick={() => setAchievementsOpen((v) => !v)}
           >
-            <span className={styles.barsTitle}>Progress by Category</span>
-            <span className={`${styles.chevron} ${categoryOpen ? styles.chevronOpen : ''}`}>▾</span>
+            <span className={styles.barsTitle}>
+              Achievements ({achievements.filter((a) => a.unlocked).length}/{achievements.length})
+            </span>
+            <span className={`${styles.chevron} ${achievementsOpen ? styles.chevronOpen : ''}`}>▾</span>
           </button>
-          <div className={`${styles.barsCollapsible} ${categoryOpen ? styles.barsOpen : ''}`}>
-            {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
-              const count = approved_by_category[key] || 0
-              const pct = (count / maxCategoryCount) * 100
-              return (
-                <div key={key} className={styles.barRow}>
-                  <span className={styles.barLabel}>{label}</span>
-                  <div className={styles.barTrack}>
-                    <div
-                      className={styles.barFill}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className={styles.barCount}>{count}</span>
-                </div>
-              )
-            })}
+          <div className={`${styles.barsCollapsible} ${achievementsOpen ? styles.barsOpen : ''}`}>
+            <AchievementsGrid achievements={achievements} />
           </div>
         </div>
       )}

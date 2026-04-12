@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { getCategoryChampions, getMyStats } from '../api/leaderboard'
 import PersonalStatsPanel from '../components/leaderboard/PersonalStatsPanel'
+import PointsLeaderboard from '../components/leaderboard/PointsLeaderboard'
 import ActivityLeaderboard from '../components/leaderboard/ActivityLeaderboard'
 import StreakLeaderboard from '../components/leaderboard/StreakLeaderboard'
 import CategoryChampionsGrid from '../components/leaderboard/CategoryChampionsGrid'
@@ -50,9 +51,11 @@ export default function LeaderboardPage() {
 
       {isScout && myStats && <PersonalStatsPanel stats={myStats} />}
 
+      <PointsLeaderboard currentUserId={user?.id} />
+
       <ActivityLeaderboard myStats={myStats} currentUserId={user?.id} />
 
-      <StreakLeaderboard currentUserId={user?.id} />
+<StreakLeaderboard currentUserId={user?.id} />
 
       {champions && (
         <CategoryChampionsGrid
