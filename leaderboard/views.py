@@ -154,8 +154,8 @@ ACHIEVEMENTS = [
     },
     {
         'id': 'mystery_3',
-        'name': '???',
-        'description': '???',
+        'name': 'Good Turn Given',
+        'description': 'Thanked Scouter Samson!',
         'mystery': True,
         'check': lambda ctx: 'mystery_3' in ctx['special_achievement_ids'],
     },
