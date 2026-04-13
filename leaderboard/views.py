@@ -133,6 +133,12 @@ ACHIEVEMENTS = [
         'check': lambda ctx: 'contributer' in ctx['special_achievement_ids'],
     },
     {
+        'id': 'thankful',
+        'name': 'Good Turn Given',
+        'description': 'Thanked Scouter Samson!',
+        'check': lambda ctx: 'thankful' in ctx['special_achievement_ids'],
+    },
+    {
         'id': 'badge_bash_2026',
         'name': '2026 Badge Bash Winner',
         'description': 'Highest number of submissions in a 7 day period',
@@ -151,13 +157,6 @@ ACHIEVEMENTS = [
         'description': '???',
         'mystery': True,
         'check': lambda ctx: ctx['is_baden_powell'] or 'mystery_2' in ctx['special_achievement_ids'],
-    },
-    {
-        'id': 'mystery_3',
-        'name': 'Good Turn Given',
-        'description': 'Thanked Scouter Samson!',
-        'mystery': True,
-        'check': lambda ctx: 'mystery_3' in ctx['special_achievement_ids'],
     },
 ]
 
