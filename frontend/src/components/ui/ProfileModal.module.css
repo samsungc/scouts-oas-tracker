@@ -75,6 +75,24 @@
   box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
 }
 
+.inputPending {
+  border-color: var(--color-accent);
+  background: #fffbf0;
+}
+.inputPending:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.2);
+}
+
+.inputConfirmed {
+  border-color: var(--color-status-approved);
+  background: #f0fff0;
+}
+.inputConfirmed:focus {
+  border-color: var(--color-status-approved);
+  box-shadow: 0 0 0 2px rgba(42, 125, 42, 0.15);
+}
+
 .fieldError {
   font-size: 0.8rem;
   color: #c0392b;

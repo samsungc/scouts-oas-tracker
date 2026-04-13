@@ -12,6 +12,7 @@ class CaseInsensitiveTokenSerializer(TokenObtainPairSerializer):
 
 class MeSerializer(serializers.ModelSerializer):
     peer_review_eligible = serializers.SerializerMethodField()
+    pending_email = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -25,6 +26,7 @@ class MeSerializer(serializers.ModelSerializer):
             "last_login",
             "peer_review_eligible",
             "email_notifications",
+            "pending_email",
         ]
         read_only_fields = ["id", "username", "role", "last_login"]
 
@@ -33,6 +35,13 @@ class MeSerializer(serializers.ModelSerializer):
             return False
         from submissions.utils import get_peer_reviewable_requirement_ids
         return bool(get_peer_reviewable_requirement_ids(obj))
+
+    def get_pending_email(self, obj):
+        from .models import PendingEmailChange
+        pending = PendingEmailChange.objects.filter(user=obj).first()
+        if pending and pending.is_valid():
+            return pending.new_email
+        return None
 
 
 class ChangePasswordSerializer(serializers.Serializer):

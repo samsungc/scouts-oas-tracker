@@ -47,3 +47,7 @@ export function getEmailSettings() {
 export function updateEmailSettings(data) {
   return api.patch('/users/settings/', data)
 }
+
+export function confirmEmailChange(token) {
+  return api.post('/users/confirm-email/', { token })
+}
