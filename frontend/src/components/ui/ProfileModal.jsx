@@ -47,11 +47,13 @@ export default function ProfileModal({ onClose }) {
   const [profileForm, setProfileForm] = useState({
     first_name: user?.first_name ?? '',
     last_name: user?.last_name ?? '',
-    email: user?.email ?? '',
+    email: user?.pending_email ?? user?.email ?? '',
   })
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError] = useState('')
-  const [profileSuccess, setProfileSuccess] = useState(false)
+  const [profileSuccess, setProfileSuccess] = useState(
+    user?.pending_email ? 'confirmation_pending' : false
+  )
 
   // Change password state
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
@@ -169,7 +171,13 @@ export default function ProfileModal({ onClose }) {
           <label className={styles.fieldLabel}>Email</label>
           <input
             type="email"
-            className={styles.input}
+            className={`${styles.input} ${
+              profileSuccess === 'confirmation_pending'
+                ? styles.inputPending
+                : user?.email
+                ? styles.inputConfirmed
+                : ''
+            }`}
             value={profileForm.email}
             onChange={(e) => setProfileForm((f) => ({ ...f, email: e.target.value }))}
           />

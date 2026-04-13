@@ -15,6 +15,7 @@ import ImportPage from './pages/ImportPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import UnsubscribePage from './pages/UnsubscribePage'
+import ConfirmEmailPage from './pages/ConfirmEmailPage'
 
 function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -145,6 +146,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
+      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
