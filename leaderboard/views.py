@@ -117,6 +117,27 @@ ACHIEVEMENTS = [
         'description': 'Helped fix a bug',
         'check': lambda ctx: 'bug_catcher' in ctx['special_achievement_ids'],
     },
+    *[
+        {
+            'id': f'level_{level}_complete',
+            'name': f'Level {level} Complete',
+            'description': f'Achieve level {level} in all 9 OAS categories',
+            'check': _level_check(level),
+        }
+        for level in range(1, 4)
+    ],
+    {
+        'id': 'contributer',
+        'name': 'Contributer',
+        'description': 'Contributed an idea that was implemented on this website',
+        'check': lambda ctx: 'contributer' in ctx['special_achievement_ids'],
+    },
+    {
+        'id': 'badge_bash_2026',
+        'name': '2026 Badge Bash Winner',
+        'description': 'Highest number of submissions in a 7 day period',
+        'check': lambda ctx: 'badge_bash_2026' in ctx['special_achievement_ids'],
+    },
     {
         'id': 'mystery_1',
         'name': '???',
@@ -138,15 +159,6 @@ ACHIEVEMENTS = [
         'mystery': True,
         'check': lambda ctx: 'mystery_3' in ctx['special_achievement_ids'],
     },
-    *[
-        {
-            'id': f'level_{level}_complete',
-            'name': f'Level {level} Complete',
-            'description': f'Achieve level {level} in all 9 OAS categories',
-            'check': _level_check(level),
-        }
-        for level in range(1, 10)
-    ],
 ]
 
 
