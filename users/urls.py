@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     MeView,
     ChangePasswordView,
+    ConfirmEmailChangeView,
     ScoutListView,
     ScoutStatsView,
     CreateUserView,
@@ -15,6 +16,7 @@ from .views import (
 
 urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
+    path("confirm-email/", ConfirmEmailChangeView.as_view(), name="confirm-email"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("scouts/stats/", ScoutStatsView.as_view(), name="scout-stats"),
     path("scouts/", ScoutListView.as_view(), name="scout-list"),

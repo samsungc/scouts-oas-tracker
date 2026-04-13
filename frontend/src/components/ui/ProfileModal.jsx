@@ -70,9 +70,13 @@ export default function ProfileModal({ onClose }) {
     setProfileError('')
     setProfileSuccess(false)
     try {
-      await updateMe(profileForm)
+      const result = await updateMe(profileForm)
       await refreshUser()
-      setProfileSuccess(true)
+      if (result?.email_confirmation_pending) {
+        setProfileSuccess('confirmation_pending')
+      } else {
+        setProfileSuccess(true)
+      }
     } catch (err) {
       setProfileError(err.detail ?? 'Failed to update profile.')
     } finally {
@@ -170,7 +174,10 @@ export default function ProfileModal({ onClose }) {
             onChange={(e) => setProfileForm((f) => ({ ...f, email: e.target.value }))}
           />
           {profileError && <ErrorMessage message={profileError} />}
-          {profileSuccess && <p className={styles.success}>Profile updated.</p>}
+          {profileSuccess === 'confirmation_pending' && (
+            <p className={styles.success}>Check your inbox to confirm your new email address.</p>
+          )}
+          {profileSuccess === true && <p className={styles.success}>Profile updated.</p>}
           <button type="submit" className={styles.saveBtn} disabled={profileSaving}>
             {profileSaving ? 'Saving…' : 'Save Changes'}
           </button>

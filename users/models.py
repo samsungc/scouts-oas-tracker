@@ -73,3 +73,19 @@ class PasswordResetToken(models.Model):
         if self.used:
             return False
         return (timezone.now() - self.created_at) <= timedelta(hours=self.TOKEN_EXPIRY_HOURS)
+
+
+class PendingEmailChange(models.Model):
+    user = models.OneToOneField(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="pending_email_change",
+    )
+    new_email = models.EmailField()
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    EXPIRY_HOURS = 24
+
+    def is_valid(self):
+        return (timezone.now() - self.created_at) <= timedelta(hours=self.EXPIRY_HOURS)

@@ -13,7 +13,9 @@ from django.db import transaction
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken as JWTRefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +74,92 @@ class CaseInsensitiveTokenView(TokenObtainPairView):
         return response
 
 
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            raw_refresh = request.data.get("refresh", "")
+            if raw_refresh:
+                try:
+                    token = JWTRefreshToken(raw_refresh)
+                    user_id = token["user_id"]
+                    from .models import User
+                    user = User.objects.get(id=user_id, is_active=True)
+                    _reset_notification_state_on_login(user)
+                except (TokenError, User.DoesNotExist, KeyError):
+                    pass
+
+        return response
+
+
 class MeView(generics.RetrieveUpdateAPIView):
     serializer_class = MeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        new_email = request.data.get("email")
+        current_email = request.user.email
+        email_changing = bool(new_email and new_email != current_email)
+
+        if email_changing:
+            data_without_email = {k: v for k, v in request.data.items() if k != "email"}
+            serializer = self.get_serializer(self.get_object(), data=data_without_email, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+
+            from .models import PendingEmailChange
+            from .emails import send_email_confirmation_email
+
+            existing = PendingEmailChange.objects.filter(user=request.user).first()
+            if not (existing and existing.new_email == new_email and existing.is_valid()):
+                from .models import PasswordResetToken
+                raw_token, token_hash = PasswordResetToken.make_token()
+                PendingEmailChange.objects.filter(user=request.user).delete()
+                PendingEmailChange.objects.create(
+                    user=request.user,
+                    new_email=new_email,
+                    token=token_hash,
+                )
+                try:
+                    send_email_confirmation_email(request.user, new_email, raw_token)
+                except Exception:
+                    logger.exception("Failed to send email confirmation to %s", new_email)
+
+            resp_data = dict(serializer.data)
+            resp_data["email_confirmation_pending"] = True
+            return Response(resp_data)
+
+        return super().update(request, *args, **kwargs)
+
+
+class ConfirmEmailChangeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        raw_token = request.data.get("token", "")
+        if not raw_token:
+            return Response({"detail": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .models import PasswordResetToken, PendingEmailChange
+        token_hash = PasswordResetToken.hash_token(raw_token)
+        try:
+            pending = PendingEmailChange.objects.select_related("user").get(token=token_hash)
+        except PendingEmailChange.DoesNotExist:
+            return Response({"detail": "Invalid or expired confirmation link."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not pending.is_valid():
+            pending.delete()
+            return Response({"detail": "This confirmation link has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = pending.user
+        user.email = pending.new_email
+        user.save(update_fields=["email"])
+        pending.delete()
+        return Response({"detail": "Email updated successfully."}, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(APIView):
