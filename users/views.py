@@ -3,6 +3,7 @@ import logging
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+from django.utils import timezone as django_tz
 
 from django.contrib.auth import password_validation
 from django.core import signing
@@ -106,6 +107,12 @@ class MeView(generics.RetrieveUpdateAPIView):
         email_changing = bool(new_email and new_email != current_email)
 
         if email_changing:
+            if request.user.email_change_locked:
+                return Response(
+                    {"detail": "Email changes are locked. Contact an admin."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             data_without_email = {k: v for k, v in request.data.items() if k != "email"}
             serializer = self.get_serializer(self.get_object(), data=data_without_email, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -117,13 +124,23 @@ class MeView(generics.RetrieveUpdateAPIView):
             existing = PendingEmailChange.objects.filter(user=request.user).first()
             if not (existing and existing.new_email == new_email and existing.is_valid()):
                 from .models import PasswordResetToken
+                # Carry over the send count so changing to a new email doesn't reset the limit.
+                prior_send_count = existing.send_count if existing else 0
+                new_send_count = prior_send_count + 1
+
                 raw_token, token_hash = PasswordResetToken.make_token()
                 PendingEmailChange.objects.filter(user=request.user).delete()
                 PendingEmailChange.objects.create(
                     user=request.user,
                     new_email=new_email,
                     token=token_hash,
+                    send_count=new_send_count,
                 )
+
+                if new_send_count >= 3:
+                    request.user.email_change_locked = True
+                    request.user.save(update_fields=["email_change_locked"])
+
                 try:
                     send_email_confirmation_email(request.user, new_email, raw_token)
                 except Exception:
@@ -157,9 +174,76 @@ class ConfirmEmailChangeView(APIView):
 
         user = pending.user
         user.email = pending.new_email
-        user.save(update_fields=["email"])
+        user.email_change_locked = False
+        user.save(update_fields=["email", "email_change_locked"])
         pending.delete()
         return Response({"detail": "Email updated successfully."}, status=status.HTTP_200_OK)
+
+
+class ResendEmailConfirmationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    COOLDOWN_SECONDS = 30
+    MAX_SENDS = 3
+
+    def post(self, request):
+        from .models import PendingEmailChange, PasswordResetToken
+        from .emails import send_email_confirmation_email
+
+        user = request.user
+
+        if user.email_change_locked:
+            return Response(
+                {"detail": "Email changes are locked. Contact an admin."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        pending = PendingEmailChange.objects.filter(user=user).first()
+        if not pending or not pending.is_valid():
+            return Response(
+                {"detail": "No pending email confirmation found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if pending.send_count >= self.MAX_SENDS:
+            return Response(
+                {"detail": "Email confirmation limit reached. Contact an admin."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        elapsed = (django_tz.now() - pending.created_at).total_seconds()
+        if elapsed < self.COOLDOWN_SECONDS:
+            wait = int(self.COOLDOWN_SECONDS - elapsed) + 1
+            return Response(
+                {"detail": f"Please wait {wait} seconds before resending."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        raw_token, token_hash = PasswordResetToken.make_token()
+        pending.token = token_hash
+        pending.send_count += 1
+        # Reset created_at to now so it doubles as "last sent at" for the cooldown.
+        # auto_now_add prevents direct assignment, so use update() instead.
+        PendingEmailChange.objects.filter(pk=pending.pk).update(
+            token=token_hash,
+            send_count=pending.send_count,
+            created_at=django_tz.now(),
+        )
+        pending.refresh_from_db()
+
+        if pending.send_count >= self.MAX_SENDS:
+            user.email_change_locked = True
+            user.save(update_fields=["email_change_locked"])
+
+        try:
+            send_email_confirmation_email(user, pending.new_email, raw_token)
+        except Exception:
+            logger.exception("Failed to resend email confirmation to %s", pending.new_email)
+
+        return Response(
+            {"send_count": pending.send_count, "locked": user.email_change_locked},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ChangePasswordView(APIView):

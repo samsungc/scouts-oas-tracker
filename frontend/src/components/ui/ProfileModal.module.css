@@ -124,7 +124,7 @@
 
 .saveBtn {
   align-self: flex-start;
-  margin-top: 10px;
+  margin-top: 0;
   background: var(--color-primary);
   color: var(--color-white);
   border: none;
@@ -144,6 +144,45 @@
   font-weight: 500;
   margin: 4px 0 0;
 }
+
+.inputLocked {
+  border-color: #c0392b;
+  background: #fff5f5;
+}
+.inputLocked:focus {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+.lockedMessage {
+  font-size: 0.85rem;
+  color: #c0392b;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.resendBtn {
+  margin-top: 0;
+  background: none;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.resendBtn:hover:not(:disabled) { background: rgba(21, 101, 167, 0.07); }
+.resendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .toggleRow {
   display: flex;

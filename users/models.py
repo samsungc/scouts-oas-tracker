@@ -16,6 +16,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="scout")
     email_notifications = models.BooleanField(default=True)
+    email_change_locked = models.BooleanField(default=False)
 
 
 class EmailSuppression(models.Model):
@@ -84,6 +85,7 @@ class PendingEmailChange(models.Model):
     new_email = models.EmailField()
     token = models.CharField(max_length=64, unique=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    send_count = models.IntegerField(default=1)
 
     EXPIRY_HOURS = 24
 

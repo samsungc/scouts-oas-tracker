@@ -3,6 +3,7 @@ from .views import (
     MeView,
     ChangePasswordView,
     ConfirmEmailChangeView,
+    ResendEmailConfirmationView,
     ScoutListView,
     ScoutStatsView,
     CreateUserView,
@@ -17,6 +18,7 @@ from .views import (
 urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
     path("confirm-email/", ConfirmEmailChangeView.as_view(), name="confirm-email"),
+    path("resend-email-confirmation/", ResendEmailConfirmationView.as_view(), name="resend-email-confirmation"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("scouts/stats/", ScoutStatsView.as_view(), name="scout-stats"),
     path("scouts/", ScoutListView.as_view(), name="scout-list"),
