@@ -76,6 +76,12 @@ ACHIEVEMENTS = [
         'check': lambda ctx: ctx['total_approved'] >= 1,
     },
     {
+        'id': 'verified_email',
+        'name': 'Verified!',
+        'description': 'Have a verified email address on your account',
+        'check': lambda ctx: bool(ctx['email']),
+    },
+    {
         'id': 'week_warrior',
         'name': 'Week Warrior',
         'description': 'Achieve a 7-day submission streak',
@@ -493,6 +499,7 @@ class MyAchievementsView(APIView):
             'special_achievement_ids': special_achievement_ids,
             'reset_dates': reset_dates,
             'is_baden_powell': user.get_full_name().strip().lower() == 'baden powell',
+            'email': user.email,
         }
 
         if my_ctx['is_baden_powell']:
@@ -569,6 +576,11 @@ class MyAchievementsView(APIView):
             for s in User.objects.filter(id__in=scout_ids).only('id', 'first_name', 'last_name')
         }
 
+        email_by_scout = {
+            s['id']: s['email']
+            for s in User.objects.filter(id__in=scout_ids).values('id', 'email')
+        }
+
         def scout_ctx(sid):
             return {
                 'total_submitted': submitted_by_scout[sid],
@@ -579,6 +591,7 @@ class MyAchievementsView(APIView):
                 'special_achievement_ids': special_ids_by_scout[sid],
                 'reset_dates': reset_dates_by_scout[sid],
                 'is_baden_powell': scout_name_map.get(sid, '') == 'baden powell',
+                'email': email_by_scout.get(sid, ''),
             }
 
         achievements = []
@@ -609,7 +622,7 @@ class AchievementScoutsView(APIView):
 
         # Bulk queries for all active scouts
         scouts_qs = list(
-            User.objects.filter(role='scout', is_active=True).only('id', 'first_name', 'last_name')
+            User.objects.filter(role='scout', is_active=True).only('id', 'first_name', 'last_name', 'email')
         )
         scout_ids = [s.id for s in scouts_qs]
 
@@ -680,6 +693,7 @@ class AchievementScoutsView(APIView):
             reset_dates_by_scout[r['user_id']].add(r['date'])
 
         scout_name_map = {s.id: s.get_full_name().strip().lower() for s in scouts_qs}
+        email_by_scout = {s.id: s.email for s in scouts_qs}
 
         def scout_ctx(sid):
             return {
@@ -691,6 +705,7 @@ class AchievementScoutsView(APIView):
                 'special_achievement_ids': special_ids_by_scout[sid],
                 'reset_dates': reset_dates_by_scout[sid],
                 'is_baden_powell': scout_name_map.get(sid, '') == 'baden powell',
+                'email': email_by_scout.get(sid, ''),
             }
 
         scout_obj_map = {s.id: s for s in scouts_qs}
