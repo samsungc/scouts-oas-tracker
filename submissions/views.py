@@ -114,6 +114,12 @@ class ReviewSubmissionViewSet(
     permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
     pagination_class = SubmissionPagePagination
 
+    def paginate_queryset(self, queryset):
+        # Skip pagination for bounded per-scout or per-requirement queries
+        if self.request.query_params.get("scout_id") or self.request.query_params.get("requirement_id"):
+            return None
+        return super().paginate_queryset(queryset)
+
     def get_queryset(self):
         queryset = BadgeSubmission.objects.select_related(
             "scout",
