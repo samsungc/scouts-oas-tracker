@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function EyeIcon() {
   return (
@@ -20,7 +20,7 @@ function EyeOffIcon() {
 import Modal from './Modal'
 import ErrorMessage from './ErrorMessage'
 import { useAuth } from '../../context/AuthContext'
-import { updateMe, changePassword } from '../../api/users'
+import { updateMe, changePassword, resendEmailConfirmation } from '../../api/users'
 import styles from './ProfileModal.module.css'
 
 export default function ProfileModal({ onClose }) {
@@ -55,6 +55,38 @@ export default function ProfileModal({ onClose }) {
     user?.pending_email ? 'confirmation_pending' : false
   )
 
+  // Email resend state
+  const [resending, setResending] = useState(false)
+  const [cooldownSecsLeft, setCooldownSecsLeft] = useState(0)
+
+  const isLocked = user?.email_change_locked ?? false
+  const sendCount = user?.email_send_count ?? 0
+  const isPending = Boolean(user?.pending_email)
+
+  useEffect(() => {
+    if (!user?.email_last_sent_at) return
+    const update = () => {
+      const elapsed = (Date.now() - new Date(user.email_last_sent_at)) / 1000
+      setCooldownSecsLeft(Math.max(0, Math.ceil(30 - elapsed)))
+    }
+    update()
+    const id = setInterval(update, 500)
+    return () => clearInterval(id)
+  }, [user?.email_last_sent_at])
+
+  async function handleResend() {
+    setResending(true)
+    setProfileError('')
+    try {
+      await resendEmailConfirmation()
+      await refreshUser()
+    } catch (err) {
+      setProfileError(err.detail ?? 'Failed to resend confirmation email.')
+    } finally {
+      setResending(false)
+    }
+  }
+
   // Change password state
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
@@ -68,6 +100,11 @@ export default function ProfileModal({ onClose }) {
 
   async function handleProfileSave(e) {
     e.preventDefault()
+    const emailChanging = profileForm.email !== (user?.email ?? '')
+    if (emailChanging && isLocked) {
+      setProfileError('Email changes are locked. Contact an admin.')
+      return
+    }
     setProfileSaving(true)
     setProfileError('')
     setProfileSuccess(false)
@@ -172,7 +209,9 @@ export default function ProfileModal({ onClose }) {
           <input
             type="email"
             className={`${styles.input} ${
-              profileSuccess === 'confirmation_pending'
+              isLocked
+                ? styles.inputLocked
+                : isPending
                 ? styles.inputPending
                 : user?.email
                 ? styles.inputConfirmed
@@ -182,13 +221,34 @@ export default function ProfileModal({ onClose }) {
             onChange={(e) => setProfileForm((f) => ({ ...f, email: e.target.value }))}
           />
           {profileError && <ErrorMessage message={profileError} />}
-          {profileSuccess === 'confirmation_pending' && (
+          {isPending && !isLocked && (
             <p className={styles.success}>Check your inbox to confirm your new email address.</p>
           )}
+          {isLocked && (
+            <p className={styles.lockedMessage}>
+              Too many confirmation emails sent. Please contact an admin to continue.
+            </p>
+          )}
           {profileSuccess === true && <p className={styles.success}>Profile updated.</p>}
-          <button type="submit" className={styles.saveBtn} disabled={profileSaving}>
-            {profileSaving ? 'Saving…' : 'Save Changes'}
-          </button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.saveBtn} disabled={profileSaving}>
+              {profileSaving ? 'Saving…' : 'Save Changes'}
+            </button>
+            {isPending && !isLocked && (
+              <button
+                type="button"
+                className={styles.resendBtn}
+                onClick={handleResend}
+                disabled={resending || sendCount >= 3 || cooldownSecsLeft > 0}
+              >
+                {resending
+                  ? 'Resending\u2026'
+                  : cooldownSecsLeft > 0
+                  ? `Resend in ${cooldownSecsLeft}s (${sendCount}/3 sent)`
+                  : `Resend confirmation email (${sendCount}/3 sent)`}
+              </button>
+            )}
+          </div>
         </form>
       </section>
 

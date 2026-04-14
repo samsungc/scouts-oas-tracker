@@ -51,3 +51,7 @@ export function updateEmailSettings(data) {
 export function confirmEmailChange(token) {
   return api.post('/users/confirm-email/', { token })
 }
+
+export function resendEmailConfirmation() {
+  return api.post('/users/resend-email-confirmation/')
+}

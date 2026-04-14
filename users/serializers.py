@@ -13,6 +13,8 @@ class CaseInsensitiveTokenSerializer(TokenObtainPairSerializer):
 class MeSerializer(serializers.ModelSerializer):
     peer_review_eligible = serializers.SerializerMethodField()
     pending_email = serializers.SerializerMethodField()
+    email_send_count = serializers.SerializerMethodField()
+    email_last_sent_at = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -27,8 +29,11 @@ class MeSerializer(serializers.ModelSerializer):
             "peer_review_eligible",
             "email_notifications",
             "pending_email",
+            "email_change_locked",
+            "email_send_count",
+            "email_last_sent_at",
         ]
-        read_only_fields = ["id", "username", "role", "last_login"]
+        read_only_fields = ["id", "username", "role", "last_login", "email_change_locked"]
 
     def get_peer_review_eligible(self, obj):
         if obj.role != 'scout':
@@ -36,12 +41,27 @@ class MeSerializer(serializers.ModelSerializer):
         from submissions.utils import get_peer_reviewable_requirement_ids
         return bool(get_peer_reviewable_requirement_ids(obj))
 
+    def _get_pending(self, obj):
+        if not hasattr(self, '_pending_cache'):
+            self._pending_cache = {}
+        if obj.pk not in self._pending_cache:
+            from .models import PendingEmailChange
+            self._pending_cache[obj.pk] = PendingEmailChange.objects.filter(user=obj).first()
+        return self._pending_cache[obj.pk]
+
     def get_pending_email(self, obj):
-        from .models import PendingEmailChange
-        pending = PendingEmailChange.objects.filter(user=obj).first()
+        pending = self._get_pending(obj)
         if pending and pending.is_valid():
             return pending.new_email
         return None
+
+    def get_email_send_count(self, obj):
+        pending = self._get_pending(obj)
+        return pending.send_count if pending else 0
+
+    def get_email_last_sent_at(self, obj):
+        pending = self._get_pending(obj)
+        return pending.created_at.isoformat() if pending else None
 
 
 class ChangePasswordSerializer(serializers.Serializer):
