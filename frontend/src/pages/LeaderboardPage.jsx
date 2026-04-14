@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getCategoryChampions, getMyStats } from '../api/leaderboard'
+import { getCategoryChampions, getMyStats, getMyAchievements } from '../api/leaderboard'
 import PersonalStatsPanel from '../components/leaderboard/PersonalStatsPanel'
+import AchievementsGrid from '../components/leaderboard/AchievementsGrid'
 import PointsLeaderboard from '../components/leaderboard/PointsLeaderboard'
 import ActivityLeaderboard from '../components/leaderboard/ActivityLeaderboard'
 import StreakLeaderboard from '../components/leaderboard/StreakLeaderboard'
@@ -16,6 +17,7 @@ export default function LeaderboardPage() {
 
   const [champions, setChampions] = useState(null)
   const [myStats, setMyStats] = useState(null)
+  const [achievements, setAchievements] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -27,11 +29,12 @@ export default function LeaderboardPage() {
     setLoading(true)
     setError('')
     try {
-      const calls = [getCategoryChampions()]
+      const calls = [getCategoryChampions(), getMyAchievements()]
       if (isScout) calls.push(getMyStats())
       const results = await Promise.all(calls)
       setChampions(results[0].champions)
-      if (isScout) setMyStats(results[1])
+      setAchievements(results[1].achievements)
+      if (isScout) setMyStats(results[2])
     } catch {
       setError('Failed to load leaderboard. Please try refreshing.')
     } finally {
@@ -51,11 +54,18 @@ export default function LeaderboardPage() {
 
       {isScout && myStats && <PersonalStatsPanel stats={myStats} />}
 
+      {!isScout && achievements && achievements.length > 0 && (
+        <div className={styles.achievementsSection}>
+          <h2 className={styles.achievementsTitle}>Scout Achievements</h2>
+          <AchievementsGrid achievements={achievements} />
+        </div>
+      )}
+
       <PointsLeaderboard currentUserId={user?.id} />
 
       <ActivityLeaderboard myStats={myStats} currentUserId={user?.id} />
 
-<StreakLeaderboard currentUserId={user?.id} />
+      <StreakLeaderboard currentUserId={user?.id} />
 
       {champions && (
         <CategoryChampionsGrid

@@ -44,3 +44,18 @@
 .bannerClose:hover {
   background: rgba(0, 0, 0, 0.06);
 }
+
+.achievementsSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.achievementsTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  margin-bottom: 16px;
+}
