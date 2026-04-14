@@ -10,10 +10,9 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const loadUser = useCallback(async () => {
-    if (!api.getAccessToken()) {
-      setIsLoading(false)
-      return
-    }
+    // Remove any tokens left over from the old localStorage-based auth system
+    localStorage.removeItem('access')
+    localStorage.removeItem('refresh')
     try {
       const me = await getMe()
       // Keep stored last_login up-to-date for use at next explicit login
@@ -22,7 +21,6 @@ export function AuthProvider({ children }) {
       }
       setUser(me)
     } catch {
-      api.clearTokens()
       setUser(null)
     } finally {
       setIsLoading(false)
@@ -32,6 +30,15 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     loadUser()
   }, [loadUser])
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      sessionStorage.clear()
+      setUser(null)
+    }
+    window.addEventListener('oas:session-expired', handleSessionExpired)
+    return () => window.removeEventListener('oas:session-expired', handleSessionExpired)
+  }, [])
 
   async function login(username, password) {
     // Capture the previous login time before this new login updates it
@@ -49,8 +56,12 @@ export function AuthProvider({ children }) {
     setUser(me)
   }
 
-  function logout() {
-    api.clearTokens()
+  async function logout() {
+    try {
+      await api.post('/auth/logout/')
+    } catch {
+      // Best-effort: server may be unreachable, proceed regardless
+    }
     sessionStorage.clear()
     setUser(null)
   }

@@ -17,12 +17,13 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
-from users.views import CaseInsensitiveTokenView, CustomTokenRefreshView
+from users.views import CaseInsensitiveTokenView, CustomTokenRefreshView, LogoutView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/login/", CaseInsensitiveTokenView.as_view(), name="token_obtain_pair"),
     path("api/auth/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
+    path("api/auth/logout/", LogoutView.as_view(), name="logout"),
     path("api/users/", include("users.urls")),
     path("api/badges/", include("badges.urls")),
     path("api/", include("submissions.urls")),

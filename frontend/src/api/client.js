@@ -7,41 +7,19 @@ export function mediaUrl(path) {
   return API_ORIGIN + path
 }
 
-function getAccessToken() {
-  return localStorage.getItem('access')
-}
-
-function getRefreshToken() {
-  return localStorage.getItem('refresh')
-}
-
-function setTokens(access, refresh) {
-  localStorage.setItem('access', access)
-  if (refresh) localStorage.setItem('refresh', refresh)
-}
-
-function clearTokens() {
-  localStorage.removeItem('access')
-  localStorage.removeItem('refresh')
-}
-
 let refreshPromise = null
 
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise
 
   refreshPromise = (async () => {
-    const refresh = getRefreshToken()
-    if (!refresh) throw new Error('No refresh token')
     const res = await fetch(`${BASE}/auth/refresh/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh }),
+      credentials: 'include',
     })
     if (!res.ok) throw new Error('Refresh failed')
-    const data = await res.json()
-    setTokens(data.access)
-    return data.access
+    // Server sets a new access cookie; nothing to store client-side
   })()
 
   try {
@@ -61,24 +39,21 @@ export class ApiError extends Error {
 }
 
 async function request(path, options = {}, retry = true) {
-  const accessToken = getAccessToken()
   const isFormData = options.body instanceof FormData
 
   const headers = {
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers || {}),
   }
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers })
+  const res = await fetch(`${BASE}${path}`, { ...options, headers, credentials: 'include' })
 
   if (res.status === 401 && retry) {
     try {
       await refreshAccessToken()
       return request(path, options, false)
     } catch {
-      clearTokens()
-      window.location.href = '/'
+      window.dispatchEvent(new CustomEvent('oas:session-expired'))
       throw new ApiError(401, 'Session expired')
     }
   }
@@ -117,8 +92,4 @@ export const api = {
   patch: (path, body) =>
     request(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (path) => request(path, { method: 'DELETE' }),
-  setTokens,
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
 }

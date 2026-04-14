@@ -1,4 +1,4 @@
-import { api, ApiError } from './client'
+import { ApiError } from './client'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') + '/api'
 
@@ -38,6 +38,7 @@ export async function login(username, password) {
   const res = await fetch(`${BASE}/auth/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ username, password }),
   })
 
@@ -49,6 +50,6 @@ export async function login(username, password) {
     throw new ApiError(res.status, detail, json)
   }
 
-  api.setTokens(json.access, json.refresh)
+  // Server sets httpOnly cookies; nothing to store client-side
   return json
 }
