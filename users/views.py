@@ -11,12 +11,15 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 
+from django.conf import settings
+
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken as JWTRefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +61,22 @@ def _reset_notification_state_on_login(user):
         )
 
 
+def _set_auth_cookies(response, access, refresh=None):
+    """Attach httpOnly JWT cookies to a response."""
+    kw = dict(httponly=True, secure=not settings.DEBUG, samesite='Strict')
+    response.set_cookie('access', access, max_age=30 * 60, **kw)
+    if refresh is not None:
+        response.set_cookie('refresh', refresh, max_age=7 * 24 * 60 * 60, **kw)
+
+
 class CaseInsensitiveTokenView(TokenObtainPairView):
     serializer_class = CaseInsensitiveTokenSerializer
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
+            access = response.data.get('access')
+            refresh = response.data.get('refresh')
             username = request.data.get("username", "")
             if username:
                 from .models import User
@@ -72,25 +85,54 @@ class CaseInsensitiveTokenView(TokenObtainPairView):
                     _reset_notification_state_on_login(user)
                 except User.DoesNotExist:
                     pass
+            _set_auth_cookies(response, access, refresh)
+            response.data = {}
         return response
 
 
-class CustomTokenRefreshView(TokenRefreshView):
+class CustomTokenRefreshView(APIView):
+    """Cookie-only token refresh. Validates the refresh cookie directly without
+    involving DRF's request body parser (avoids 400 on empty POST body)."""
+
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
+        refresh_cookie = request.COOKIES.get('refresh')
+        if not refresh_cookie:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-        if response.status_code == 200:
-            raw_refresh = request.data.get("refresh", "")
-            if raw_refresh:
-                try:
-                    token = JWTRefreshToken(raw_refresh)
-                    user_id = token["user_id"]
-                    from .models import User
-                    user = User.objects.get(id=user_id, is_active=True)
-                    _reset_notification_state_on_login(user)
-                except (TokenError, User.DoesNotExist, KeyError):
-                    pass
+        try:
+            refresh_token = JWTRefreshToken(refresh_cookie)
+            access = str(refresh_token.access_token)
+        except TokenError:
+            return Response(
+                {'detail': 'Token is invalid or expired.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
+        try:
+            user_id = refresh_token['user_id']
+            from .models import User
+            user = User.objects.get(id=user_id, is_active=True)
+            _reset_notification_state_on_login(user)
+        except (TokenError, User.DoesNotExist, KeyError):
+            pass
+
+        response = Response(status=status.HTTP_200_OK)
+        _set_auth_cookies(response, access)
+        return response
+
+
+class LogoutView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({'detail': 'Logged out.'})
+        response.delete_cookie('access', samesite='Strict')
+        response.delete_cookie('refresh', samesite='Strict')
         return response
 
 
