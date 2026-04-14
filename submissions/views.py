@@ -8,6 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
 from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer, BadgeHandoutSerializer
+from .pagination import SubmissionPagePagination
 from .permissions import IsScouterOrAdmin
 from .utils import get_peer_reviewable_requirement_ids
 from .emails import notify_submission_received, notify_submission_reviewed
@@ -111,6 +112,7 @@ class ReviewSubmissionViewSet(
 ):
     serializer_class = BadgeSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
+    pagination_class = SubmissionPagePagination
 
     def get_queryset(self):
         queryset = BadgeSubmission.objects.select_related(
@@ -131,6 +133,10 @@ class ReviewSubmissionViewSet(
 
         if requirement_id:
             queryset = queryset.filter(requirement_id=requirement_id)
+
+        search_param = self.request.query_params.get("search")
+        if search_param:
+            queryset = queryset.filter(scout__username__icontains=search_param)
 
         days_param = self.request.query_params.get("days")
         if days_param:
