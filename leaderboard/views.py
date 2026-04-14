@@ -212,7 +212,7 @@ class ActivityLeaderboardView(APIView):
         cutoff = timezone.now() - delta
 
         scouts = (
-            User.objects.filter(role='scout')
+            User.objects.filter(role='scout', is_active=True)
             .annotate(
                 approved_count=Count(
                     'badge_submissions',
@@ -274,7 +274,7 @@ class CategoryChampionsView(APIView):
         }
 
         # Load scouts
-        scouts = {s.id: s for s in User.objects.filter(role='scout')}
+        scouts = {s.id: s for s in User.objects.filter(role='scout', is_active=True)}
 
         # For each badge, collect scouts who have completed it (all reqs approved)
         badge_completions = {}  # badge_id -> [scout_id, ...]

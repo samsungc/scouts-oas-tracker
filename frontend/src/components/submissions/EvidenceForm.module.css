@@ -116,3 +116,10 @@
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
 }
+
+.spicesIntro {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}

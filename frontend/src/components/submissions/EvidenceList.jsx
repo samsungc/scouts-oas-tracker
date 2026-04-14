@@ -20,6 +20,15 @@ const SMART_FIELDS = [
   { key: 't', letter: 'T', label: 'Time-Bound',  prompt: 'When will I accomplish my goal?' },
 ]
 
+const SPICES_FIELDS = [
+  { key: 'social',       letter: 'S', label: 'Social' },
+  { key: 'physical',     letter: 'P', label: 'Physical' },
+  { key: 'intellectual', letter: 'I', label: 'Intellectual' },
+  { key: 'character',    letter: 'C', label: 'Character' },
+  { key: 'emotional',    letter: 'E', label: 'Emotional' },
+  { key: 'spiritual',    letter: 'S', label: 'Spiritual' },
+]
+
 function SmartGoalDisplay({ data }) {
   return (
     <div className={styles.smartGoal}>
@@ -60,12 +69,48 @@ function parseSmartGoal(text) {
   }
 }
 
+function parseSpicesReview(text) {
+  if (!text || !text.startsWith('{"__type":"spices_review"')) return null
+  try {
+    const data = JSON.parse(text)
+    return data.__type === 'spices_review' ? data : null
+  } catch {
+    return null
+  }
+}
+
+function SpicesReviewDisplay({ data }) {
+  return (
+    <div className={styles.smartGoal}>
+      <span className={styles.smartTitle}>SPICES Review</span>
+      {SPICES_FIELDS.map(({ key, letter, label }) =>
+        data[key] ? (
+          <div key={key} className={styles.smartRow}>
+            <span className={styles.smartLetter}>{letter}</span>
+            <div className={styles.smartContent}>
+              <span className={styles.smartLabel}>{label}</span>
+              <span className={styles.smartText}>{data[key]}</span>
+            </div>
+          </div>
+        ) : null
+      )}
+      {data.reflection && (
+        <div className={styles.goalStatement}>
+          <span className={styles.goalStatementLabel}>Overall Reflection</span>
+          <span className={styles.goalStatementText}>{data.reflection}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDeleted, onUpdated }, ref) {
   const addToast = useToast()
   const [confirmId, setConfirmId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState('')
   const [editSmart, setEditSmart] = useState(null)
+  const [editSpices, setEditSpices] = useState(null)
   const [saving, setSaving] = useState(false)
 
   useImperativeHandle(ref, () => ({
@@ -85,13 +130,20 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
 
   function startEdit(ev) {
     const smartData = ev.text_note ? parseSmartGoal(ev.text_note) : null
+    const spicesData = ev.text_note ? parseSpicesReview(ev.text_note) : null
     setEditingId(ev.id)
     if (smartData) {
       setEditSmart({ category: smartData.category || '', s: smartData.s || '', m: smartData.m || '', a: smartData.a || '', r: smartData.r || '', t: smartData.t || '', goal: smartData.goal || '' })
+      setEditSpices(null)
+      setEditText('')
+    } else if (spicesData) {
+      setEditSpices({ social: spicesData.social || '', physical: spicesData.physical || '', intellectual: spicesData.intellectual || '', character: spicesData.character || '', emotional: spicesData.emotional || '', spiritual: spicesData.spiritual || '', reflection: spicesData.reflection || '' })
+      setEditSmart(null)
       setEditText('')
     } else {
       setEditText(ev.text_note || '')
       setEditSmart(null)
+      setEditSpices(null)
     }
     setConfirmId(null)
   }
@@ -100,11 +152,14 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
     setEditingId(null)
     setEditText('')
     setEditSmart(null)
+    setEditSpices(null)
   }
 
   async function handleSave(ev) {
     const newTextNote = editSmart
       ? JSON.stringify({ __type: 'smart_goal', ...editSmart })
+      : editSpices
+      ? JSON.stringify({ __type: 'spices_review', ...editSpices })
       : editText.trim()
 
     if (!newTextNote) return
@@ -116,6 +171,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
       setEditingId(null)
       setEditText('')
       setEditSmart(null)
+      setEditSpices(null)
       addToast({ message: 'Evidence updated', variant: 'success' })
     } catch (err) {
       addToast({ message: err.message || 'Failed to update evidence.', variant: 'error' })
@@ -132,6 +188,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
     <ul className={styles.list}>
       {evidence.map((ev) => {
         const smartData = ev.text_note ? parseSmartGoal(ev.text_note) : null
+        const spicesData = ev.text_note ? parseSpicesReview(ev.text_note) : null
         const isEditing = editingId === ev.id
         const canEdit = isDraft && !ev.file
 
@@ -183,6 +240,40 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                       </button>
                     </div>
                   </div>
+                ) : editSpices ? (
+                  <div className={styles.editForm}>
+                    {SPICES_FIELDS.map(({ key, letter, label }) => (
+                      <div key={key} className={styles.editField}>
+                        <label className={styles.editLabel}>
+                          <span className={styles.editSmartLetter}>{letter}</span>
+                          <span className={styles.editLabelText}>{label}</span>
+                        </label>
+                        <textarea
+                          className={styles.editTextarea}
+                          value={editSpices[key]}
+                          onChange={(e) => setEditSpices((p) => ({ ...p, [key]: e.target.value }))}
+                          rows={3}
+                        />
+                      </div>
+                    ))}
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}><span className={styles.editLabelText}>Overall Reflection</span></label>
+                      <textarea
+                        className={styles.editTextarea}
+                        value={editSpices.reflection}
+                        onChange={(e) => setEditSpices((p) => ({ ...p, reflection: e.target.value }))}
+                        rows={3}
+                      />
+                    </div>
+                    <div className={styles.editActions}>
+                      <button className={styles.saveBtn} onClick={() => handleSave(ev)} disabled={saving}>
+                        {saving ? 'Saving…' : 'Save'}
+                      </button>
+                      <button className={styles.cancelBtn} onClick={cancelEdit} disabled={saving}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className={styles.editForm}>
                     <textarea
@@ -205,6 +296,8 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                 <>
                   {smartData ? (
                     <SmartGoalDisplay data={smartData} />
+                  ) : spicesData ? (
+                    <SpicesReviewDisplay data={spicesData} />
                   ) : ev.text_note ? (
                     <p className={styles.textNote}>{ev.text_note}</p>
                   ) : null}
