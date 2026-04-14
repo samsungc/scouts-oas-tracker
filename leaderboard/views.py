@@ -146,15 +146,15 @@ ACHIEVEMENTS = [
     },
     {
         'id': 'mystery_1',
-        'name': '???',
-        'description': '???',
+        'name': 'Forgetful',
+        'description': 'Used forget password 3 days in a row',
         'mystery': True,
         'check': lambda ctx: _has_consecutive_days(ctx['reset_dates'], 3),
     },
     {
         'id': 'mystery_2',
-        'name': '???',
-        'description': '???',
+        'name': 'Who is BP?',
+        'description': 'renamed themselves to Baden Powell',
         'mystery': True,
         'check': lambda ctx: ctx['is_baden_powell'] or 'mystery_2' in ctx['special_achievement_ids'],
     },
@@ -589,8 +589,8 @@ class MyAchievementsView(APIView):
             pct = round(unlocked_count / total_scouts * 100) if total_scouts else 0
             achievements.append({
                 'id': a['id'],
-                'name': '???' if is_mystery else a['name'],
-                'description': '???' if is_mystery else a['description'],
+                'name': a['name'],
+                'description': '? mystery ?' if is_mystery else a['description'],
                 'mystery': is_mystery,
                 'unlocked': unlocked,
                 'percent_holding': pct,
