@@ -7,6 +7,8 @@ export function getReviewSubmissions(params) {
   if (p.scout_id) qs.set('scout_id', p.scout_id)
   if (p.requirement_id) qs.set('requirement_id', p.requirement_id)
   if (p.days) qs.set('days', p.days)
+  if (p.search) qs.set('search', p.search)
+  if (p.page && p.page > 1) qs.set('page', p.page)
   const query = qs.toString()
   return api.get(`/review/submissions/${query ? '?' + query : ''}`)
 }
