@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getBadgeDetail } from '../../api/badges'
+import { mediaUrl } from '../../api/client'
 import RequirementRow from './RequirementRow'
 import Spinner from '../ui/Spinner'
 import styles from './BadgeCard.module.css'
@@ -65,14 +66,23 @@ export default function BadgeCard({
         disabled={!badge.is_active}
       >
         <div className={styles.headerLeft}>
-          <span className={styles.name}>{badge.name}</span>
-          {requirementCount !== null && (
-            <span className={styles.count}>
-              {typeof requirementCount === 'string'
-                ? requirementCount
-                : `${requirementCount} requirements`}
-            </span>
+          {badge.image && (
+            <img
+              src={mediaUrl(badge.image)}
+              alt=""
+              className={styles.badgeImage}
+            />
           )}
+          <div className={styles.headerLeftText}>
+            <span className={styles.name}>{badge.name}</span>
+            {requirementCount !== null && (
+              <span className={styles.count}>
+                {typeof requirementCount === 'string'
+                  ? requirementCount
+                  : `${requirementCount} requirements`}
+              </span>
+            )}
+          </div>
         </div>
         <div className={styles.headerRight}>
           {!badge.is_active && (

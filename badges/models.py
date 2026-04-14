@@ -21,6 +21,7 @@ class Badge(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, db_index=True)
     level = models.PositiveIntegerField(null=True, blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
+    image = models.ImageField(upload_to='badges/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

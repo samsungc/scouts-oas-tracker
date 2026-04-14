@@ -16,7 +16,7 @@ class BadgeRequirementDetailSerializer(serializers.ModelSerializer):
 class BadgeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badge
-        fields = ["id", "name", "category", "level", "is_active"]
+        fields = ["id", "name", "category", "level", "is_active", "image"]
 
 class BadgeDetailSerializer(serializers.ModelSerializer):
     requirements = BadgeRequirementSerializer(
@@ -26,4 +26,4 @@ class BadgeDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Badge
-        fields = ["id", "name", "category", "level", "is_active", "requirements"]
+        fields = ["id", "name", "category", "level", "is_active", "image", "requirements"]
