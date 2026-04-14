@@ -11,17 +11,17 @@ from .import_utils import run_import
 class BadgeListView(generics.ListAPIView):
     queryset = Badge.objects.filter(is_active=True).prefetch_related('requirements')
     serializer_class = BadgeDetailSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 class BadgeDetailView(generics.RetrieveAPIView):
     queryset = Badge.objects.filter(is_active=True)
     serializer_class = BadgeDetailSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 class RequirementDetailView(generics.RetrieveAPIView):
     queryset = BadgeRequirement.objects.select_related('badge')
     serializer_class = BadgeRequirementDetailSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ImportBadgeRecordsView(APIView):
