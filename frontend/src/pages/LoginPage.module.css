@@ -136,3 +136,32 @@
   font-size: 0.8rem;
   color: var(--color-text-muted);
 }
+
+.legal {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.legal a {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal a:hover {
+  color: var(--color-primary);
+}
+
+.legalDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  flex-shrink: 0;
+}
