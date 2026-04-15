@@ -49,6 +49,8 @@
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Locked badge — muted with lock indicator */
@@ -81,12 +83,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 20px;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
-  gap: 8px;
+  gap: 10px;
 }
 
 .inactive .header {
@@ -153,7 +155,7 @@
 }
 
 .body {
-  padding: 8px 16px 16px;
+  padding: 8px 20px 18px;
   border-top: 1px solid var(--color-border-light);
 }
 
