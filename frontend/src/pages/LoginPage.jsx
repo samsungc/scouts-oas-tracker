@@ -102,6 +102,11 @@ export default function LoginPage() {
         <p className={styles.hint}>
           Accounts are created by your Scouter. Contact them if you need access.
         </p>
+        <p className={styles.legal}>
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <span className={styles.legalDot} />
+          <Link to="/terms-of-service">Terms of Service</Link>
+        </p>
       </div>
     </div>
   )
