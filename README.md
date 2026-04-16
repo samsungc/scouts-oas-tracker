@@ -1,17 +1,33 @@
 # OAS Badge Tracker — 6th Richmond Hill Scout Group
 
-A web app for scouts to track their progress through OAS (Outdoors Achievement Scheme) badge requirements. Scouts can submit evidence for each requirement, and scouters can review and approve or reject submissions.
+A web app for scouts to track their progress through OAS (Outdoors Achievement Scheme) badge requirements, built as a passion project to encourage scouts to earn more badges.
 
-## Background
+## About
 
-This project was built to complement the troop website created by Scouter Kit for the 6th Richmond Hill Scout Group. The entire frontend was built by [Claude](https://claude.ai) (Anthropic AI).
+Earning badges is one of the most rewarding parts of scouting — but it can be hard to stay on top of requirements, track progress, and know what's left to complete. This project was built to make that easier for the 6th Richmond Hill Scout Group.
+
+Scouts can browse all available OAS badges, see exactly what each one requires, and submit evidence directly through the app. Scouters get a clean review queue to approve or reject submissions, keeping things moving without the paper trail. The goal is simple: lower the friction between a scout deciding to pursue a badge and actually earning it.
+
+The frontend was developed with heavy assistance from [Claude](https://claude.ai) (Anthropic AI).
+
+## How it works
+
+1. **Browse** — Scouts browse available OAS badges and view the requirements for each one
+2. **Submit** — Scouts upload evidence (photos, videos, or PDFs) for each requirement and submit for review
+3. **Review** — Scouters approve or reject submissions, with notes sent back to the scout by email
 
 ## Tech Stack
 
-- **Backend:** Django 6 + Django REST Framework, SimpleJWT, PostgreSQL
-- **Frontend:** React + Vite
+| Layer | Technology |
+|-------|------------|
+| Backend | Django 6 + Django REST Framework + SimpleJWT |
+| Database | PostgreSQL (hosted on Render) |
+| Frontend | React 19 + Vite + React Router |
+| Email | [Resend](https://resend.com) — transactional notifications for submission updates |
+| File Storage | Amazon S3 — evidence uploads (photos, videos, PDFs) |
+| Deployment | [Render](https://render.com) (backend + database), [Vercel](https://vercel.com) (frontend) |
 
-## Setup
+## Local Development
 
 ### Backend
 
@@ -28,50 +44,3 @@ cd frontend
 npm install
 npm run dev                       # http://localhost:5173
 ```
-
-## Roles
-
-| Role | Description |
-|------|-------------|
-| `scout` | Can view badges, create submissions, and upload evidence |
-| `scouter` | Can review, approve, and reject submitted work |
-| `admin` | Full access |
-
-## API Reference
-
-### Auth
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/login/` | Login — returns `{access, refresh}` |
-| `POST` | `/api/auth/refresh/` | Refresh access token |
-
-### Users
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/users/me/` | Current user info `{id, username, role}` |
-
-### Badges
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/badges/` | List all badges (public) |
-| `GET` | `/api/badges/{badge_id}/` | Badge detail with requirements (public) |
-
-### Submissions (Scout)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/submissions/` | List own submissions |
-| `POST` | `/api/submissions/` | Create a new submission |
-| `GET` | `/api/submissions/{id}/` | Submission detail |
-| `PATCH` | `/api/submissions/{id}/` | Update draft submission |
-| `PUT` | `/api/submissions/{id}/` | Update draft submission |
-| `DELETE` | `/api/submissions/{id}/` | Delete draft submission |
-| `POST` | `/api/submissions/{id}/submit/` | Submit for review |
-| `POST` | `/api/submissions/{id}/evidence/` | Upload evidence (photo, video, or PDF — max 10 MB) |
-| `DELETE` | `/api/evidence/{evidence_id}/` | Remove evidence from a draft submission |
-
-### Review (Scouter/Admin only)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/review/submissions/` | List all submitted work |
-| `POST` | `/api/review/submissions/{id}/approve/` | Approve a submission |
-| `POST` | `/api/review/submissions/{id}/reject/` | Reject — requires `{reviewer_notes}` |
