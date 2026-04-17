@@ -116,7 +116,9 @@ class CustomTokenRefreshView(APIView):
         try:
             user_id = refresh_token['user_id']
             from .models import User
+            from django.contrib.auth import update_last_login
             user = User.objects.get(id=user_id, is_active=True)
+            update_last_login(None, user)
             _reset_notification_state_on_login(user)
         except (TokenError, User.DoesNotExist, KeyError):
             pass

@@ -76,8 +76,13 @@ function buildScoutStats(scoutSubs, badgeDetails) {
 function timeSince(dateStr) {
   if (!dateStr) return 'Never'
   const diffMs = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diffMs / 60_000)
   const days = Math.floor(diffMs / 86_400_000)
-  if (days === 0) return 'Today'
+  if (days === 0) {
+    if (mins < 1)  return 'Just now'
+    if (mins < 60) return `${mins} min ago`
+    return `${Math.floor(mins / 60)} hr ago`
+  }
   if (days === 1) return 'Yesterday'
   if (days < 7) return `${days} days ago`
   if (days < 30) return `${Math.floor(days / 7)}w ago`
