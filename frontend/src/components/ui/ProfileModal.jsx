@@ -188,6 +188,12 @@ export default function ProfileModal({ onClose }) {
             Email notifications{notifSaving ? ' (saving\u2026)' : ''}
           </span>
         </label>
+        <p className={styles.notifBlurb}>
+          The first submission of the day triggers an email immediately. Further
+          submissions are queued and sent together as a digest every 10 — so you
+          won't get flooded on busy days. The count resets at midnight and on
+          each login.
+        </p>
       </section>
 
       <section className={styles.section}>

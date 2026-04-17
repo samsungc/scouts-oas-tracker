@@ -195,3 +195,10 @@
 .toggleLabel {
   color: var(--color-text);
 }
+
+.notifBlurb {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b7280);
+  line-height: 1.4;
+}
