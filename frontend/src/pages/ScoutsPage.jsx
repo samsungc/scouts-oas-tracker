@@ -128,7 +128,7 @@ export default function ScoutsPage() {
     setLoading(true)
     setError('')
     try {
-      const promises = [getScoutStats(), getBadges(), getHandouts()]
+      const promises = [getScoutStats(), getBadges(), getHandouts().catch(() => [])]
       if (user?.role === 'admin') {
         promises.push(getEmailSettings())
       }
