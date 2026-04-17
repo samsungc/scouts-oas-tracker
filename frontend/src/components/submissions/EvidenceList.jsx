@@ -303,7 +303,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                   ) : null}
                   {ev.file && (() => {
                     const url = mediaUrl(ev.file)
-                    const filename = ev.file.split('/').pop()
+                    const filename = ev.file.split('/').pop().split('?')[0]
                     const isImage = /\.(jpe?g|png|gif|webp|svg)(\?.*)?$/i.test(filename)
                     return isImage ? (
                       <a href={url} target="_blank" rel="noopener noreferrer">
