@@ -275,7 +275,7 @@ def notify_submission_reviewed(submission):
     - Subsequent ones are queued; a batch summary is sent every BATCH_SIZE notifications.
     - State resets at midnight and on login (see users/views.py).
     """
-    from .models import ScoutNotificationState, PendingScoutNotification
+    from .models import ScoutNotificationState, PendingScoutNotification, PendingNotification
 
     scout = submission.scout
     if not scout.email_notifications or not scout.email:
@@ -284,6 +284,9 @@ def notify_submission_reviewed(submission):
         return
     if submission.status not in ("approved", "rejected"):
         return
+
+    # Remove this submission from every scouter's pending queue — it's been reviewed.
+    PendingNotification.objects.filter(submission=submission, sent=False).delete()
 
     today = timezone.localdate()
 
