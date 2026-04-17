@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
 import { getScoutStats, getEmailSettings, updateEmailSettings } from '../api/users'
@@ -94,6 +95,10 @@ const PP_LEVEL_LABELS = { 0: 'N/A', 1: 'Trailhead', 2: 'Tree Line', 3: 'Snow Lin
 
 export default function ScoutsPage() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const cameFromReview = location.state?.from === 'review'
   const [scouts, setScouts] = useState([])        // from /api/users/scouts/stats/
   const [summary, setSummary] = useState(null)    // aggregate counts from stats endpoint
   const [badgeDetails, setBadgeDetails] = useState([])
@@ -159,6 +164,15 @@ export default function ScoutsPage() {
     },
     [badgeDetails],
   )
+
+  // Auto-open scout detail when ?username= param is present (e.g. linked from ReviewCard)
+  useEffect(() => {
+    if (loading || scouts.length === 0) return
+    const usernameParam = searchParams.get('username')
+    if (!usernameParam) return
+    const target = scouts.find(s => s.username === usernameParam)
+    if (target) handleScoutClick(target)
+  }, [loading, scouts, searchParams, handleScoutClick])
 
   async function openTodo() {
     try {
@@ -238,8 +252,11 @@ export default function ScoutsPage() {
   if (selectedScout) {
     return (
       <div>
-        <button className={styles.backBtn} onClick={() => setSelectedScout(null)}>
-          ← Back to Scouts
+        <button
+          className={styles.backBtn}
+          onClick={() => cameFromReview ? navigate(-1) : setSelectedScout(null)}
+        >
+          {cameFromReview ? '← Back to Review' : '← Back to Scouts'}
         </button>
         {detailLoading && <Spinner centered />}
         {detailError && <ErrorMessage message={detailError} />}
