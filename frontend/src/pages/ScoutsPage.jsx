@@ -128,7 +128,7 @@ export default function ScoutsPage() {
     setLoading(true)
     setError('')
     try {
-      const promises = [getScoutStats(), getBadges()]
+      const promises = [getScoutStats(), getBadges(), getHandouts().catch(() => [])]
       if (user?.role === 'admin') {
         promises.push(getEmailSettings())
       }
@@ -136,8 +136,9 @@ export default function ScoutsPage() {
       setScouts(results[0].scouts)
       setSummary(results[0].summary)
       setBadgeDetails(results[1])
-      if (user?.role === 'admin' && results[2]) {
-        setEmailsPaused(results[2].emails_paused)
+      setTodoItems(results[2])
+      if (user?.role === 'admin' && results[3]) {
+        setEmailsPaused(results[3].emails_paused)
       }
       setLoading(false)
     } catch {
@@ -179,13 +180,7 @@ export default function ScoutsPage() {
     if (target) handleScoutClick(target)
   }, [loading, scouts, searchParams, handleScoutClick])
 
-  async function openTodo() {
-    try {
-      const data = await getHandouts()
-      setTodoItems(data)
-    } catch {
-      setTodoItems([])
-    }
+  function openTodo() {
     setShowTodo(true)
   }
 
