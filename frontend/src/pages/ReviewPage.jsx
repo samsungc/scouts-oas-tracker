@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getReviewSubmissions } from '../api/review'
+import { getBadges } from '../api/badges'
 import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Modal from '../components/ui/Modal'
@@ -40,11 +41,16 @@ export default function ReviewPage() {
   const [error, setError] = useState('')
   const [rejectTarget, setRejectTarget] = useState(null)
   const [showAllTimeConfirm, setShowAllTimeConfirm] = useState(false)
+  const [allBadges, setAllBadges] = useState([])
   const searchDebounceRef = useRef(null)
 
   useEffect(() => {
     loadSubmissions()
   }, [filter, dateRange, statusFilter, debouncedSearch, page])
+
+  useEffect(() => {
+    getBadges().then(setAllBadges).catch(() => {})
+  }, [])
 
   async function loadSubmissions() {
     setLoading(true)
@@ -204,6 +210,7 @@ export default function ReviewPage() {
                   requirement={sub.requirement_detail}
                   onApproved={handleApproved}
                   onRejectClick={setRejectTarget}
+                  allBadges={allBadges}
                 />
               ))}
             </div>

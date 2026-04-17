@@ -1,18 +1,27 @@
 import { useState } from 'react'
-import { approveSubmission } from '../../api/review'
+import { Link } from 'react-router-dom'
+import { approveSubmission, getReviewSubmissions } from '../../api/review'
 import StatusPill from '../ui/StatusPill'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
 import EvidenceList from '../submissions/EvidenceList'
+import Modal from '../ui/Modal'
+import Spinner from '../ui/Spinner'
 import { useToast } from '../../context/ToastContext'
 import styles from './ReviewCard.module.css'
 
-export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove }) {
+export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove, allBadges = [] }) {
   const addToast = useToast()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showGoals, setShowGoals] = useState(false)
+  const [goalsSubmission, setGoalsSubmission] = useState(null)
+  const [goalsLoading, setGoalsLoading] = useState(false)
+  const [goalsError, setGoalsError] = useState('')
 
   const approveAction = onApprove ?? ((id) => approveSubmission(id))
+
+  const isCompletedGoal = /completed goal/i.test(requirement?.title ?? '')
 
   async function handleApprove() {
     setLoading(true)
@@ -28,6 +37,41 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
     }
   }
 
+  async function handleShowGoals() {
+    setGoalsSubmission(null)
+    setGoalsError('')
+    setShowGoals(true)
+
+    const badge = allBadges.find(b => b.name === requirement?.badge_name)
+    if (!badge) {
+      setGoalsError('Could not find badge data for this submission.')
+      return
+    }
+
+    const setGoalsReq = badge.requirements?.find(r => /set.*goals/i.test(r.title))
+    if (!setGoalsReq) {
+      setGoalsError('This badge does not have a Set Goals requirement.')
+      return
+    }
+
+    setGoalsLoading(true)
+    try {
+      const data = await getReviewSubmissions({ requirement_id: setGoalsReq.id, scout_id: submission.scout_id })
+      const results = data.results ?? data
+      setGoalsSubmission(Array.isArray(results) && results.length > 0 ? results[0] : null)
+    } catch {
+      setGoalsError('Failed to load Set Goals submission.')
+    } finally {
+      setGoalsLoading(false)
+    }
+  }
+
+  function closeGoalsModal() {
+    setShowGoals(false)
+    setGoalsSubmission(null)
+    setGoalsError('')
+  }
+
   const submittedDate = submission.submitted_at
     ? new Date(submission.submitted_at).toLocaleDateString()
     : null
@@ -36,7 +80,13 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.meta}>
-          <span className={styles.scout}>{submission.scout_username}</span>
+          <Link
+            className={styles.scout}
+            to={`/scouts?username=${encodeURIComponent(submission.scout_username)}`}
+            state={{ from: 'review' }}
+          >
+            {submission.scout_username}
+          </Link>
           {submittedDate && (
             <span className={styles.date}>Submitted {submittedDate}</span>
           )}
@@ -78,24 +128,33 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
 
       <ErrorMessage message={error} />
 
-      {submission.status === 'submitted' && (
+      {(submission.status === 'submitted' || isCompletedGoal) && (
         <div className={styles.actions}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleApprove}
-            loading={loading}
-          >
-            ✓ Approve
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => onRejectClick(submission)}
-            disabled={loading}
-          >
-            ✕ Return
-          </Button>
+          {submission.status === 'submitted' && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleApprove}
+              loading={loading}
+            >
+              ✓ Approve
+            </Button>
+          )}
+          {submission.status === 'submitted' && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onRejectClick(submission)}
+              disabled={loading}
+            >
+              ✕ Return
+            </Button>
+          )}
+          {isCompletedGoal && (
+            <Button variant="secondary" size="sm" onClick={handleShowGoals}>
+              Show Goals
+            </Button>
+          )}
         </div>
       )}
 
@@ -108,6 +167,22 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
             <span><strong>Notes:</strong> {submission.reviewer_notes}</span>
           )}
         </div>
+      )}
+
+      {showGoals && (
+        <Modal
+          title={`Set Goals — ${requirement?.badge_name ?? 'Badge'}`}
+          onClose={closeGoalsModal}
+        >
+          {goalsLoading && <Spinner centered />}
+          {goalsError && <p>{goalsError}</p>}
+          {!goalsLoading && !goalsError && !goalsSubmission && (
+            <p>No &ldquo;Set Goals&rdquo; submission found for this scout.</p>
+          )}
+          {!goalsLoading && goalsSubmission && (
+            <EvidenceList evidence={goalsSubmission.evidence} isDraft={false} onDeleted={() => {}} />
+          )}
+        </Modal>
       )}
     </div>
   )
