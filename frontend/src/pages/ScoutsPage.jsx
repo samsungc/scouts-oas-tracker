@@ -119,8 +119,8 @@ export default function ScoutsPage() {
   const [showDeleteUser, setShowDeleteUser] = useState(false)
   const [showTodo, setShowTodo] = useState(false)
   const [todoItems, setTodoItems] = useState([])
-  const [sortKey, setSortKey] = useState('name')
-  const [sortDir, setSortDir] = useState('asc')
+  const [sortKey, setSortKey] = useState(() => localStorage.getItem('scouts_sortKey') ?? 'name')
+  const [sortDir, setSortDir] = useState(() => localStorage.getItem('scouts_sortDir') ?? 'asc')
   const [emailsPaused, setEmailsPaused] = useState(null)
   const [pauseLoading, setPauseLoading] = useState(false)
 
@@ -195,10 +195,14 @@ export default function ScoutsPage() {
 
   function handleSort(key) {
     if (key === sortKey) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+      const next = sortDir === 'asc' ? 'desc' : 'asc'
+      setSortDir(next)
+      localStorage.setItem('scouts_sortDir', next)
     } else {
       setSortKey(key)
       setSortDir('asc')
+      localStorage.setItem('scouts_sortKey', key)
+      localStorage.setItem('scouts_sortDir', 'asc')
     }
     setPage(1)
   }
