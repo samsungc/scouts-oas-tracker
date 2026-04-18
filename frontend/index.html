@@ -6,7 +6,9 @@
     <title>OAS Badge Tracker — 6th Richmond Hill Scout Group</title>
     <script>
       (function() {
-        if (localStorage.getItem('oas_theme') === 'dark')
+        var stored = localStorage.getItem('oas_theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark))
           document.documentElement.setAttribute('data-theme', 'dark');
       })();
     </script>

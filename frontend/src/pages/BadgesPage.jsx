@@ -3,6 +3,7 @@ import { getBadges } from '../api/badges'
 import { getSubmissions } from '../api/submissions'
 import { useAuth } from '../context/AuthContext'
 import BadgeCategoryGroup from '../components/badges/BadgeCategoryGroup'
+import BadgesBanner from '../components/badges/BadgesBanner'
 import BatchApprovalModal from '../components/review/BatchApprovalModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
@@ -162,28 +163,13 @@ export default function BadgesPage() {
 
   return (
     <div>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.title}>OAS Badges</h1>
-        <p className={styles.subtitle}>
-          Browse all badge categories and their requirements.
-          {isScout && ' Click a requirement to submit your evidence.'}
-          {isScouter && ' Click Review on any requirement to batch-approve scouts.'}
-        </p>
-        {isScout && !loading && totalBadges > 0 && (
-          <div className={styles.progressBar}>
-            <div className={styles.progressText}>
-              <span className={styles.progressCount}>{completedBadges} / {totalBadges}</span>
-              <span className={styles.progressLabel}> OAS badges completed</span>
-            </div>
-            <div className={styles.progressTrack}>
-              <div
-                className={styles.progressFill}
-                style={{ width: `${(completedBadges / totalBadges) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <BadgesBanner
+        isScout={isScout}
+        isScouter={isScouter}
+        user={user}
+        completedBadges={completedBadges}
+        totalBadges={totalBadges}
+      />
 
       <div className={styles.controls}>
         <div className={styles.searchBar}>

@@ -12,7 +12,7 @@
 .formTitle {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .toggle {
@@ -83,14 +83,14 @@
 .goalLetter {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   min-width: 16px;
 }
 
 .goalLabelText {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .goalPrompt {

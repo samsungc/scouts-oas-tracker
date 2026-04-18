@@ -19,7 +19,7 @@
 .title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .tabs {
@@ -47,7 +47,7 @@
 }
 
 .tab.active {
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   font-weight: 700;
   border-bottom-color: var(--color-accent);
 }

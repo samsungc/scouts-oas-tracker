@@ -157,13 +157,13 @@
 .editLabelText {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .editSmartLetter {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   min-width: 16px;
 }
 
@@ -275,7 +275,7 @@
 .smartLetter {
   font-size: 0.9rem;
   font-weight: 800;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   min-width: 16px;
   padding-top: 1px;
 }
@@ -321,7 +321,7 @@
 .goalStatementText {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   font-style: italic;
   white-space: pre-wrap;
   word-break: break-word;
