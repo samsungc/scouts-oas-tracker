@@ -16,7 +16,7 @@
 .heading {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .text {

@@ -57,6 +57,15 @@
   transform: rotate(180deg);
 }
 
+[data-theme="dark"] .categoryHeader {
+  background: #1a2535;
+  color: #e0e4e8;
+}
+
+[data-theme="dark"] .categoryHeader:hover {
+  background: #1f2d42;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;

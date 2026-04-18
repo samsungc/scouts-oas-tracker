@@ -9,7 +9,7 @@
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   margin-bottom: 6px;
 }
 
@@ -106,7 +106,7 @@
 .statValue {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   line-height: 1;
 }
 
@@ -233,7 +233,7 @@
 
 .scoutDisplayName {
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   font-size: 0.95rem;
 }
 
@@ -328,7 +328,7 @@
 }
 
 .backBtn:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 @media (max-width: 640px) {

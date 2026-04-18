@@ -5,7 +5,7 @@
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   margin-bottom: 6px;
 }
 
@@ -25,7 +25,7 @@
   margin-bottom: 24px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   gap: 12px;
 }
 
@@ -56,6 +56,6 @@
 .achievementsTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   margin-bottom: 16px;
 }

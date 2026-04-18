@@ -5,7 +5,7 @@
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   margin-bottom: 6px;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .filterBtn.active {
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   font-weight: 700;
   border-bottom-color: var(--color-accent);
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ProfileModal from '../ui/ProfileModal'
@@ -8,17 +8,16 @@ export default function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showProfile, setShowProfile] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    if (window.innerWidth <= 640) {
-      document.documentElement.setAttribute('data-theme', '')
-      return 'light'
-    }
-    return localStorage.getItem('oas_theme') || 'light'
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [theme, setThemeState] = useState(() => {
+    const stored = localStorage.getItem('oas_theme')
+    if (stored) return stored
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const menuRef = useRef(null)
 
-  function toggleTheme() {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
+  function applyTheme(next) {
+    setThemeState(next)
     localStorage.setItem('oas_theme', next)
     document.documentElement.setAttribute('data-theme', next === 'dark' ? 'dark' : '')
   }
@@ -28,8 +27,27 @@ export default function NavBar() {
     navigate('/')
   }
 
+  useEffect(() => {
+    function onMouseDown(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    function onKeyDown(e) {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [])
+
   const isReviewer = user?.role === 'scouter' || user?.role === 'admin'
   const isScout = user?.role === 'scout'
+  const displayName = user?.first_name || user?.username || ''
+  const initial = displayName.charAt(0).toUpperCase()
 
   return (
     <>
@@ -106,22 +124,50 @@ export default function NavBar() {
             </NavLink>
           )}
         </div>
-        <div className={styles.userArea}>
-          {user && (
-            <span className={styles.greeting}>
-              Hello, {user.first_name || user.username}
-            </span>
-          )}
-          <button className={styles.themeBtn} onClick={toggleTheme} title="Toggle dark mode">
-            {theme === 'dark' ? '☀' : '☾'}
-          </button>
-          <button className={styles.profileBtn} onClick={() => setShowProfile(true)}>
-            My Profile
-          </button>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            Sign Out
-          </button>
-        </div>
+        {user && (
+          <div className={styles.menuAvatarWrapper} ref={menuRef}>
+            <button
+              className={styles.avatarBtn}
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="User menu"
+            >
+              <span className={styles.avatarInitial}>{initial}</span>
+              <span className={styles.avatarName}>{displayName}</span>
+            </button>
+            {menuOpen && (
+              <div className={styles.menu}>
+                <div className={styles.menuHeader}>{displayName}</div>
+                <hr className={styles.menuDivider} />
+                <button
+                  className={styles.menuItem}
+                  onClick={() => { setShowProfile(true); setMenuOpen(false) }}
+                >
+                  My Profile
+                </button>
+                <div className={styles.themeRow}>
+                  <div className={styles.themeSegment}>
+                    <button
+                      className={`${styles.themeSegBtn} ${theme === 'light' ? styles.themeSegActive : ''}`}
+                      onClick={() => applyTheme('light')}
+                    >
+                      ☀ Light
+                    </button>
+                    <button
+                      className={`${styles.themeSegBtn} ${theme === 'dark' ? styles.themeSegActive : ''}`}
+                      onClick={() => applyTheme('dark')}
+                    >
+                      ☾ Dark
+                    </button>
+                  </div>
+                </div>
+                <hr className={styles.menuDivider} />
+                <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleLogout}>
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
     {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}

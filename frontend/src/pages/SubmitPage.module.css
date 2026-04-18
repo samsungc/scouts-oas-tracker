@@ -14,7 +14,7 @@
 }
 
 .back:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   text-decoration: underline;
 }
 
@@ -34,7 +34,7 @@
 .title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
   margin-bottom: 10px;
 }
 
@@ -68,7 +68,7 @@
 .submissionsTitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: var(--color-heading);
 }
 
 .noSubmissions {
