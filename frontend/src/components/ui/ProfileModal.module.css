@@ -68,10 +68,10 @@
 }
 
 .inputError {
-  border-color: #c0392b;
+  border-color: var(--color-danger);
 }
 .inputError:focus {
-  border-color: #c0392b;
+  border-color: var(--color-danger);
   box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
 }
 
@@ -95,7 +95,7 @@
 
 .fieldError {
   font-size: 0.8rem;
-  color: #c0392b;
+  color: var(--color-danger);
   margin-top: -2px;
 }
 
@@ -126,7 +126,7 @@
   align-self: flex-start;
   margin-top: 0;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border: none;
   padding: 8px 18px;
   border-radius: var(--radius-sm);
@@ -146,19 +146,31 @@
 }
 
 .inputLocked {
-  border-color: #c0392b;
+  border-color: var(--color-danger);
   background: #fff5f5;
 }
 .inputLocked:focus {
-  border-color: #c0392b;
+  border-color: var(--color-danger);
   box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
 }
 
 .lockedMessage {
   font-size: 0.85rem;
-  color: #c0392b;
+  color: var(--color-danger);
   font-weight: 500;
   margin: 4px 0 0;
+}
+
+[data-theme="dark"] .inputPending {
+  background: rgba(245, 166, 35, 0.1);
+}
+
+[data-theme="dark"] .inputConfirmed {
+  background: rgba(42, 125, 42, 0.12);
+}
+
+[data-theme="dark"] .inputLocked {
+  background: rgba(198, 40, 40, 0.1);
 }
 
 .formActions {
