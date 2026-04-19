@@ -256,6 +256,12 @@
   gap: 10px;
 }
 
+.formBtns {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .notifyLabel {
   display: flex;
   align-items: center;

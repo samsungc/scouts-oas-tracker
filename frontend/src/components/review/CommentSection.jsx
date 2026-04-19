@@ -253,16 +253,18 @@ try {
                 Notify mentioned scouters
               </label>
             )}
-            <button className={styles.cancelBtn} type="button" onClick={() => { setShowForm(false); setBody(''); setError(null) }} disabled={submitting}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className={styles.submitBtn}
-              disabled={submitting || !body.trim()}
-            >
-              {submitting ? 'Posting…' : 'Post'}
-            </button>
+            <div className={styles.formBtns}>
+              <button className={styles.cancelBtn} type="button" onClick={() => { setShowForm(false); setBody(''); setError(null) }} disabled={submitting}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={submitting || !body.trim()}
+              >
+                {submitting ? 'Posting…' : 'Post'}
+              </button>
+            </div>
           </div>
         </form>
       )}
