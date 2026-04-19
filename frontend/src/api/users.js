@@ -20,6 +20,11 @@ export function getScouts() {
   return api.get('/users/scouts/')
 }
 
+/** Returns all active scouters and admins. Scouter/admin only. */
+export function getScouters() {
+  return api.get('/users/scouters/')
+}
+
 /**
  * Returns per-scout badge stats + aggregate summary counts.
  * Much faster than loading all submissions client-side.

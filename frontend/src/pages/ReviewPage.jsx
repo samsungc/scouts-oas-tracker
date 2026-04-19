@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, startTransition } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
+import { getScouters } from '../api/users'
+import { useAuth } from '../context/AuthContext'
 import ReviewCard from '../components/review/ReviewCard'
 import RejectModal from '../components/review/RejectModal'
 import Modal from '../components/ui/Modal'
@@ -29,9 +31,11 @@ const STATUS_FILTERS = [
 ]
 
 export default function ReviewPage() {
+  const { user } = useAuth()
   const [filter, setFilter] = useState('submitted')
   const [dateRange, setDateRange] = useState(7)
   const [statusFilter, setStatusFilter] = useState('')
+  const [mentionedFilter, setMentionedFilter] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [submissions, setSubmissions] = useState([])
@@ -42,6 +46,7 @@ export default function ReviewPage() {
   const [rejectTarget, setRejectTarget] = useState(null)
   const [showAllTimeConfirm, setShowAllTimeConfirm] = useState(false)
   const [allBadges, setAllBadges] = useState([])
+  const [scouters, setScouters] = useState([])
   const searchDebounceRef = useRef(null)
 
   useEffect(() => {
@@ -50,6 +55,7 @@ export default function ReviewPage() {
 
   useEffect(() => {
     getBadges().then(setAllBadges).catch(() => {})
+    getScouters().then(data => setScouters(Array.isArray(data) ? data : [])).catch(() => {})
   }, [])
 
   async function loadSubmissions() {
@@ -87,6 +93,7 @@ export default function ReviewPage() {
       setFilter(val)
       setDateRange(7)
       setStatusFilter('')
+      setMentionedFilter(false)
     })
   }
 
@@ -152,6 +159,16 @@ export default function ReviewPage() {
             </button>
           ))}
         </div>
+        {filter === 'submitted' && (
+          <div className={styles.dateRangeGroup}>
+            <button
+              className={`${styles.dateRangeBtn} ${mentionedFilter ? styles.dateRangeBtnActive : ''}`}
+              onClick={() => setMentionedFilter(v => !v)}
+            >
+              @ Mentioned
+            </button>
+          </div>
+        )}
         {filter === '' && (
           <div className={styles.dateRangeGroup}>
             <div className={styles.btnGroup}>
@@ -196,10 +213,20 @@ export default function ReviewPage() {
       {error && <ErrorMessage message={error} />}
 
       {!loading && !error && (() => {
-        return submissions.length === 0 ? (
+        const displayedSubs = mentionedFilter && user
+          ? submissions.filter(sub =>
+              (sub.scouter_comments ?? []).some(c =>
+                c.body.includes(`@${user.username}`)
+              )
+            )
+          : submissions
+
+        return displayedSubs.length === 0 ? (
           <div className={styles.empty}>
             <p>
-              {debouncedSearch
+              {mentionedFilter
+                ? 'No submissions where you are mentioned.'
+                : debouncedSearch
                 ? `No submissions found for "${debouncedSearch}".`
                 : filter === 'submitted'
                 ? 'No submissions pending review.'
@@ -209,7 +236,7 @@ export default function ReviewPage() {
         ) : (
           <>
             <div className={styles.cards}>
-              {submissions.map((sub) => (
+              {displayedSubs.map((sub) => (
                 <ReviewCard
                   key={sub.id}
                   submission={sub}
@@ -217,6 +244,7 @@ export default function ReviewPage() {
                   onApproved={handleApproved}
                   onRejectClick={setRejectTarget}
                   allBadges={allBadges}
+                  scouters={scouters}
                 />
               ))}
             </div>

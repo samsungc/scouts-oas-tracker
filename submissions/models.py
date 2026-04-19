@@ -133,6 +133,33 @@ class ScoutNotificationState(models.Model):
         return f"{self.email} ({self.state_date}, first_sent={self.first_sent_today})"
 
 
+class SubmissionComment(models.Model):
+    submission = models.ForeignKey(
+        BadgeSubmission,
+        on_delete=models.CASCADE,
+        related_name="scouter_comments",
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="authored_comments",
+    )
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["submission"], name="sc_submission_idx"),
+        ]
+
+    def __str__(self):
+        author_name = self.author.username if self.author else "deleted user"
+        return f"Comment by {author_name} on submission {self.submission_id}"
+
+
 class PendingScoutNotification(models.Model):
     """Queued review notifications for scouts waiting to be included in the next batch."""
     submission = models.ForeignKey(

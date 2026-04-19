@@ -32,3 +32,10 @@ export function rejectSubmission(submissionId, reviewerNotes) {
     reviewer_notes: reviewerNotes,
   })
 }
+
+export function addComment(submissionId, body, notifyMentions = true) {
+  return api.post(`/review/submissions/${submissionId}/comments/`, {
+    body,
+    notify_mentions: notifyMentions,
+  })
+}

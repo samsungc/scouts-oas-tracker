@@ -1,0 +1,204 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-bg-page);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lockIcon {
+  font-size: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-radius: 10px;
+  padding: 0 6px;
+  line-height: 1.6;
+}
+
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.author {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.commentDate {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.commentBody {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.mention {
+  color: var(--color-accent-dark, #b07a00);
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.textareaWrap {
+  position: relative;
+}
+
+.textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  resize: vertical;
+  outline: none;
+  color: var(--color-text);
+  background: var(--color-white);
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 4px 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.dropdownItem:hover,
+.dropdownItemActive {
+  background: rgba(21, 101, 167, 0.08);
+}
+
+.dropdownUsername {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.dropdownName {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.error {
+  font-size: 0.8rem;
+  color: #c0392b;
+  margin: 0;
+}
+
+.formFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notifyLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.notifyLabel input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.submitBtn {
+  margin-left: auto;
+  padding: 5px 14px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

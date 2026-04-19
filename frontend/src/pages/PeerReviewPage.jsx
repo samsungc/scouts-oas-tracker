@@ -91,6 +91,7 @@ export default function PeerReviewPage() {
                   onApproved={handleApproved}
                   onRejectClick={setRejectTarget}
                   onApprove={(id) => peerApproveSubmission(id)}
+                  showScoterNotes={false}
                 />
               ))}
             </div>

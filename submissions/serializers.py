@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout, SubmissionComment
 from badges.serializers import BadgeRequirementDetailSerializer
 
 
@@ -58,6 +58,29 @@ class BadgeSubmissionSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class SubmissionCommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source="author.username", read_only=True, default=None)
+    author_display_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SubmissionComment
+        fields = ["id", "author_username", "author_display_name", "body", "created_at"]
+        read_only_fields = ["id", "author_username", "author_display_name", "created_at"]
+
+    def get_author_display_name(self, obj):
+        if not obj.author:
+            return "Deleted user"
+        full = f"{obj.author.first_name} {obj.author.last_name}".strip()
+        return full or obj.author.username
+
+
+class ReviewBadgeSubmissionSerializer(BadgeSubmissionSerializer):
+    scouter_comments = SubmissionCommentSerializer(many=True, read_only=True)
+
+    class Meta(BadgeSubmissionSerializer.Meta):
+        fields = BadgeSubmissionSerializer.Meta.fields + ["scouter_comments"]
 
 
 class RejectSubmissionSerializer(serializers.Serializer):
