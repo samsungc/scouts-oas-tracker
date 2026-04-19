@@ -27,9 +27,12 @@ def check_badge_completion(sender, instance, **kwargs):
 
     if requirement_ids <= approved_req_ids:
         from .models import BadgeHandout
+        from .emails import notify_badge_completed
         completed_at = instance.reviewed_at or timezone.now()
-        BadgeHandout.objects.get_or_create(
+        handout, created = BadgeHandout.objects.get_or_create(
             scout=scout,
             badge=badge,
             defaults={"completed_at": completed_at},
         )
+        if created:
+            notify_badge_completed(handout)
