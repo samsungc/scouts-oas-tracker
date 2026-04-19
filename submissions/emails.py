@@ -267,6 +267,36 @@ def _send_scout_batch_summary(scout, pending_notifications):
     _send_email([scout.email], subject, body)
 
 
+def notify_scouter_mentioned(comment, mentioned_user):
+    """Immediately email a scouter who was @mentioned in a comment."""
+    if not mentioned_user.email_notifications or not mentioned_user.email:
+        return
+    if _is_suppressed(mentioned_user.email):
+        return
+
+    submission = comment.submission
+    scout = submission.scout
+    scout_name = f"{scout.first_name} {scout.last_name}".strip() or scout.username
+    requirement_title = submission.requirement.title
+    badge_name = submission.requirement.badge.name
+
+    author = comment.author
+    author_name = (
+        f"{author.first_name} {author.last_name}".strip() or author.username
+        if author else "A scouter"
+    )
+
+    subject = f"You were mentioned in a comment \u2014 {scout_name}: {requirement_title}"
+    body = (
+        f"{author_name} mentioned you in a comment on {scout_name}'s submission "
+        f'for "{requirement_title}" ({badge_name}):\n\n'
+        f'  "{comment.body}"\n\n'
+        f"Log in to review it at https://6rhventurers.ca"
+        f"{_build_unsubscribe_footer(mentioned_user.pk)}"
+    )
+    _send_email([mentioned_user.email], subject, body)
+
+
 def notify_submission_reviewed(submission):
     """Notify the scout when their submission is approved or rejected.
 

@@ -6,8 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout
-from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer, BadgeHandoutSerializer
+from .models import BadgeSubmission, SubmissionEvidence, BadgeHandout, SubmissionComment
+from .serializers import BadgeSubmissionSerializer, SubmissionEvidenceSerializer, RejectSubmissionSerializer, BatchDirectApproveSerializer, BadgeHandoutSerializer, SubmissionCommentSerializer, ReviewBadgeSubmissionSerializer
 from .pagination import SubmissionPagePagination
 from .permissions import IsScouterOrAdmin
 from .utils import get_peer_reviewable_requirement_ids
@@ -110,7 +110,7 @@ class ReviewSubmissionViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    serializer_class = BadgeSubmissionSerializer
+    serializer_class = ReviewBadgeSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
     pagination_class = SubmissionPagePagination
 
@@ -125,7 +125,7 @@ class ReviewSubmissionViewSet(
             "scout",
             "requirement",
             "reviewed_by",
-        ).prefetch_related("evidence")
+        ).prefetch_related("evidence", "scouter_comments__author")
 
         status_param = self.request.query_params.get("status")
         scout_id = self.request.query_params.get("scout_id")
@@ -381,3 +381,69 @@ class SubmissionEvidenceViewSet(
             )
         kwargs["partial"] = True
         return super().partial_update(request, *args, **kwargs)
+
+
+class SubmissionCommentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = SubmissionCommentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
+
+    def _get_submission(self):
+        submission_pk = self.kwargs["submission_pk"]
+        try:
+            return BadgeSubmission.objects.get(pk=submission_pk)
+        except BadgeSubmission.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound("Submission not found.")
+
+    def get_queryset(self):
+        return SubmissionComment.objects.filter(
+            submission_id=self.kwargs["submission_pk"]
+        ).select_related("author")
+
+    def create(self, request, *args, **kwargs):
+        import re
+        from users.models import User
+        from .emails import notify_scouter_mentioned
+
+        submission = self._get_submission()
+        body = request.data.get("body", "").strip()
+        notify_mentions = request.data.get("notify_mentions", True)
+
+        if not body:
+            return Response({"detail": "Comment body is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        mentioned_usernames = re.findall(r"@([\w.]+)", body)
+        invalid_mentions = []
+        mentioned_users = []
+
+        for username in mentioned_usernames:
+            user = User.objects.filter(username=username, role__in=["scouter", "admin"], is_active=True).first()
+            if user is None:
+                invalid_mentions.append(f"@{username}")
+            else:
+                if user not in mentioned_users:
+                    mentioned_users.append(user)
+
+        if invalid_mentions:
+            return Response(
+                {"invalid_mentions": invalid_mentions},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        comment = SubmissionComment.objects.create(
+            submission=submission,
+            author=request.user,
+            body=body,
+        )
+
+        if notify_mentions:
+            for user in mentioned_users:
+                if user != request.user:
+                    notify_scouter_mentioned(comment, user)
+
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

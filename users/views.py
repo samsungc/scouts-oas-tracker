@@ -324,6 +324,29 @@ class ScoutListView(generics.ListAPIView):
         return User.objects.filter(role="scout", is_active=True).order_by("username")
 
 
+class ScouterListView(APIView):
+    """Returns all active scouters and admins. Scouters and admins only."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        from submissions.permissions import IsScouterOrAdmin
+        return [permissions.IsAuthenticated(), IsScouterOrAdmin()]
+
+    def get(self, request):
+        from .models import User
+        scouters = User.objects.filter(
+            role__in=["scouter", "admin"], is_active=True
+        ).order_by("username").values("username", "first_name", "last_name")
+        data = [
+            {
+                "username": s["username"],
+                "display_name": f"{s['first_name']} {s['last_name']}".strip() or s["username"],
+            }
+            for s in scouters
+        ]
+        return Response(data)
+
+
 class ScoutStatsView(APIView):
     """
     Returns per-scout badge stats and aggregate summary counts.
