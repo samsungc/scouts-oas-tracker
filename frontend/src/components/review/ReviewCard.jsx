@@ -11,7 +11,7 @@ import CommentSection from './CommentSection'
 import { useToast } from '../../context/ToastContext'
 import styles from './ReviewCard.module.css'
 
-export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove, allBadges = [], scouters = [] }) {
+export default function ReviewCard({ submission, requirement, onApproved, onRejectClick, onApprove, allBadges = [], scouters = [], showScoterNotes = true }) {
   const addToast = useToast()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -127,11 +127,13 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         </div>
       )}
 
-      <CommentSection
-        submissionId={submission.id}
-        initialComments={submission.scouter_comments ?? []}
-        scouters={scouters}
-      />
+      {showScoterNotes && (
+        <CommentSection
+          submissionId={submission.id}
+          initialComments={submission.scouter_comments ?? []}
+          scouters={scouters}
+        />
+      )}
 
       <ErrorMessage message={error} />
 
