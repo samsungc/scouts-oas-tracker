@@ -62,14 +62,14 @@ export default function RequirementRow({ requirement, badgeId, submissionsMap, b
           ) : submission ? (
             <button
               className={styles.viewBtn}
-              onClick={() => navigate(`/submit?requirementId=${requirement.id}`)}
+              onClick={() => navigate(`/submit?requirementId=${requirement.id}&badgeId=${badgeId}`)}
             >
               <StatusPill status={submission.status} />
             </button>
           ) : (
             <button
               className={styles.startBtn}
-              onClick={() => navigate(`/submit?requirementId=${requirement.id}`)}
+              onClick={() => navigate(`/submit?requirementId=${requirement.id}&badgeId=${badgeId}`)}
             >
               Start
             </button>

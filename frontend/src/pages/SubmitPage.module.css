@@ -1,3 +1,11 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
 .back {
   background: none;
   border: none;
@@ -6,16 +14,88 @@
   font-weight: 500;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 20px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   transition: color 0.15s;
+  flex-shrink: 0;
 }
 
 .back:hover {
   color: var(--color-heading);
   text-decoration: underline;
+}
+
+.reqNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reqNavBtn {
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.reqNavBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.reqNavBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.reqNavCount {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  min-width: 36px;
+  text-align: center;
+}
+
+.bottomNav {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.bottomNavBtn {
+  flex: 1;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 16px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bottomNavBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.bottomNavBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .pageHeader {
