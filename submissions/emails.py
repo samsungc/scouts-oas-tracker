@@ -24,36 +24,42 @@ def _is_suppressed(email):
     return EmailSuppression.objects.filter(email__iexact=email).exists()
 
 
-def _send_ses(to_addresses, subject, body_text):
+def _send_ses(to_addresses, subject, body_text, body_html=None):
     try:
         client = boto3.client("ses", region_name=settings.SES_REGION)
+        body = {"Text": {"Data": body_text}}
+        if body_html:
+            body["Html"] = {"Data": body_html}
         client.send_email(
             Source=settings.SES_FROM_EMAIL,
             Destination={"ToAddresses": to_addresses},
             Message={
                 "Subject": {"Data": subject},
-                "Body": {"Text": {"Data": body_text}},
+                "Body": body,
             },
         )
     except (BotoCoreError, ClientError, Exception):
         logger.error("Failed to send email via SES to %s — subject: %s", to_addresses, subject, exc_info=True)
 
 
-def _send_resend(to_addresses, subject, body_text):
+def _send_resend(to_addresses, subject, body_text, body_html=None):
     import resend
     resend.api_key = settings.RESEND_API_KEY
     try:
-        resend.Emails.send({
+        payload = {
             "from": settings.RESEND_FROM_EMAIL,
             "to": to_addresses,
             "subject": subject,
             "text": body_text,
-        })
+        }
+        if body_html:
+            payload["html"] = body_html
+        resend.Emails.send(payload)
     except Exception:
         logger.error("Failed to send email via Resend to %s — subject: %s", to_addresses, subject, exc_info=True)
 
 
-def _send_email(to_addresses, subject, body_text):
+def _send_email(to_addresses, subject, body_text, body_html=None):
     if not to_addresses:
         return
 
@@ -67,9 +73,9 @@ def _send_email(to_addresses, subject, body_text):
         return
 
     if getattr(settings, "EMAIL_PROVIDER", "ses") == "resend":
-        _send_resend(active, subject, body_text)
+        _send_resend(active, subject, body_text, body_html=body_html)
     else:
-        _send_ses(active, subject, body_text)
+        _send_ses(active, subject, body_text, body_html=body_html)
 
 
 def _send_submission_notification(email, submission):
@@ -353,3 +359,77 @@ def notify_submission_reviewed(submission):
         if pending_qs.count() >= BATCH_SIZE:
             _send_scout_batch_summary(scout, list(pending_qs))
             pending_qs.update(sent=True)
+
+
+def notify_badge_completed(handout):
+    """Send a congratulatory badge-completion email to a scout."""
+    from badges.models import Badge
+
+    scout = handout.scout
+    if not scout.email_notifications or not scout.email:
+        return
+    if _is_suppressed(scout.email):
+        return
+
+    badge = handout.badge
+    scout_first = scout.first_name or scout.username
+
+    next_badge = None
+    if badge.level is not None:
+        next_badge = (
+            Badge.objects.filter(
+                category=badge.category,
+                level=badge.level + 1,
+                is_active=True,
+            ).first()
+        )
+
+    insignia_url = (
+        "https://6thrichmondhillscoutgroup.org/wp-content/uploads/2023/10/venturer-insignia-placement.pdf"
+    )
+    footer = _build_unsubscribe_footer(scout.pk)
+
+    next_stage_text = ""
+    next_stage_html = ""
+    if next_badge:
+        next_stage_text = (
+            f"\nPlease note {next_badge.name} is now unlocked for you. "
+            f"This higher stage builds on the skills and knowledge expected of you in "
+            f"stage {badge.level} \u2014 we hope to see your continual development in "
+            f"the {badge.get_category_display()} pathway.\n"
+        )
+        next_stage_html = (
+            f"<p>Please note <strong>{next_badge.name}</strong> is now unlocked for you. "
+            f"This higher stage builds on the skills and knowledge expected of you in "
+            f"stage {badge.level} \u2014 we hope to see your continual development in "
+            f"the {badge.get_category_display()} pathway.</p>"
+        )
+
+    subject = f"Congratulations \u2014 you completed {badge.name}"
+
+    body_text = (
+        f"Dear {scout_first},\n\n"
+        f"Our Company is pleased to confirm you completed {badge.name}.\n\n"
+        f"To recognize your hard work and achievement, we will present the badge to you in "
+        f"front of your peers at the next appropriate occasion. Information on proper badge "
+        f"placement on your uniform is available at our group website ({insignia_url})."
+        f"\n{next_stage_text}"
+        f"\nCongratulations {scout_first} and keep up your good work!\n\n"
+        f"Thank you,\n"
+        f"6th Richmond Hill Venturer Company"
+        f"{footer}"
+    )
+
+    body_html = (
+        f"<p>Dear {scout_first},</p>"
+        f"<p>Our Company is pleased to confirm you completed <strong>{badge.name}</strong>.</p>"
+        f"<p>To recognize your hard work and achievement, we will present the badge to you in "
+        f"front of your peers at the next appropriate occasion. Information on proper badge "
+        f'placement on your uniform is available at our <a href="{insignia_url}">group website</a>.</p>'
+        f"{next_stage_html}"
+        f"<p>Congratulations {scout_first} and keep up your good work!</p>"
+        f"<p>Thank you,<br>6th Richmond Hill Venturer Company</p>"
+        f"<p style=\"color:#888;font-size:12px;\">{footer.strip()}</p>"
+    )
+
+    _send_email([scout.email], subject, body_text, body_html=body_html)
