@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, startTransition } from 'react'
 import { getStreakLeaderboard } from '../../api/leaderboard'
 import Pagination from '../ui/Pagination'
 import Spinner from '../ui/Spinner'
@@ -68,7 +68,7 @@ export default function StreakLeaderboard({ currentUserId }) {
             <button
               key={t.key}
               className={`${styles.tab} ${tab === t.key ? styles.active : ''}`}
-              onClick={() => setTab(t.key)}
+              onClick={() => startTransition(() => setTab(t.key))}
             >
               {t.label}
             </button>

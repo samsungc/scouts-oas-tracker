@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, startTransition } from 'react'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
 import ReviewCard from '../components/review/ReviewCard'
@@ -82,20 +82,26 @@ export default function ReviewPage() {
   }
 
   function changeFilter(val) {
-    setPage(1)
-    setFilter(val)
-    setDateRange(7)
-    setStatusFilter('')
+    startTransition(() => {
+      setPage(1)
+      setFilter(val)
+      setDateRange(7)
+      setStatusFilter('')
+    })
   }
 
   function changeDateRange(val) {
-    setPage(1)
-    setDateRange(val)
+    startTransition(() => {
+      setPage(1)
+      setDateRange(val)
+    })
   }
 
   function changeStatusFilter(val) {
-    setPage(1)
-    setStatusFilter(val)
+    startTransition(() => {
+      setPage(1)
+      setStatusFilter(val)
+    })
   }
 
   function handleSearchChange(e) {

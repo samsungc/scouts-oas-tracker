@@ -1,4 +1,4 @@
-import { useState, forwardRef, useImperativeHandle } from 'react'
+import { useState, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { deleteEvidence, updateEvidence } from '../../api/submissions'
 import { mediaUrl } from '../../api/client'
 import { useToast } from '../../context/ToastContext'
@@ -180,15 +180,23 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
     }
   }
 
+  const parsedEvidence = useMemo(
+    () => evidence?.map((ev) => ({
+      ...ev,
+      smartData: ev.text_note ? parseSmartGoal(ev.text_note) : null,
+      spicesData: ev.text_note ? parseSpicesReview(ev.text_note) : null,
+    })) ?? [],
+    [evidence],
+  )
+
   if (!evidence || evidence.length === 0) {
     return <p className={styles.empty}>No evidence added yet.</p>
   }
 
   return (
     <ul className={styles.list}>
-      {evidence.map((ev) => {
-        const smartData = ev.text_note ? parseSmartGoal(ev.text_note) : null
-        const spicesData = ev.text_note ? parseSpicesReview(ev.text_note) : null
+      {parsedEvidence.map((ev) => {
+        const { smartData, spicesData } = ev
         const isEditing = editingId === ev.id
         const canEdit = isDraft && !ev.file
 
