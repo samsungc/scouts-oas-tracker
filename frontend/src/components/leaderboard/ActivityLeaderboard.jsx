@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { getActivityLeaderboard } from '../../api/leaderboard'
 import Pagination from '../ui/Pagination'
 import Spinner from '../ui/Spinner'
@@ -52,7 +52,7 @@ export default function ActivityLeaderboard({ myStats, currentUserId }) {
             <button
               key={w.key}
               className={`${styles.tab} ${window === w.key ? styles.active : ''}`}
-              onClick={() => setWindow(w.key)}
+              onClick={() => startTransition(() => setWindow(w.key))}
             >
               {w.label}
             </button>

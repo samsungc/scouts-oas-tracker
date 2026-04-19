@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, startTransition } from 'react'
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom'
 import { getReviewSubmissions } from '../api/review'
 import { getBadges } from '../api/badges'
 import { getScoutStats, getEmailSettings, updateEmailSettings } from '../api/users'
 import { useAuth } from '../context/AuthContext'
 import { getHandouts } from '../api/handouts'
+import { useDebounce } from '../hooks/useDebounce'
 import ScoutDetail from '../components/scouts/ScoutDetail'
 import CreateUserModal from '../components/scouts/CreateUserModal'
 import DeleteUserModal from '../components/scouts/DeleteUserModal'
@@ -121,6 +122,7 @@ export default function ScoutsPage() {
   const [todoItems, setTodoItems] = useState([])
   const [sortKey, setSortKey] = useState(() => localStorage.getItem('scouts_sortKey') ?? 'name')
   const [sortDir, setSortDir] = useState(() => localStorage.getItem('scouts_sortDir') ?? 'asc')
+  const debouncedSearch = useDebounce(search, 300)
   const [emailsPaused, setEmailsPaused] = useState(null)
   const [pauseLoading, setPauseLoading] = useState(false)
 
@@ -171,6 +173,10 @@ export default function ScoutsPage() {
     [badgeDetails],
   )
 
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
   // Auto-open scout detail when ?username= param is present (e.g. linked from ReviewCard)
   useEffect(() => {
     if (loading || scouts.length === 0) return
@@ -191,19 +197,16 @@ export default function ScoutsPage() {
   function handleSort(key) {
     if (key === sortKey) {
       const next = sortDir === 'asc' ? 'desc' : 'asc'
-      setSortDir(next)
-      localStorage.setItem('scouts_sortDir', next)
+      startTransition(() => { setSortDir(next); setPage(1) })
+      setTimeout(() => localStorage.setItem('scouts_sortDir', next), 0)
     } else {
-      setSortKey(key)
-      setSortDir('asc')
-      localStorage.setItem('scouts_sortKey', key)
-      localStorage.setItem('scouts_sortDir', 'asc')
+      startTransition(() => { setSortKey(key); setSortDir('asc'); setPage(1) })
+      setTimeout(() => { localStorage.setItem('scouts_sortKey', key); localStorage.setItem('scouts_sortDir', 'asc') }, 0)
     }
-    setPage(1)
   }
 
   const filteredScouts = useMemo(() => {
-    const lower = search.toLowerCase()
+    const lower = debouncedSearch.toLowerCase()
     const filtered = scouts.filter(
       (s) =>
         s.username.toLowerCase().includes(lower) ||
@@ -234,7 +237,7 @@ export default function ScoutsPage() {
           return 0
       }
     })
-  }, [scouts, search, sortKey, sortDir])
+  }, [scouts, debouncedSearch, sortKey, sortDir])
 
   const totalPages = Math.ceil(filteredScouts.length / PAGE_SIZE)
   const paginatedScouts = filteredScouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -370,9 +373,9 @@ export default function ScoutsPage() {
               className={styles.searchInput}
               placeholder="Search scouts by name or username…"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              onChange={(e) => setSearch(e.target.value)}
             />
-            {search && (
+            {debouncedSearch && (
               <span className={styles.searchCount}>
                 {filteredScouts.length} result{filteredScouts.length !== 1 ? 's' : ''}
               </span>
@@ -382,7 +385,7 @@ export default function ScoutsPage() {
           {/* ── Scout table ── */}
           {filteredScouts.length === 0 ? (
             <div className={styles.empty}>
-              <p>{search ? 'No scouts match your search.' : 'No scouts registered yet.'}</p>
+              <p>{debouncedSearch ? 'No scouts match your search.' : 'No scouts registered yet.'}</p>
             </div>
           ) : (
             <div className={styles.table}>

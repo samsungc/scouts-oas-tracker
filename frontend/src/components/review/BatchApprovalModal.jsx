@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDebounce } from '../../hooks/useDebounce'
 import { getScouts } from '../../api/users'
 import { getReviewSubmissions, batchDirectApprove } from '../../api/review'
 import Modal from '../ui/Modal'
@@ -86,8 +87,9 @@ export default function BatchApprovalModal({ requirement, onClose }) {
     }
   }
 
-  const lowerSearch = search.toLowerCase()
-  const visibleScouts = search
+  const debouncedSearch = useDebounce(search, 200)
+  const lowerSearch = debouncedSearch.toLowerCase()
+  const visibleScouts = debouncedSearch
     ? scouts.filter((s) => {
         const name = [s.first_name, s.last_name].filter(Boolean).join(' ') || s.username
         return name.toLowerCase().includes(lowerSearch) || s.username.toLowerCase().includes(lowerSearch)
@@ -141,7 +143,7 @@ export default function BatchApprovalModal({ requirement, onClose }) {
 
               <div className={styles.scoutList}>
                 {visibleScouts.length === 0 ? (
-                  <p className={styles.noMatch}>No scouts match &ldquo;{search}&rdquo;.</p>
+                  <p className={styles.noMatch}>No scouts match &ldquo;{debouncedSearch}&rdquo;.</p>
                 ) : visibleScouts.map((scout) => {
                   const approved = alreadyApprovedIds.has(scout.id)
                   const name = [scout.first_name, scout.last_name].filter(Boolean).join(' ') || scout.username
