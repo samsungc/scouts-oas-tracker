@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import BadgeSubmissionViewSet, ReviewSubmissionViewSet, SubmissionEvidenceViewSet, PeerReviewViewSet, BadgeHandoutViewSet, SubmissionCommentViewSet
+from .views import BadgeSubmissionViewSet, ReviewSubmissionViewSet, SubmissionEvidenceViewSet, PeerReviewViewSet, BadgeHandoutViewSet, SubmissionCommentViewSet, SubmissionCommentDetailView
 
 router = DefaultRouter()
 router.register(r"submissions", BadgeSubmissionViewSet, basename="submissions")
@@ -14,5 +14,10 @@ urlpatterns = router.urls + [
         "review/submissions/<int:submission_pk>/comments/",
         SubmissionCommentViewSet.as_view({"get": "list", "post": "create"}),
         name="submission-comments",
+    ),
+    path(
+        "review/comments/<int:pk>/",
+        SubmissionCommentDetailView.as_view({"patch": "partial_update", "delete": "destroy"}),
+        name="submission-comment-detail",
     ),
 ]

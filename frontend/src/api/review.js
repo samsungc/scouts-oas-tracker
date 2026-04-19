@@ -39,3 +39,11 @@ export function addComment(submissionId, body, notifyMentions = true) {
     notify_mentions: notifyMentions,
   })
 }
+
+export function updateComment(commentId, body) {
+  return api.patch(`/review/comments/${commentId}/`, { body })
+}
+
+export function deleteComment(commentId) {
+  return api.delete(`/review/comments/${commentId}/`)
+}
