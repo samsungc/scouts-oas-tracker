@@ -447,3 +447,47 @@ class SubmissionCommentViewSet(
 
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SubmissionCommentDetailView(
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = SubmissionCommentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsScouterOrAdmin]
+    http_method_names = ["patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        return SubmissionComment.objects.select_related("author")
+
+    def partial_update(self, request, *args, **kwargs):
+        import re
+        comment = self.get_object()
+
+        if comment.author != request.user:
+            return Response({"detail": "You can only edit your own comments."}, status=status.HTTP_403_FORBIDDEN)
+
+        body = request.data.get("body", "").strip()
+        if not body:
+            return Response({"detail": "Comment body is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        mentioned_usernames = re.findall(r"@([\w.]+)", body)
+        from users.models import User
+        invalid_mentions = [
+            f"@{u}" for u in mentioned_usernames
+            if not User.objects.filter(username=u, role__in=["scouter", "admin"], is_active=True).exists()
+        ]
+        if invalid_mentions:
+            return Response({"invalid_mentions": invalid_mentions}, status=status.HTTP_400_BAD_REQUEST)
+
+        comment.body = body
+        comment.save(update_fields=["body", "updated_at"])
+        return Response(self.get_serializer(comment).data)
+
+    def destroy(self, request, *args, **kwargs):
+        comment = self.get_object()
+        if comment.author != request.user and request.user.role != "admin":
+            return Response({"detail": "You can only delete your own comments."}, status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -19,6 +19,8 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
   const [goalsSubmission, setGoalsSubmission] = useState(null)
   const [goalsLoading, setGoalsLoading] = useState(false)
   const [goalsError, setGoalsError] = useState('')
+  const [showComments, setShowComments] = useState(false)
+  const hasComments = (submission.scouter_comments ?? []).length > 0
 
   const approveAction = onApprove ?? ((id) => approveSubmission(id))
 
@@ -127,44 +129,43 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         </div>
       )}
 
-      {showScoterNotes && (
+      <ErrorMessage message={error} />
+
+      <div className={styles.actions}>
+        {submission.status === 'submitted' && (
+          <Button variant="primary" size="sm" onClick={handleApprove} loading={loading}>
+            ✓ Approve
+          </Button>
+        )}
+        {submission.status === 'submitted' && (
+          <Button variant="danger" size="sm" onClick={() => onRejectClick(submission)} disabled={loading}>
+            ✕ Return
+          </Button>
+        )}
+        {isCompletedGoal && (
+          <Button variant="secondary" size="sm" onClick={handleShowGoals}>
+            Show Goals
+          </Button>
+        )}
+        {showScoterNotes && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowComments(v => !v)}
+          >
+            {hasComments ? `Notes (${(submission.scouter_comments ?? []).length})` : 'Comment'}
+          </Button>
+        )}
+      </div>
+
+      {showScoterNotes && (showComments || hasComments) && (
         <CommentSection
           submissionId={submission.id}
           initialComments={submission.scouter_comments ?? []}
           scouters={scouters}
+          open={showComments}
+          onOpen={() => setShowComments(true)}
         />
-      )}
-
-      <ErrorMessage message={error} />
-
-      {(submission.status === 'submitted' || isCompletedGoal) && (
-        <div className={styles.actions}>
-          {submission.status === 'submitted' && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleApprove}
-              loading={loading}
-            >
-              ✓ Approve
-            </Button>
-          )}
-          {submission.status === 'submitted' && (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onRejectClick(submission)}
-              disabled={loading}
-            >
-              ✕ Return
-            </Button>
-          )}
-          {isCompletedGoal && (
-            <Button variant="secondary" size="sm" onClick={handleShowGoals}>
-              Show Goals
-            </Button>
-          )}
-        </div>
       )}
 
       {(submission.reviewed_by_username || submission.reviewer_notes) && (

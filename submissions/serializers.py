@@ -63,17 +63,21 @@ class BadgeSubmissionSerializer(serializers.ModelSerializer):
 class SubmissionCommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source="author.username", read_only=True, default=None)
     author_display_name = serializers.SerializerMethodField()
+    is_edited = serializers.SerializerMethodField()
 
     class Meta:
         model = SubmissionComment
-        fields = ["id", "author_username", "author_display_name", "body", "created_at"]
-        read_only_fields = ["id", "author_username", "author_display_name", "created_at"]
+        fields = ["id", "author_username", "author_display_name", "body", "created_at", "is_edited"]
+        read_only_fields = ["id", "author_username", "author_display_name", "created_at", "is_edited"]
 
     def get_author_display_name(self, obj):
         if not obj.author:
             return "Deleted user"
         full = f"{obj.author.first_name} {obj.author.last_name}".strip()
         return full or obj.author.username
+
+    def get_is_edited(self, obj):
+        return (obj.updated_at - obj.created_at).total_seconds() > 1
 
 
 class ReviewBadgeSubmissionSerializer(BadgeSubmissionSerializer):
