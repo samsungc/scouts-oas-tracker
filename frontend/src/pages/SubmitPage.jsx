@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { getRequirement } from '../api/badges'
+import { getRequirement, getBadgeDetail } from '../api/badges'
 import { getSubmissions, createSubmission } from '../api/submissions'
 import SubmissionCard from '../components/submissions/SubmissionCard'
 import Button from '../components/ui/Button'
@@ -12,6 +12,7 @@ export default function SubmitPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const requirementId = searchParams.get('requirementId')
+  const badgeId = searchParams.get('badgeId')
 
   const [requirement, setRequirement] = useState(null)
   const [badgeName, setBadgeName] = useState('')
@@ -19,6 +20,7 @@ export default function SubmitPage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
+  const [siblingReqs, setSiblingReqs] = useState([])
 
   useEffect(() => {
     if (!requirementId) {
@@ -30,13 +32,17 @@ export default function SubmitPage() {
       setLoading(true)
       setError('')
       try {
-        const [allSubs, reqData] = await Promise.all([
-          getSubmissions(),
-          getRequirement(requirementId),
-        ])
+        const fetches = [getSubmissions(), getRequirement(requirementId)]
+        if (badgeId) fetches.push(getBadgeDetail(badgeId))
+        const [allSubs, reqData, badgeData] = await Promise.all(fetches)
 
         setRequirement(reqData)
         setBadgeName(reqData.badge_name)
+
+        if (badgeData?.requirements) {
+          const sorted = [...badgeData.requirements].sort((a, b) => a.order - b.order)
+          setSiblingReqs(sorted)
+        }
 
         const relatedSubs = allSubs.filter(
           (s) => String(s.requirement) === String(requirementId)
@@ -49,7 +55,7 @@ export default function SubmitPage() {
       }
     }
     load()
-  }, [requirementId, navigate])
+  }, [requirementId, badgeId, navigate])
 
   async function handleCreate() {
     setCreating(true)
@@ -76,11 +82,42 @@ export default function SubmitPage() {
 
   const hasSubmission = submissions.length > 0
 
+  const currentIdx = siblingReqs.findIndex((r) => String(r.id) === String(requirementId))
+  const prevReq = currentIdx > 0 ? siblingReqs[currentIdx - 1] : null
+  const nextReq = currentIdx >= 0 && currentIdx < siblingReqs.length - 1 ? siblingReqs[currentIdx + 1] : null
+
+  function navToReq(req) {
+    navigate(`/submit?requirementId=${req.id}${badgeId ? `&badgeId=${badgeId}` : ''}`)
+  }
+
   return (
     <div>
-      <button className={styles.back} onClick={() => navigate('/badges')}>
-        ← Back to Badges
-      </button>
+      <div className={styles.topBar}>
+        <button className={styles.back} onClick={() => navigate('/badges')}>
+          ← Back to Badges
+        </button>
+        {siblingReqs.length > 1 && (
+          <div className={styles.reqNav}>
+            <button
+              className={styles.reqNavBtn}
+              onClick={() => prevReq && navToReq(prevReq)}
+              disabled={!prevReq}
+            >
+              ← Prev
+            </button>
+            <span className={styles.reqNavCount}>
+              {currentIdx + 1} / {siblingReqs.length}
+            </span>
+            <button
+              className={styles.reqNavBtn}
+              onClick={() => nextReq && navToReq(nextReq)}
+              disabled={!nextReq}
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </div>
 
       {loading && <Spinner centered />}
       {error && <ErrorMessage message={error} />}
@@ -143,6 +180,25 @@ export default function SubmitPage() {
               </div>
             )}
           </div>
+
+          {(prevReq || nextReq) && (
+            <div className={styles.bottomNav}>
+              <button
+                className={styles.bottomNavBtn}
+                onClick={() => prevReq && navToReq(prevReq)}
+                disabled={!prevReq}
+              >
+                ← {prevReq ? prevReq.title : 'Previous'}
+              </button>
+              <button
+                className={styles.bottomNavBtn}
+                onClick={() => nextReq && navToReq(nextReq)}
+                disabled={!nextReq}
+              >
+                {nextReq ? nextReq.title : 'Next'} →
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
