@@ -27,6 +27,7 @@ export default function LiveFeed() {
   const [showBottom, setShowBottom] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const listRef = useRef(null)
+  const sectionRef = useRef(null)
 
   async function load() {
     try {
@@ -51,6 +52,19 @@ export default function LiveFeed() {
     setShowBottom(el.scrollHeight > el.clientHeight)
   }, [feed])
 
+  useEffect(() => {
+    if (!expanded || !sectionRef.current) return
+    // wait for the max-height CSS transition (0.3s) to finish before scrolling
+    const id = setTimeout(() => {
+      const rect = sectionRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const extra = 24
+      const overlap = rect.bottom + extra - window.innerHeight
+      if (overlap > 0) window.scrollBy({ top: overlap, behavior: 'smooth' })
+    }, 320)
+    return () => clearTimeout(id)
+  }, [expanded])
+
   function handleScroll() {
     const el = listRef.current
     if (!el) return
@@ -64,7 +78,7 @@ export default function LiveFeed() {
   if (loading && feed.length === 0) return null
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} ref={sectionRef}>
       <div className={styles.header}>
         <h2 className={styles.title}>Recent Activity</h2>
         <button className={styles.expandBtn} onClick={() => setExpanded(e => !e)}>
