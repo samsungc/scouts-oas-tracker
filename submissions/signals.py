@@ -36,3 +36,27 @@ def check_badge_completion(sender, instance, **kwargs):
         )
         if created:
             notify_badge_completed(handout)
+
+
+@receiver(post_save, sender="submissions.BadgeSubmission")
+def record_submission_event(sender, instance, created, **kwargs):
+    from .models import SubmissionEvent
+
+    update_fields = kwargs.get("update_fields")
+    if not created and update_fields is not None and "status" not in update_fields:
+        return
+
+    if instance.status == "submitted":
+        SubmissionEvent.objects.create(
+            submission=instance,
+            event_type="submitted",
+            actor=instance.scout,
+            occurred_at=instance.submitted_at or instance.updated_at,
+        )
+    elif instance.status in ("approved", "rejected"):
+        SubmissionEvent.objects.create(
+            submission=instance,
+            event_type=instance.status,
+            actor=instance.reviewed_by,
+            occurred_at=instance.reviewed_at or instance.updated_at,
+        )

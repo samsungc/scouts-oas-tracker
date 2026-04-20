@@ -160,6 +160,34 @@ class SubmissionComment(models.Model):
         return f"Comment by {author_name} on submission {self.submission_id}"
 
 
+class SubmissionEvent(models.Model):
+    EVENT_CHOICES = [
+        ("submitted", "Submitted"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+    submission = models.ForeignKey(
+        BadgeSubmission,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submission_events",
+    )
+    occurred_at = models.DateTimeField(db_index=True)
+
+    class Meta:
+        ordering = ["-occurred_at"]
+
+    def __str__(self):
+        return f"{self.event_type} on submission {self.submission_id} at {self.occurred_at}"
+
+
 class PendingScoutNotification(models.Model):
     """Queued review notifications for scouts waiting to be included in the next batch."""
     submission = models.ForeignKey(
