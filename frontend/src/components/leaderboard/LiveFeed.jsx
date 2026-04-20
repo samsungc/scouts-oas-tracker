@@ -70,9 +70,8 @@ export default function LiveFeed() {
     if (!el) return
     setShowTop(el.scrollTop > 4)
     setShowBottom(el.scrollTop < el.scrollHeight - el.clientHeight - 4)
-    // auto-expand once user scrolls past ~5 rows, collapse when back at top
+    // auto-expand once user scrolls past ~5 rows; never auto-collapse
     if (el.scrollTop > 200) setExpanded(true)
-    else if (el.scrollTop < 8) setExpanded(false)
   }
 
   if (loading && feed.length === 0) return null
