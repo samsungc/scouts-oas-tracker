@@ -26,6 +26,7 @@ export default function PersonalStatsPanel({ stats }) {
     total_approved,
     total_submitted,
     completed_badges,
+    personal_progression_name,
     total_points,
     rank_label,
     current_streak_days,
@@ -88,6 +89,12 @@ export default function PersonalStatsPanel({ stats }) {
           <div className={styles.pill}>
             <span className={styles.pillValue}>{completed_badges}</span>
             <span className={styles.pillLabel}>Badges Done</span>
+          </div>
+          <div className={styles.pill}>
+            <span className={personal_progression_name ? styles.pillValueSm : styles.pillValue}>
+              {personal_progression_name ?? 'N/A'}
+            </span>
+            <span className={styles.pillLabel}>Prog. Level</span>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from users.models import User
-from submissions.models import BadgeSubmission
+from submissions.models import BadgeSubmission, SubmissionEvent
 from badges.models import Badge
 from leaderboard.models import UserSpecialAchievement, PasswordResetLog
 
@@ -748,12 +748,20 @@ class MyStatsView(APIView):
             approved_req_ids_by_badge[badge.id].add(sub.requirement_id)
 
         completed_badges = 0
+        personal_progression_level = 0
+        personal_progression_name = None
         for badge in Badge.objects.filter(is_active=True).prefetch_related('requirements'):
             all_req_ids = {r.id for r in badge.requirements.all()}
-            if all_req_ids and all_req_ids.issubset(
-                approved_req_ids_by_badge.get(badge.id, set())
-            ):
-                completed_badges += 1
+            if not all_req_ids:
+                continue
+            if all_req_ids.issubset(approved_req_ids_by_badge.get(badge.id, set())):
+                if badge.category == 'personal_progression':
+                    lvl = badge.level or 0
+                    if lvl > personal_progression_level:
+                        personal_progression_level = lvl
+                        personal_progression_name = badge.name
+                elif badge.category != 'awards':
+                    completed_badges += 1
 
         total_points = (total_approved * 10) + (completed_badges * 25)
         rank_label = get_rank_label(total_points)
@@ -784,6 +792,8 @@ class MyStatsView(APIView):
             'total_approved': total_approved,
             'total_submitted': total_submitted,
             'completed_badges': completed_badges,
+            'personal_progression_level': personal_progression_level,
+            'personal_progression_name': personal_progression_name,
             'total_points': total_points,
             'rank_label': rank_label,
             'current_streak_days': current_streak,
@@ -797,23 +807,26 @@ class ActivityFeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        submissions = (
-            BadgeSubmission.objects
-            .filter(status__in=['submitted', 'approved', 'rejected'])
-            .select_related('scout', 'requirement', 'requirement__badge')
-            .order_by('-updated_at')[:100]
+        events = (
+            SubmissionEvent.objects
+            .select_related(
+                'submission__scout',
+                'submission__requirement',
+                'submission__requirement__badge',
+            )
+            .order_by('-occurred_at')[:100]
         )
         feed = []
-        for sub in submissions:
+        for evt in events:
+            sub = evt.submission
             scout = sub.scout
             display_name = f"{scout.first_name} {scout.last_name}".strip() or scout.username
-            event_time = sub.reviewed_at if sub.status in ('approved', 'rejected') else sub.submitted_at
             feed.append({
-                'id': sub.id,
+                'id': evt.id,
                 'scout_name': display_name,
                 'badge_name': sub.requirement.badge.name,
                 'requirement_title': sub.requirement.title,
-                'status': sub.status,
-                'event_time': event_time or sub.updated_at,
+                'status': evt.event_type,
+                'event_time': evt.occurred_at,
             })
         return Response({'feed': feed})
