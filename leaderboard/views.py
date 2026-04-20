@@ -791,3 +791,29 @@ class MyStatsView(APIView):
             'approved_by_category': dict(by_category),
             'recent_activity': recent_activity,
         })
+
+
+class ActivityFeedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        submissions = (
+            BadgeSubmission.objects
+            .filter(status__in=['submitted', 'approved', 'rejected'])
+            .select_related('scout', 'requirement', 'requirement__badge')
+            .order_by('-updated_at')[:100]
+        )
+        feed = []
+        for sub in submissions:
+            scout = sub.scout
+            display_name = f"{scout.first_name} {scout.last_name}".strip() or scout.username
+            event_time = sub.reviewed_at if sub.status in ('approved', 'rejected') else sub.submitted_at
+            feed.append({
+                'id': sub.id,
+                'scout_name': display_name,
+                'badge_name': sub.requirement.badge.name,
+                'requirement_title': sub.requirement.title,
+                'status': sub.status,
+                'event_time': event_time or sub.updated_at,
+            })
+        return Response({'feed': feed})

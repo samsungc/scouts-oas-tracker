@@ -8,7 +8,7 @@ import styles from './ActivityLeaderboard.module.css'
 const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
 const PAGE_SIZE = 5
 
-export default function PointsLeaderboard({ currentUserId }) {
+export default function PointsLeaderboard({ currentUserId, compact = false }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -65,12 +65,16 @@ export default function PointsLeaderboard({ currentUserId }) {
                         {entry.scout_display_name}
                         {isMe && <span className={styles.youBadge}>you</span>}
                       </span>
-                      <span className={styles.count}>
-                        {entry.total_approved} req{entry.total_approved !== 1 ? 's' : ''}
-                      </span>
-                      <span className={styles.count}>
-                        {entry.completed_badges} badge{entry.completed_badges !== 1 ? 's' : ''}
-                      </span>
+                      {!compact && (
+                        <>
+                          <span className={styles.count}>
+                            {entry.total_approved} req{entry.total_approved !== 1 ? 's' : ''}
+                          </span>
+                          <span className={styles.count}>
+                            {entry.completed_badges} badge{entry.completed_badges !== 1 ? 's' : ''}
+                          </span>
+                        </>
+                      )}
                       <span className={styles.pts}>{entry.total_points} pts</span>
                     </div>
                   )

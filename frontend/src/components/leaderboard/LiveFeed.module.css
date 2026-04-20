@@ -1,0 +1,157 @@
+.section {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 2px 0;
+  transition: opacity 0.15s;
+}
+
+.expandBtn:hover {
+  opacity: 0.75;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.listWrap {
+  position: relative;
+}
+
+.fadeTop,
+.fadeBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 52px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fadeTop {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-white), transparent);
+}
+
+.fadeBottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-white), transparent);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 228px; /* overridden by inline style when expanded */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  transition: max-height 0.3s ease;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  transition: background 0.1s;
+}
+
+.row:hover {
+  background: var(--color-bg-page);
+}
+
+.pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  min-width: 72px;
+  text-align: center;
+}
+
+.submitted {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.rejected {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.scout {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.separator {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.badge {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.req {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
