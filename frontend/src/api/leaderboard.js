@@ -27,3 +27,7 @@ export function getMyAchievements() {
 export function getAchievementScouts(achievementId) {
   return api.get(`/leaderboard/achievements/${achievementId}/scouts/`)
 }
+
+export function getActivityFeed() {
+  return api.get('/leaderboard/activity-feed/')
+}

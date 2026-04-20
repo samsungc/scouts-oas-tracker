@@ -7,9 +7,12 @@ import PointsLeaderboard from '../components/leaderboard/PointsLeaderboard'
 import ActivityLeaderboard from '../components/leaderboard/ActivityLeaderboard'
 import StreakLeaderboard from '../components/leaderboard/StreakLeaderboard'
 import CategoryChampionsGrid from '../components/leaderboard/CategoryChampionsGrid'
+import LiveFeed from '../components/leaderboard/LiveFeed'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import styles from './LeaderboardPage.module.css'
+
+const NAV_LABELS = ['All-Time Points', 'Most Active', 'Streaks']
 
 export default function LeaderboardPage() {
   const { user } = useAuth()
@@ -20,6 +23,7 @@ export default function LeaderboardPage() {
   const [achievements, setAchievements] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [activeIdx, setActiveIdx] = useState(1)
 
   useEffect(() => {
     load()
@@ -42,6 +46,11 @@ export default function LeaderboardPage() {
     }
   }
 
+  function slot(idx) {
+    const d = ((idx - activeIdx) % 3 + 3) % 3
+    return d === 0 ? 'center' : d === 1 ? 'right' : 'left'
+  }
+
   if (loading) return <Spinner centered />
   if (error) return <ErrorMessage message={error} />
 
@@ -61,11 +70,56 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      <PointsLeaderboard currentUserId={user?.id} />
+      <div className={styles.carouselWrap}>
+        <div className={styles.carouselTrack}>
+          <div
+            className={`${styles.carouselCard} ${styles[slot(0)]}`}
+            onClick={() => slot(0) !== 'center' && setActiveIdx(0)}
+          >
+            <PointsLeaderboard currentUserId={user?.id} />
+          </div>
+          <div
+            className={`${styles.carouselCard} ${styles[slot(1)]}`}
+            onClick={() => slot(1) !== 'center' && setActiveIdx(1)}
+          >
+            <ActivityLeaderboard myStats={myStats} currentUserId={user?.id} />
+          </div>
+          <div
+            className={`${styles.carouselCard} ${styles[slot(2)]}`}
+            onClick={() => slot(2) !== 'center' && setActiveIdx(2)}
+          >
+            <StreakLeaderboard currentUserId={user?.id} />
+          </div>
+        </div>
 
-      <ActivityLeaderboard myStats={myStats} currentUserId={user?.id} />
+        <div className={styles.carouselNav}>
+          <button
+            className={styles.carouselNavBtn}
+            onClick={() => setActiveIdx((activeIdx + 2) % 3)}
+          >
+            ← Prev
+          </button>
+          <div className={styles.carouselDots}>
+            {NAV_LABELS.map((label, idx) => (
+              <button
+                key={idx}
+                className={`${styles.dot} ${idx === activeIdx ? styles.dotActive : ''}`}
+                onClick={() => setActiveIdx(idx)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            className={styles.carouselNavBtn}
+            onClick={() => setActiveIdx((activeIdx + 1) % 3)}
+          >
+            Next →
+          </button>
+        </div>
+      </div>
 
-      <StreakLeaderboard currentUserId={user?.id} />
+      <LiveFeed />
 
       {champions && (
         <CategoryChampionsGrid

@@ -9,4 +9,5 @@ urlpatterns = [
     path('my-stats/', views.MyStatsView.as_view(), name='leaderboard-my-stats'),
     path('points/', views.PointsLeaderboardView.as_view(), name='leaderboard-points'),
     path('streaks/', views.StreakLeaderboardView.as_view(), name='leaderboard-streaks'),
+    path('activity-feed/', views.ActivityFeedView.as_view(), name='leaderboard-activity-feed'),
 ]
