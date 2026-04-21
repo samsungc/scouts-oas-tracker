@@ -41,9 +41,31 @@ export default function LiveFeed() {
   }
 
   useEffect(() => {
-    load()
-    const id = setInterval(load, 30000)
-    return () => clearInterval(id)
+    let id = null
+
+    function start() {
+      stop()
+      load()
+      id = setInterval(load, 30000)
+    }
+
+    function stop() {
+      clearInterval(id)
+      id = null
+    }
+
+    function handleVisibility() {
+      if (document.hidden) stop()
+      else start()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    if (!document.hidden) start()
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      stop()
+    }
   }, [])
 
   useEffect(() => {
