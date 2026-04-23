@@ -101,7 +101,7 @@ export default function LiveFeed() {
   return (
     <div className={styles.section} ref={sectionRef}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Recent Activity</h2>
+        <h2 className={styles.title}>Live Feed</h2>
         <button className={styles.expandBtn} onClick={() => setExpanded(e => !e)}>
           {expanded ? 'Show less' : 'Show more'}
         </button>
