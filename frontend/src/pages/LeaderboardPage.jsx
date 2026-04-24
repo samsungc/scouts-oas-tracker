@@ -7,7 +7,6 @@ import PointsLeaderboard from '../components/leaderboard/PointsLeaderboard'
 import ActivityLeaderboard from '../components/leaderboard/ActivityLeaderboard'
 import StreakLeaderboard from '../components/leaderboard/StreakLeaderboard'
 import CategoryChampionsGrid from '../components/leaderboard/CategoryChampionsGrid'
-import LiveFeed from '../components/leaderboard/LiveFeed'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import styles from './LeaderboardPage.module.css'
@@ -118,8 +117,6 @@ export default function LeaderboardPage() {
           </button>
         </div>
       </div>
-
-      <LiveFeed />
 
       {champions && (
         <CategoryChampionsGrid

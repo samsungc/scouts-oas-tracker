@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import BadgeCategoryGroup from '../components/badges/BadgeCategoryGroup'
 import BadgesBanner from '../components/badges/BadgesBanner'
 import BatchApprovalModal from '../components/review/BatchApprovalModal'
+import LiveFeed from '../components/leaderboard/LiveFeed'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import styles from './BadgesPage.module.css'
@@ -170,6 +171,8 @@ export default function BadgesPage() {
         completedBadges={completedBadges}
         totalBadges={totalBadges}
       />
+
+      <LiveFeed />
 
       <div className={styles.controls}>
         <div className={styles.searchBar}>
