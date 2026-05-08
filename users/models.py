@@ -14,9 +14,22 @@ class User(AbstractUser):
         ("admin", "Admin"),
     ]
 
+    EC_ROLE_CHOICES = [
+        ("president", "President"),
+        ("vice_president", "Vice President"),
+        ("treasurer", "Treasurer"),
+        ("quartermaster", "Quartermaster"),
+        ("historian", "Historian"),
+        ("secretary", "Secretary"),
+        ("first_year_rep", "First Year Rep"),
+    ]
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="scout")
     email_notifications = models.BooleanField(default=True)
     email_change_locked = models.BooleanField(default=False)
+    ec_role = models.CharField(
+        max_length=20, choices=EC_ROLE_CHOICES, null=True, blank=True, default=None
+    )
 
 
 class EmailSuppression(models.Model):

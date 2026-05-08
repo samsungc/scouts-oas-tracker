@@ -1,0 +1,251 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Deposit / Withdrawal toggle */
+.typeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.typeBtn {
+  padding: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+}
+
+.typeBtn:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.typeBtnDeposit {
+  background: var(--color-deposit-bg);
+  color: var(--color-deposit);
+}
+
+.typeBtnWithdrawal {
+  background: var(--color-withdrawal-bg);
+  color: var(--color-withdrawal);
+}
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Select */
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 10px 32px 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}
+
+.selectWrap::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Amount */
+.amountWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currencySign {
+  position: absolute;
+  left: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.amountInput {
+  width: 100%;
+  padding: 10px 12px 10px 26px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.amountInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}
+
+/* Denomination breakdown */
+.denomHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.sumOk    { font-size: 0.82rem; font-weight: 600; color: var(--color-deposit); }
+.sumError { font-size: 0.82rem; font-weight: 600; color: var(--color-withdrawal); }
+.sumNeutral { font-size: 0.82rem; color: var(--color-text-muted); }
+
+.denomGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.denomCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+  transition: border-color 0.12s, background 0.12s;
+  cursor: text;
+}
+
+.denomCell:focus-within {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.denomFilled {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+
+.denomOverdrawn {
+  border-color: var(--color-withdrawal) !important;
+  background: var(--color-withdrawal-bg) !important;
+}
+
+.denomLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.denomInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+  outline: none;
+  padding: 0;
+  /* Hide the browser spinners */
+  -moz-appearance: textfield;
+}
+
+.denomInput::-webkit-outer-spin-button,
+.denomInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.denomInput::placeholder {
+  color: var(--color-border);
+  font-weight: 400;
+}
+
+.mismatchMsg {
+  font-size: 0.8rem;
+  color: var(--color-withdrawal);
+  background: var(--color-withdrawal-bg);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+}
+
+/* Note */
+.textarea {
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 167, 0.1);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
