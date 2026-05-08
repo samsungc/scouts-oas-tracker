@@ -43,6 +43,11 @@ export function deactivateUser(id) {
   return api.patch(`/users/${id}/deactivate/`)
 }
 
+/** Assign or clear EC role for a scout. Admin only. Pass null to remove. */
+export function assignECRole(id, ecRole) {
+  return api.patch(`/users/${id}/ec-role/`, { ec_role: ecRole })
+}
+
 /** Get site-wide settings. Admin only. */
 export function getEmailSettings() {
   return api.get('/users/settings/')

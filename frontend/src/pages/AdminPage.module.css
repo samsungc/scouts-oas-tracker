@@ -1,0 +1,318 @@
+.pageHeader {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+/* ── Sections ── */
+
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin-bottom: 6px;
+}
+
+.sectionSubtitle {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+/* ── Import card ── */
+
+.card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 28px;
+  max-width: 540px;
+  margin-bottom: 24px;
+}
+
+.uploadArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileLabel {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--color-bg-page);
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileLabel:hover {
+  border-color: var(--color-primary);
+}
+
+.fileSize {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dryRunBtn {
+  padding: 9px 20px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dryRunBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: white;
+}
+
+.dryRunBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.importBtn {
+  padding: 9px 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.importBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.importBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.loadingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.errorMsg {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--color-surface-rejected-bg);
+  border: 1px solid var(--color-surface-rejected-border, var(--color-status-rejected));
+  border-radius: 6px;
+  color: var(--color-status-rejected);
+  font-size: 0.9rem;
+}
+
+/* ── Import results ── */
+
+.results {
+  max-width: 700px;
+}
+
+.dryRunBanner {
+  padding: 10px 16px;
+  background: var(--color-surface-warning);
+  border: 1.5px solid var(--color-accent);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-surface-warning-text);
+  margin-bottom: 20px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statCardCreated {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.warningsSection {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-accent);
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+
+.warningsTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-surface-warning-text);
+  margin-bottom: 14px;
+}
+
+.warningGroup {
+  margin-bottom: 14px;
+}
+
+.warningGroup:last-child {
+  margin-bottom: 0;
+}
+
+.warningHeading {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.warningList {
+  list-style: disc;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.noWarnings {
+  font-size: 0.9rem;
+  color: var(--color-status-approved);
+  font-weight: 500;
+  padding: 12px 0;
+}
+
+/* ── EC Members ── */
+
+.ecCard {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  max-width: 560px;
+  overflow: hidden;
+}
+
+.ecDivider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
+.ecRow {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+}
+
+.ecRoleLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.ecRoleCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ecSelect {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-page);
+  color: var(--color-text);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ecSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.ecSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedbackSaved {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-status-approved);
+  white-space: nowrap;
+}
+
+.feedbackError {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-status-rejected);
+  white-space: nowrap;
+}
+
+.emptyMsg {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  padding: 16px 24px;
+}

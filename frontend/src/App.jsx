@@ -11,7 +11,7 @@ import ScoutsPage from './pages/ScoutsPage'
 import MySubmissionsPage from './pages/MySubmissionsPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import NotFoundPage from './pages/NotFoundPage'
-import ImportPage from './pages/ImportPage'
+import AdminPage from './pages/AdminPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import UnsubscribePage from './pages/UnsubscribePage'
@@ -135,11 +135,11 @@ export default function App() {
       />
 
       <Route
-        path="/import"
+        path="/admin"
         element={
           <ProtectedRoute roles={['admin']}>
             <Layout>
-              <ImportPage />
+              <AdminPage />
             </Layout>
           </ProtectedRoute>
         }

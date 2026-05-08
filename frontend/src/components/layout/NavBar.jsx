@@ -115,12 +115,12 @@ export default function NavBar() {
           )}
           {user?.role === 'admin' && (
             <NavLink
-              to="/import"
+              to="/admin"
               className={({ isActive }) =>
                 `${styles.link} ${styles.mobileHide} ${isActive ? styles.active : ''}`
               }
             >
-              Import
+              Admin
             </NavLink>
           )}
         </div>

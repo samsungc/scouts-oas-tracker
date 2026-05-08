@@ -7,6 +7,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ("Role & Notifications", {"fields": ("role", "email_notifications")}),
         ("Email Change", {"fields": ("email_change_locked",)}),
+        ("EC Membership", {"fields": ("ec_role",)}),
     )
 
     def save_model(self, request, obj, form, change):

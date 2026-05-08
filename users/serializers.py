@@ -32,8 +32,9 @@ class MeSerializer(serializers.ModelSerializer):
             "email_change_locked",
             "email_send_count",
             "email_last_sent_at",
+            "ec_role",
         ]
-        read_only_fields = ["id", "username", "role", "last_login", "email_change_locked"]
+        read_only_fields = ["id", "username", "role", "last_login", "email_change_locked", "ec_role"]
 
     def get_peer_review_eligible(self, obj):
         if obj.role != 'scout':
@@ -83,8 +84,8 @@ class ScoutListSerializer(serializers.ModelSerializer):
     """Minimal scout profile returned to scouters/admins."""
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "last_login"]
-        read_only_fields = ["id", "username", "first_name", "last_name", "last_login"]
+        fields = ["id", "username", "first_name", "last_name", "last_login", "ec_role"]
+        read_only_fields = ["id", "username", "first_name", "last_name", "last_login", "ec_role"]
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -114,3 +115,18 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 class PasswordResetConfirmSerializer(serializers.Serializer):
     token = serializers.CharField(min_length=1)
     new_password = serializers.CharField(write_only=True)
+
+
+class ECRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "ec_role"]
+        read_only_fields = ["id", "username"]
+
+    def validate(self, attrs):
+        ec_role = attrs.get("ec_role")
+        if ec_role and self.instance.role != "scout":
+            raise serializers.ValidationError(
+                {"ec_role": "Only scouts can hold an EC role."}
+            )
+        return attrs

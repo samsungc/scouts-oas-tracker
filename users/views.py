@@ -30,6 +30,7 @@ from .serializers import (
     CaseInsensitiveTokenSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
+    ECRoleSerializer,
 )
 
 
@@ -564,6 +565,26 @@ class DeactivateUserView(APIView):
         user.is_active = False
         user.save(update_fields=["is_active"])
         return Response({"detail": "User deactivated successfully."}, status=status.HTTP_200_OK)
+
+
+class AssignECRoleView(APIView):
+    """Assign or clear ec_role for a scout. Admin only."""
+
+    def get_permissions(self):
+        from badges.permissions import IsAdminOnly
+        return [permissions.IsAuthenticated(), IsAdminOnly()]
+
+    def patch(self, request, user_id):
+        from .models import User
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ECRoleSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 _RESET_SENT_MSG = "If that email address is registered, a reset link has been sent."
