@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/badges/", include("badges.urls")),
     path("api/", include("submissions.urls")),
     path("api/leaderboard/", include("leaderboard.urls")),
+    path("api/treasury/", include("treasury.urls")),
 ]
 
 if not getattr(settings, "USE_S3", False):
