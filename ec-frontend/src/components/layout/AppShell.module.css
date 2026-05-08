@@ -1,0 +1,19 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--content-padding);
+  overflow-y: auto;
+  background: var(--color-bg-page);
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 20px 16px 80px;
+  }
+}

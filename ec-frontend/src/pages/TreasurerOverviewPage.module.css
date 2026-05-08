@@ -1,0 +1,193 @@
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.newAccountForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 360px;
+}
+
+.fieldLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.fieldInput {
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.12s;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.fieldError {
+  font-size: 0.82rem;
+  color: var(--color-danger);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldOptional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.amountWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currencySign {
+  position: absolute;
+  left: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.amountInput {
+  width: 100%;
+  padding: 9px 12px 9px 24px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.amountInput:focus {
+  border-color: var(--color-primary);
+}
+
+.denomHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.denomGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.denomCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 4px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: text;
+  transition: border-color 0.12s;
+}
+
+.denomCell:focus-within {
+  border-color: var(--color-primary);
+}
+
+.denomFilled {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+
+.denomLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.denomInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+  outline: none;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.denomInput::-webkit-outer-spin-button,
+.denomInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.sumOk     { font-size: 0.8rem; font-weight: 600; color: var(--color-deposit); }
+.sumError  { font-size: 0.8rem; font-weight: 600; color: var(--color-withdrawal); }
+.sumNeutral{ font-size: 0.8rem; color: var(--color-text-muted); }
+
+.sumErrorMsg {
+  font-size: 0.78rem;
+  color: var(--color-withdrawal);
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -23,7 +23,6 @@ class Transaction(models.Model):
     ]
 
     WITHDRAWAL_CATEGORIES = [
-        "registration_fees",
         "camp_expenses",
         "program_expenses",
         "admin_expenses",
@@ -55,6 +54,7 @@ class Transaction(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     is_reversal = models.BooleanField(default=False)
+    is_opening_balance = models.BooleanField(default=False)
     reversal_of = models.OneToOneField(
         "self",
         on_delete=models.SET_NULL,
@@ -76,6 +76,11 @@ class Transaction(models.Model):
 class FinancialStatement(models.Model):
     period_start = models.DateField()
     period_end = models.DateField()
+    accounts = models.ManyToManyField(
+        Account,
+        blank=True,
+        related_name="statements",
+    )
     generated_at = models.DateTimeField(auto_now_add=True)
     generated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -100,7 +105,7 @@ class FinancialStatement(models.Model):
     )
 
     class Meta:
-        ordering = ["-period_end"]
+        ordering = ["-generated_at"]
 
     def __str__(self):
         return f"Financial Statement {self.period_start} – {self.period_end}"

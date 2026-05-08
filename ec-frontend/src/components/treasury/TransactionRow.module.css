@@ -1,0 +1,95 @@
+.row td {
+  padding: 11px 14px;
+  height: 52px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--color-border-light);
+  vertical-align: middle;
+}
+
+
+.reversal td {
+  color: var(--color-reversal-text);
+}
+
+.date {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.pill.deposit {
+  background: var(--color-deposit-bg);
+  color: var(--color-deposit);
+}
+
+.pill.withdrawal {
+  background: var(--color-withdrawal-bg);
+  color: var(--color-withdrawal);
+}
+
+.category {
+  text-transform: capitalize;
+  color: var(--color-text-muted);
+}
+
+.amount {
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount.deposit { color: var(--color-deposit); }
+.amount.withdrawal { color: var(--color-withdrawal); }
+
+.reversalTag {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-reversal-text);
+  background: var(--color-surface-draft-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.user {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.rowWithNote td {
+  border-top: none;
+}
+
+.noteRow td {
+  border-bottom: none;
+}
+
+.noteCell {
+  padding: 10px 14px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.rowWithNote td {
+  padding-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .row td {
+    padding: 10px 10px;
+    height: auto;
+    min-height: 44px;
+  }
+}

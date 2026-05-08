@@ -1,0 +1,185 @@
+/* ============================================================
+   CSS Custom Properties — Scout Colour Scheme
+   ============================================================ */
+:root {
+  --color-primary: #1565a7;
+  --color-primary-dark: #0d3b6e;
+  --color-primary-hover: #124f8a;
+  --color-accent: #f5a623;
+  --color-accent-dark: #c8841a;
+  --color-bg-page: #f5f7fa;
+  --color-white: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #666666;
+  --color-border: #dde3ea;
+  --color-border-light: #eef1f5;
+  --color-surface: #ffffff;
+  --color-bg-hover: rgba(0, 0, 0, 0.05);
+  --color-danger: #c62828;
+  --color-danger-bg: rgba(198, 40, 40, 0.08);
+  --color-heading: var(--color-primary-dark);
+
+  --color-status-draft: #888888;
+  --color-status-submitted: #e68a00;
+  --color-status-approved: #2a7d2a;
+  --color-status-rejected: #c62828;
+
+  --color-surface-warning: #fdf8ed;
+  --color-surface-warning-border: #c8841a;
+  --color-surface-warning-text: #5a3a00;
+  --color-surface-info: #f0f5fb;
+  --color-surface-info-border: #c2d6ed;
+  --color-surface-approved-bg: #dff2df;
+  --color-surface-rejected-bg: #fde8e8;
+  --color-surface-draft-bg: #e8e8e8;
+  --color-surface-submitted-bg: #fff3dc;
+  --color-overlay: rgba(13, 59, 110, 0.45);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* EC Sidebar */
+  --sidebar-width: 240px;
+  --sidebar-bg: #0d3b6e;
+  --sidebar-text: rgba(255,255,255,0.75);
+  --sidebar-text-active: #ffffff;
+  --sidebar-item-hover-bg: rgba(255,255,255,0.08);
+  --sidebar-item-active-bg: rgba(255,255,255,0.14);
+  --sidebar-item-active-border: var(--color-accent);
+  --sidebar-border: rgba(255,255,255,0.10);
+
+  /* Treasury colours */
+  --color-deposit: #2a7d2a;
+  --color-deposit-bg: #dff2df;
+  --color-withdrawal: #c62828;
+  --color-withdrawal-bg: #fde8e8;
+  --color-reversal-text: #888888;
+
+  --content-padding: 32px;
+}
+
+[data-theme="dark"] {
+  --color-primary: #4a9edd;
+  --color-primary-dark: #3a7fd4;
+  --color-primary-hover: #3d8fd4;
+  --color-accent: #f5a623;
+  --color-accent-dark: #c8841a;
+  --color-bg-page: #111214;
+  --color-white: #1a1b1e;
+  --color-text: #f0f0f0;
+  --color-text-muted: #888888;
+  --color-border: #2a2b2e;
+  --color-border-light: #222325;
+  --color-surface: #1a1b1e;
+  --color-bg-hover: rgba(255, 255, 255, 0.05);
+  --color-danger: #ef5350;
+  --color-danger-bg: rgba(239, 83, 80, 0.1);
+  --color-heading: #f0f0f0;
+  --color-status-draft: #888888;
+  --color-status-submitted: #f0a040;
+  --color-status-approved: #4caf70;
+  --color-status-rejected: #ef5350;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --color-surface-warning: #1e1a0a;
+  --color-surface-warning-border: #5a4200;
+  --color-surface-warning-text: #d4a340;
+  --color-surface-info: #141618;
+  --color-surface-info-border: #2a2b2e;
+  --color-surface-approved-bg: #0e1a10;
+  --color-surface-rejected-bg: #1a0e0e;
+  --color-surface-draft-bg: #1e1f22;
+  --color-surface-submitted-bg: #1a1500;
+  --color-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Treasury colours */
+  --color-deposit: #4caf70;
+  --color-deposit-bg: #0e1a10;
+  --color-withdrawal: #ef5350;
+  --color-withdrawal-bg: #1a0e0e;
+}
+
+/* Sidebar stays dark navy in both themes — no dark override needed */
+
+/* ============================================================
+   Global Reset
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background-color: var(--color-bg-page);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background-color: var(--color-white);
+  color: var(--color-text);
+}
+
+ul {
+  list-style: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Print / PDF Export
+   ============================================================ */
+@media print {
+  body * { visibility: hidden; }
+  [data-print-active], [data-print-active] * { visibility: visible; }
+  [data-print-active] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 32pt 40pt;
+    background: white;
+    color: black;
+    font-size: 11pt;
+  }
+  * { box-shadow: none !important; }
+}

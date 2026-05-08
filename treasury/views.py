@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db.models import Q, Sum
+from django.db.models import Max, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
@@ -9,9 +9,10 @@ from rest_framework.views import APIView
 
 from django.utils import timezone
 from .models import Account, FinancialStatement, Transaction, VALID_DENOMINATIONS
-from .pagination import TransactionPagePagination
-from .permissions import CanEditTreasury, CanViewTreasury
+from .pagination import StatementPagePagination, TransactionPagePagination
+from .permissions import CanEditTreasury, CanManageAccounts, CanViewTreasury
 from .serializers import (
+    AccountCreateSerializer,
     AccountDetailSerializer,
     AccountListSerializer,
     FinancialStatementSerializer,
@@ -41,12 +42,14 @@ def _compute_denomination_breakdown(account):
     return counts
 
 
-class AccountListView(generics.ListAPIView):
-    serializer_class = AccountListSerializer
-    permission_classes = [CanViewTreasury]
+class AccountListView(APIView):
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [CanManageAccounts()]
+        return [CanViewTreasury()]
 
-    def get_queryset(self):
-        return Account.objects.filter(is_active=True).annotate(
+    def get(self, request):
+        queryset = Account.objects.filter(is_active=True).annotate(
             deposit_total=Coalesce(
                 Sum("transactions__amount", filter=Q(transactions__transaction_type="deposit")),
                 Decimal("0"),
@@ -55,25 +58,31 @@ class AccountListView(generics.ListAPIView):
                 Sum("transactions__amount", filter=Q(transactions__transaction_type="withdrawal")),
                 Decimal("0"),
             ),
-        )
+            latest_txn=Max("transactions__created_at"),
+        ).order_by("-latest_txn")
+        serializer = AccountListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = AccountCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        account = serializer.save()
+        return Response(AccountListSerializer(account).data, status=status.HTTP_201_CREATED)
 
 
-class AccountDetailView(generics.RetrieveAPIView):
-    serializer_class = AccountDetailSerializer
+class AccountDetailView(APIView):
     permission_classes = [CanViewTreasury]
-    queryset = Account.objects.filter(is_active=True)
 
-    def retrieve(self, request, *args, **kwargs):
-        account = self.get_object()
+    def _get_account(self, pk):
+        return get_object_or_404(Account, pk=pk, is_active=True)
+
+    def get(self, request, pk):
+        account = self._get_account(pk)
         balance = _compute_dollar_balance(account)
         denomination_breakdown = _compute_denomination_breakdown(account)
-        serializer = self.get_serializer(
+        serializer = AccountDetailSerializer(
             account,
-            context={
-                **self.get_serializer_context(),
-                "balance": balance,
-                "denomination_breakdown": denomination_breakdown,
-            },
+            context={"balance": balance, "denomination_breakdown": denomination_breakdown},
         )
         return Response(serializer.data)
 
@@ -102,6 +111,12 @@ class TransactionListCreateView(APIView):
             .select_related("created_by", "reversal_of")
             .order_by("-created_at")
         )
+        txn_types = request.query_params.getlist("transaction_type")
+        categories = request.query_params.getlist("category")
+        if txn_types:
+            queryset = queryset.filter(transaction_type__in=txn_types)
+        if categories:
+            queryset = queryset.filter(category__in=categories)
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = TransactionListSerializer(page, many=True)
         return self.paginator.get_paginated_response(serializer.data)
@@ -129,9 +144,11 @@ class FinancialStatementListCreateView(APIView):
     def get(self, request):
         queryset = FinancialStatement.objects.select_related(
             "generated_by", "treasurer_signed_by", "president_signed_by"
-        ).order_by("-period_end")
-        serializer = FinancialStatementSerializer(queryset, many=True)
-        return Response(serializer.data)
+        ).order_by("-generated_at")
+        paginator = StatementPagePagination()
+        page = paginator.paginate_queryset(queryset, request)
+        serializer = FinancialStatementSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
         serializer = FinancialStatementSerializer(data=request.data)
@@ -140,12 +157,27 @@ class FinancialStatementListCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class FinancialStatementDetailView(generics.RetrieveAPIView):
-    serializer_class = FinancialStatementSerializer
-    permission_classes = [CanViewTreasury]
-    queryset = FinancialStatement.objects.select_related(
-        "generated_by", "treasurer_signed_by", "president_signed_by"
-    )
+class FinancialStatementDetailView(APIView):
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [CanEditTreasury()]
+        return [CanViewTreasury()]
+
+    def _get_statement(self, pk):
+        return get_object_or_404(
+            FinancialStatement.objects.select_related(
+                "generated_by", "treasurer_signed_by", "president_signed_by"
+            ),
+            pk=pk,
+        )
+
+    def get(self, request, pk):
+        serializer = FinancialStatementSerializer(self._get_statement(pk))
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        self._get_statement(pk).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FinancialStatementSignView(APIView):

@@ -1,0 +1,84 @@
+.grid {
+  display: flex;
+  flex-direction: column;
+  height: 512px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.groupHeader {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px;
+  padding: 6px 16px;
+  background: var(--color-bg-page);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.groupHeader span:nth-child(2) { text-align: center; }
+.groupHeader span:nth-child(3) { text-align: right; }
+
+.row {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: 0.875rem;
+  transition: background-color 0.1s;
+}
+
+.row:not(.zero):hover {
+  background: var(--color-bg-hover);
+}
+
+.zero {
+  opacity: 0.35;
+}
+
+.denom {
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.count {
+  color: var(--color-text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.subtotal {
+  text-align: right;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  border-top: 1px solid var(--color-border);
+  margin-top: auto;
+}
+
+.totalLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.totalValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-deposit);
+  font-variant-numeric: tabular-nums;
+}

@@ -15,3 +15,14 @@ class TransactionPagePagination(PageNumberPagination):
             "previous": self.get_previous_link(),
             "results": data,
         })
+
+
+class StatementPagePagination(PageNumberPagination):
+    page_size = 3
+
+    def get_paginated_response(self, data):
+        return Response({
+            "count": self.page.paginator.count,
+            "total_pages": self.page.paginator.num_pages,
+            "results": data,
+        })

@@ -23,3 +23,13 @@ class CanEditTreasury(permissions.BasePermission):
         if user.role in ("scouter", "admin"):
             return True
         return user.ec_role in EDIT_EC_ROLES
+
+
+class CanManageAccounts(permissions.BasePermission):
+    """Only admins and scouters can create or delete accounts."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not (user and user.is_authenticated):
+            return False
+        return user.role in ("scouter", "admin")
