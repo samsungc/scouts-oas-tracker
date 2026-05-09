@@ -172,7 +172,7 @@ ul {
   body * { visibility: hidden; }
   [data-print-active], [data-print-active] * { visibility: visible; }
   [data-print-active] {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
