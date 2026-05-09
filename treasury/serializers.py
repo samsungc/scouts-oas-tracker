@@ -58,6 +58,7 @@ class AccountDetailSerializer(serializers.ModelSerializer):
 class TransactionListSerializer(serializers.ModelSerializer):
     created_by_username = serializers.CharField(source="created_by.username", read_only=True)
     reversal_of_id = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
@@ -76,6 +77,10 @@ class TransactionListSerializer(serializers.ModelSerializer):
 
     def get_reversal_of_id(self, obj):
         return obj.reversal_of_id
+
+    def get_created_at(self, obj):
+        # Return bare YYYY-MM-DD so the frontend avoids UTC-to-local shift
+        return obj.created_at.strftime("%Y-%m-%d")
 
 
 class TransactionCreateSerializer(serializers.ModelSerializer):

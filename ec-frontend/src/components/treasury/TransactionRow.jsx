@@ -1,6 +1,14 @@
 import styles from './TransactionRow.module.css'
 
 function formatDate(iso) {
+  if (!iso) return '—'
+  // Bare YYYY-MM-DD must be parsed as local to avoid UTC midnight shift
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const [y, m, d] = iso.split('-').map(Number)
+    return new Date(y, m - 1, d).toLocaleDateString('en-CA', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    })
+  }
   return new Date(iso).toLocaleDateString('en-CA', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
