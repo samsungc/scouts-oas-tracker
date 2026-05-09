@@ -8,8 +8,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   transition: width 0.2s ease, min-width 0.2s ease;
 }
 
