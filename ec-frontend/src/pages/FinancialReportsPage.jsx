@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getStatements } from '../api/treasury'
 import StatementCard from '../components/treasury/StatementCard'
 import CreateStatementModal from '../components/treasury/CreateStatementModal'
@@ -16,7 +16,6 @@ export default function FinancialReportsPage() {
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [printingId, setPrintingId] = useState(null)
-  const printRafRef = useRef(null)
 
   useEffect(() => {
     setLoading(true)
@@ -58,15 +57,13 @@ export default function FinancialReportsPage() {
 
   function handlePrint(id) {
     setPrintingId(id)
-    printRafRef.current = requestAnimationFrame(() => {
-      window.print()
-      setPrintingId(null)
-    })
   }
 
   useEffect(() => {
-    return () => { if (printRafRef.current) cancelAnimationFrame(printRafRef.current) }
-  }, [])
+    if (printingId === null) return
+    window.print()
+    setPrintingId(null)
+  }, [printingId])
 
   return (
     <div>
