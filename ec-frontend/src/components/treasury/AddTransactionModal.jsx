@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
+import DatePicker from '../ui/DatePicker'
 import { createTransaction } from '../../api/treasury'
 import { ApiError } from '../../api/client'
 import styles from './AddTransactionModal.module.css'
+
+function todayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 const DENOMINATIONS = [10000, 5000, 2000, 1000, 500, 200, 100, 25, 10, 5]
 const DENOM_LABELS = {
@@ -32,6 +38,7 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
   const [amount, setAmount] = useState('')
   const [breakdown, setBreakdown] = useState(emptyBreakdown())
   const [note, setNote] = useState('')
+  const [date, setDate] = useState(todayStr())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -83,6 +90,7 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
         ),
         note,
         is_reversal: false,
+        created_at: date,
       }
       const newTxn = await createTransaction(accountId, body)
       onSuccess(newTxn, accountId)
@@ -119,6 +127,12 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
           >
             ↓ Withdrawal
           </button>
+        </div>
+
+        {/* Date */}
+        <div className={styles.field}>
+          <label className={styles.label}>Date</label>
+          <DatePicker value={date} onChange={setDate} required />
         </div>
 
         {/* Account selector (overview modal only) */}

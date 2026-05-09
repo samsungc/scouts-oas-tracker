@@ -90,7 +90,11 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
             "is_reversal",
             "is_opening_balance",
             "reversal_of",
+            "created_at",
         ]
+        extra_kwargs = {
+            "created_at": {"required": False},
+        }
 
     def validate_amount(self, value):
         if value <= 0:
