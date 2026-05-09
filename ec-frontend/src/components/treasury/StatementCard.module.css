@@ -120,12 +120,11 @@
 
 .sectionHeader td {
   font-weight: 700;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  padding-top: 10px;
-  padding-bottom: 2px;
+  font-size: 0.88rem;
+  color: var(--color-heading);
+  padding-top: 14px;
+  padding-bottom: 4px;
+  border-bottom: 1.5px solid var(--color-border);
 }
 
 .indent {
@@ -135,16 +134,16 @@
 .dataRow td { color: var(--color-text); }
 
 .openingRow td {
-  font-weight: 600;
+  font-weight: 700;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1.5px solid var(--color-border);
 }
 
 .subtotal td {
-  font-weight: 600;
-  border-top: 1px solid var(--color-border-light);
+  font-weight: 700;
+  border-top: 1.5px solid var(--color-border);
   padding-top: 4px;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .balanceRow td {
@@ -382,9 +381,9 @@
 
   .finTable td, .finTable th { color: black; padding: 2pt 4pt; }
   .colHeader { color: #333; border-bottom-color: black; }
-  .sectionHeader td { color: #333; padding-top: 7pt; }
+  .sectionHeader td { color: black; padding-top: 9pt; border-bottom-color: black; }
   .openingRow td { border-bottom-color: black; }
-  .subtotal td { border-top-color: #999; color: #333; }
+  .subtotal td { border-top-color: black; color: black; }
   .balanceRow td { border-top-color: black; color: black; }
   .negative { color: #c00 !important; }
 

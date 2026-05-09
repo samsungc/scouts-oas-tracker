@@ -181,5 +181,9 @@ ul {
     color: black;
     font-size: 11pt;
   }
+  /* Collapse all siblings of the active card so hidden cards don't create blank pages */
+  :has(> [data-print-active]) > *:not([data-print-active]) {
+    display: none !important;
+  }
   * { box-shadow: none !important; }
 }
