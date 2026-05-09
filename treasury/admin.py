@@ -13,15 +13,20 @@ class AccountAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     list_display = (
         "id", "account", "transaction_type", "category",
-        "amount", "created_by", "created_at", "is_reversal", "reversal_of",
+        "amount", "created_by", "created_at", "is_opening_balance",
     )
-    list_filter = ("transaction_type", "category", "account", "is_reversal")
+    list_filter = ("transaction_type", "category", "account", "is_opening_balance")
     search_fields = ("note", "created_by__username", "account__name")
+    fields = (
+        "account", "transaction_type", "category", "amount",
+        "denomination_breakdown", "note", "created_at",
+        "is_opening_balance", "created_by",
+    )
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return [f.name for f in self.model._meta.get_fields() if hasattr(f, "name")]
-        return ("created_at", "created_by", "account")
+            return ("account", "created_by")
+        return ("created_by",)
 
 
 @admin.register(FinancialStatement)

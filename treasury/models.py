@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 VALID_DENOMINATIONS = [10000, 5000, 2000, 1000, 500, 200, 100, 25, 10, 5]
 
@@ -52,7 +53,7 @@ class Transaction(models.Model):
         on_delete=models.CASCADE,
         related_name="treasury_transactions",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     is_reversal = models.BooleanField(default=False)
     is_opening_balance = models.BooleanField(default=False)
     reversal_of = models.OneToOneField(
