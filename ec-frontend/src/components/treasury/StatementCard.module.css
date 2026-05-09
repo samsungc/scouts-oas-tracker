@@ -210,6 +210,46 @@
   font-weight: 600;
 }
 
+/* ── Transaction detail (print only on screen) ── */
+.txnDetail { display: none; }
+
+.txnDetailTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.txnTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.txnColHeader {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: 3px 6px 5px;
+  text-align: left;
+}
+
+.txnCell {
+  padding: 3px 6px;
+  color: var(--color-text);
+  vertical-align: top;
+}
+
+.txnRight { text-align: right; }
+
+.txnRow:nth-child(even) td { background: var(--color-bg-page); }
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .card {
@@ -347,6 +387,43 @@
   .subtotal td { border-top-color: #999; color: #333; }
   .balanceRow td { border-top-color: black; color: black; }
   .negative { color: #c00 !important; }
+
+  /* Transaction detail on print */
+  .txnDetail {
+    display: block;
+    margin-top: 18pt;
+    page-break-inside: avoid;
+  }
+
+  .txnDetailTitle {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555;
+    margin-bottom: 4pt;
+  }
+
+  .txnTable {
+    width: 100%;
+    font-size: 9pt;
+    border-collapse: collapse;
+  }
+
+  .txnColHeader {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555;
+    border-bottom: 1px solid black;
+    padding: 2pt 4pt 3pt;
+    text-align: left;
+  }
+
+  .txnCell { padding: 2pt 4pt; color: black; }
+  .txnRight { text-align: right; }
+  .txnRow:nth-child(even) td { background: #f5f5f5; }
 
   /* Signature section on print */
   .printSigSection {

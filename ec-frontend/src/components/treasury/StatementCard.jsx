@@ -66,6 +66,8 @@ function AccountFinancialTable({ account }) {
   const accountOB = parseFloat(account.account_opening_balance || 0)
   const accountTotal = accountOB + totalRevTotal - totalExpTotal
 
+  const periodTxns = account.period_transactions || []
+
   return (
     <div className={styles.accountBlock}>
       <h4 className={styles.accountName}>{account.account_name}</h4>
@@ -123,6 +125,34 @@ function AccountFinancialTable({ account }) {
           </tr>
         </tbody>
       </table>
+
+      {periodTxns.length > 0 && (
+        <div className={styles.txnDetail}>
+          <div className={styles.txnDetailTitle}>Transaction Detail</div>
+          <table className={styles.txnTable}>
+            <thead>
+              <tr>
+                <th className={styles.txnColHeader}>Date</th>
+                <th className={styles.txnColHeader}>Category</th>
+                <th className={styles.txnColHeader}>Note</th>
+                <th className={`${styles.txnColHeader} ${styles.txnRight}`}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {periodTxns.map((t, i) => (
+                <tr key={i} className={styles.txnRow}>
+                  <td className={styles.txnCell}>{fmtDate(t.date)}</td>
+                  <td className={styles.txnCell}>{t.category}</td>
+                  <td className={styles.txnCell}>{t.note}</td>
+                  <td className={`${styles.txnCell} ${styles.txnRight} ${t.type === 'withdrawal' ? styles.negative : ''}`}>
+                    {t.type === 'withdrawal' ? '-' : '+'}{fmt(t.amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

@@ -265,6 +265,12 @@ class FinancialStatementSerializer(serializers.ModelSerializer):
             total_expense = sum(Decimal(v) for v in total_expenses.values())
             closing = opening + period_revenue - period_expenses
 
+            period_txns = list(
+                period.order_by("created_at").values(
+                    "created_at", "transaction_type", "category", "amount", "note"
+                )
+            )
+
             result.append({
                 "account_id": account.id,
                 "account_name": account.name,
@@ -279,6 +285,16 @@ class FinancialStatementSerializer(serializers.ModelSerializer):
                 "total_expenses": total_expenses,
                 "total_revenue_total": str(total_revenue),
                 "total_expenses_total": str(total_expense),
+                "period_transactions": [
+                    {
+                        "date": t["created_at"].strftime("%Y-%m-%d"),
+                        "type": t["transaction_type"],
+                        "category": t["category"].replace("_", " ").title(),
+                        "note": t["note"],
+                        "amount": str(t["amount"]),
+                    }
+                    for t in period_txns
+                ],
             })
         return result
 
