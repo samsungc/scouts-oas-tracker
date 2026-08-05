@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 500;
   padding: 16px;
   animation: overlayIn 0.15s ease;
 }
@@ -61,4 +61,28 @@
 .body {
   padding: 20px 24px 24px;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .dialog {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .header {
+    padding: 16px 16px 12px;
+  }
+
+  .body {
+    padding: 14px 16px 18px;
+  }
 }

@@ -1,3 +1,4 @@
+from collections import Counter
 from decimal import Decimal
 
 from django.db.models import Max, Q, Sum
@@ -8,6 +9,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.utils import timezone
+from .fiscal_year import (
+    current_fiscal_year,
+    fiscal_year_bounds,
+    fiscal_year_for_date,
+    fiscal_year_label,
+)
 from .models import Account, FinancialStatement, Transaction, VALID_DENOMINATIONS
 from .pagination import StatementPagePagination, TransactionPagePagination
 from .permissions import CanEditTreasury, CanManageAccounts, CanViewTreasury
@@ -40,6 +47,20 @@ def _compute_denomination_breakdown(account):
         for denom, count in txn.denomination_breakdown.items():
             counts[denom] = counts.get(denom, 0) + sign * count
     return counts
+
+
+def _compute_category_ytd_totals(account):
+    start_year, _ = current_fiscal_year()
+    lower, upper = fiscal_year_bounds(start_year)
+    totals = {}
+    type_totals = {"deposit": Decimal("0"), "withdrawal": Decimal("0")}
+    qs = account.transactions.filter(created_at__date__gte=lower, created_at__date__lte=upper)
+    for txn in qs.only("transaction_type", "category", "amount"):
+        sign = 1 if txn.transaction_type == "deposit" else -1
+        totals[txn.category] = totals.get(txn.category, Decimal("0")) + sign * txn.amount
+        type_totals[txn.transaction_type] += txn.amount
+    totals.update(type_totals)
+    return totals
 
 
 class AccountListView(APIView):
@@ -80,9 +101,14 @@ class AccountDetailView(APIView):
         account = self._get_account(pk)
         balance = _compute_dollar_balance(account)
         denomination_breakdown = _compute_denomination_breakdown(account)
+        category_ytd_totals = _compute_category_ytd_totals(account)
         serializer = AccountDetailSerializer(
             account,
-            context={"balance": balance, "denomination_breakdown": denomination_breakdown},
+            context={
+                "balance": balance,
+                "denomination_breakdown": denomination_breakdown,
+                "category_ytd_totals": category_ytd_totals,
+            },
         )
         return Response(serializer.data)
 
@@ -104,6 +130,15 @@ class TransactionListCreateView(APIView):
     def _get_account(self, pk):
         return get_object_or_404(Account, pk=pk, is_active=True)
 
+    ORDERING_FIELDS = {
+        "created_at": "created_at",
+        "-created_at": "-created_at",
+        "amount": "amount",
+        "-amount": "-amount",
+        "category": "category",
+        "-category": "-category",
+    }
+
     def get(self, request, pk):
         account = self._get_account(pk)
         queryset = (
@@ -113,10 +148,23 @@ class TransactionListCreateView(APIView):
         )
         txn_types = request.query_params.getlist("transaction_type")
         categories = request.query_params.getlist("category")
+        search = request.query_params.get("search", "").strip()
+        ordering = request.query_params.get("ordering")
+
         if txn_types:
             queryset = queryset.filter(transaction_type__in=txn_types)
         if categories:
             queryset = queryset.filter(category__in=categories)
+        if search:
+            queryset = queryset.filter(
+                Q(note__icontains=search)
+                | Q(category__icontains=search)
+                | Q(created_by__username__icontains=search)
+                | Q(amount__icontains=search)
+            )
+        if ordering in self.ORDERING_FIELDS:
+            queryset = queryset.order_by(self.ORDERING_FIELDS[ordering])
+
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = TransactionListSerializer(page, many=True)
         return self.paginator.get_paginated_response(serializer.data)
@@ -145,6 +193,19 @@ class FinancialStatementListCreateView(APIView):
         queryset = FinancialStatement.objects.select_related(
             "generated_by", "treasurer_signed_by", "president_signed_by"
         ).order_by("-generated_at")
+
+        fy_start = request.query_params.get("fiscal_year_start")
+        if fy_start is not None:
+            try:
+                fy_start = int(fy_start)
+            except ValueError:
+                return Response(
+                    {"detail": "fiscal_year_start must be an integer year."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            lower, upper = fiscal_year_bounds(fy_start)
+            queryset = queryset.filter(period_start__gte=lower, period_start__lte=upper)
+
         paginator = StatementPagePagination()
         page = paginator.paginate_queryset(queryset, request)
         serializer = FinancialStatementSerializer(page, many=True)
@@ -238,3 +299,36 @@ class TreasurerSignView(FinancialStatementSignView):
 
 class PresidentSignView(FinancialStatementSignView):
     capacity = "president"
+
+
+class FiscalYearListView(APIView):
+    """
+    GET /api/treasury/statements/fiscal-years/
+
+    Summarizes existing FinancialStatements into their Sept-Aug fiscal years,
+    always including the current fiscal year (count 0 if empty) so there's
+    always a folder to create the first report of a new year in.
+    """
+
+    permission_classes = [CanViewTreasury]
+
+    def get(self, request):
+        counts = Counter()
+        for period_start in FinancialStatement.objects.values_list("period_start", flat=True):
+            counts[fiscal_year_for_date(period_start)] += 1
+
+        current = current_fiscal_year()
+        if current not in counts:
+            counts[current] = 0
+
+        years = sorted(counts.keys(), key=lambda fy: fy[0], reverse=True)
+        data = [
+            {
+                "start_year": start_year,
+                "end_year": end_year,
+                "label": fiscal_year_label(start_year, end_year),
+                "count": counts[(start_year, end_year)],
+            }
+            for start_year, end_year in years
+        ]
+        return Response(data)

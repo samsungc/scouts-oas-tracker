@@ -49,7 +49,20 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
   function openPicker() {
     if (triggerRef.current) {
       const r = triggerRef.current.getBoundingClientRect()
-      setPopoverPos({ top: r.bottom + 6, left: r.left, width: r.width })
+      const margin = 8
+      const popoverWidth = Math.max(r.width, 272)
+      const popoverHeight = 340
+
+      let left = r.left
+      left = Math.min(left, window.innerWidth - popoverWidth - margin)
+      left = Math.max(left, margin)
+
+      let top = r.bottom + 6
+      if (top + popoverHeight > window.innerHeight - margin) {
+        top = Math.max(margin, r.top - popoverHeight - 6)
+      }
+
+      setPopoverPos({ top, left, width: r.width })
     }
     setMode('days')
     setOpen(true)

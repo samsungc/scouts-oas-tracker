@@ -1,3 +1,19 @@
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+  transition: color 0.12s;
+}
+
+.backLink:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
 .pageHeader {
   display: flex;
   align-items: center;
@@ -11,10 +27,11 @@
   color: var(--color-heading);
 }
 
-.folderGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .empty {
@@ -32,8 +49,7 @@
     margin-bottom: 20px;
   }
 
-  .folderGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .list {
+    gap: 8px;
   }
 }

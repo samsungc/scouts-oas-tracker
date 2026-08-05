@@ -1,38 +1,31 @@
 .row td {
   padding: 11px 14px;
-  height: 52px;
+  height: 48px;
   font-size: 0.875rem;
+  line-height: 1;
   border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
 }
-
 
 .reversal td {
   color: var(--color-reversal-text);
 }
 
+.dateTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: auto;
+}
+
+.noteText {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 .date {
   color: var(--color-text-muted);
   white-space: nowrap;
-}
-
-.pill {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.pill.deposit {
-  background: var(--color-deposit-bg);
-  color: var(--color-deposit);
-}
-
-.pill.withdrawal {
-  background: var(--color-withdrawal-bg);
-  color: var(--color-withdrawal);
 }
 
 .category {
@@ -41,6 +34,7 @@
 }
 
 .amount {
+  text-align: left;
   font-weight: 600;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -65,31 +59,10 @@
   white-space: nowrap;
 }
 
-.rowWithNote td {
-  border-top: none;
-}
-
-.noteRow td {
-  border-bottom: none;
-}
-
-.noteCell {
-  padding: 10px 14px 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text);
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.rowWithNote td {
-  padding-top: 4px;
-}
-
 @media (max-width: 768px) {
   .row td {
-    padding: 10px 10px;
+    padding: 8px 10px;
     height: auto;
-    min-height: 44px;
+    min-height: 36px;
   }
 }

@@ -4,6 +4,8 @@
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   box-shadow: var(--shadow-sm);
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 /* ── Visibility helpers ── */
@@ -331,6 +333,8 @@
     padding: 0;
     font-size: 11pt;
     color: black;
+    max-width: none;
+    margin: 0;
   }
 
   /* Print header */

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation, NavLink, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ProfileModal from '../ui/ProfileModal'
 import IconTreasury from '../icons/IconTreasury'
@@ -56,16 +56,13 @@ export default function BottomNav() {
   return (
     <>
       <nav className={styles.bottomNav}>
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.key}
-            to={item.to}
-            className={`${styles.navItem} ${isActive(item) ? styles.navItemActive : ''}`}
-          >
-            <item.icon size={20} />
-            <span className={styles.navLabel}>{item.label}</span>
-          </NavLink>
-        ))}
+        <button
+          className={`${styles.navItem} ${showProfile ? styles.navItemActive : ''}`}
+          onClick={() => setShowProfile(true)}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span className={styles.navLabel}>Profile</span>
+        </button>
         <button
           className={`${styles.navItem} ${drawerOpen ? styles.navItemActive : ''}`}
           onClick={() => setDrawerOpen((o) => !o)}
