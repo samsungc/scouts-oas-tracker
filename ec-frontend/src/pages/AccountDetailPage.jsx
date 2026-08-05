@@ -152,7 +152,7 @@ export default function AccountDetailPage() {
       </div>
 
       <div className={styles.filters}>
-        <span className={styles.filtersLabel}>YTD / Sort by</span>
+        <span className={styles.filtersLabel}>SORT BY / YTD</span>
         <div className={styles.filterRow}>
           <CheckChip
             label="Deposit"
