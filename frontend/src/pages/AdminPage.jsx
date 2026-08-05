@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { importBadgeRecords } from '../api/badges'
-import { getScouts, assignECRole } from '../api/users'
+import { getScouts, assignECRole, exportVenturers } from '../api/users'
 import Spinner from '../components/ui/Spinner'
 import styles from './AdminPage.module.css'
 
@@ -185,6 +185,40 @@ function ImportSection() {
   )
 }
 
+function ExportSection() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleExport() {
+    setLoading(true)
+    setError('')
+    try {
+      await exportVenturers()
+    } catch (err) {
+      setError(err.detail || 'Export failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className={styles.section}>
+      <h2 className={styles.sectionTitle}>Export Active Venturers</h2>
+      <p className={styles.sectionSubtitle}>
+        Download an Excel spreadsheet of all currently active venturers and the badges
+        each has fully achieved.
+      </p>
+
+      <div className={styles.card}>
+        <button className={styles.importBtn} disabled={loading} onClick={handleExport}>
+          {loading ? 'Preparing…' : 'Export to Excel'}
+        </button>
+        {error && <p className={styles.errorMsg}>{error}</p>}
+      </div>
+    </section>
+  )
+}
+
 function ECMembersSection() {
   const [scouts, setScouts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -293,6 +327,7 @@ export default function AdminPage() {
         <h1 className={styles.title}>Admin</h1>
       </div>
       <ImportSection />
+      <ExportSection />
       <ECMembersSection />
     </div>
   )

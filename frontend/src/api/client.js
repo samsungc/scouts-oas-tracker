@@ -82,6 +82,36 @@ async function request(path, options = {}, retry = true) {
   return json
 }
 
+async function requestBlob(path, defaultFilename, retry = true) {
+  const res = await fetch(`${BASE}${path}`, { method: 'GET', credentials: 'include' })
+
+  if (res.status === 401 && retry) {
+    try {
+      await refreshAccessToken()
+      return requestBlob(path, defaultFilename, false)
+    } catch {
+      window.dispatchEvent(new CustomEvent('oas:session-expired'))
+      throw new ApiError(401, 'Session expired')
+    }
+  }
+
+  if (!res.ok) throw new ApiError(res.status, `HTTP ${res.status}`)
+
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') || ''
+  const match = disposition.match(/filename="?([^"]+)"?/)
+  const filename = match ? match[1] : defaultFilename
+
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.URL.revokeObjectURL(url)
+}
+
 export const api = {
   get: (path) => request(path, { method: 'GET' }),
   post: (path, body) =>
@@ -92,4 +122,5 @@ export const api = {
   patch: (path, body) =>
     request(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (path) => request(path, { method: 'DELETE' }),
+  downloadFile: (path, defaultFilename) => requestBlob(path, defaultFilename),
 }
