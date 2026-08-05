@@ -1,0 +1,20 @@
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+  transition: color 0.12s;
+}
+
+.backLink:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}

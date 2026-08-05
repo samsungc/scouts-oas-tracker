@@ -25,8 +25,16 @@ export function getTransactions(accountId, params = {}) {
 export const createTransaction = (accountId, body) =>
   api.post(`/treasury/accounts/${accountId}/transactions/`, body)
 
-export const getStatements = (page = 1) =>
-  api.get(`/treasury/statements/?page=${page}`)
+export const getStatements = (page = 1, fiscalYearStart = null) => {
+  const params = new URLSearchParams({ page })
+  if (fiscalYearStart !== null && fiscalYearStart !== undefined) {
+    params.set('fiscal_year_start', fiscalYearStart)
+  }
+  return api.get(`/treasury/statements/?${params.toString()}`)
+}
+
+export const getFiscalYears = () =>
+  api.get('/treasury/statements/fiscal-years/')
 
 export const createStatement = (body) =>
   api.post('/treasury/statements/', body)

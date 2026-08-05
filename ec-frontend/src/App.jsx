@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage'
 import TreasurerOverviewPage from './pages/TreasurerOverviewPage'
 import AccountDetailPage from './pages/AccountDetailPage'
 import FinancialReportsPage from './pages/FinancialReportsPage'
+import FinancialReportYearPage from './pages/FinancialReportYearPage'
+import FinancialReportDetailPage from './pages/FinancialReportDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 import Spinner from './components/ui/Spinner'
 
@@ -65,6 +67,8 @@ export default function App() {
         <Route path="treasurer" element={<TreasurerOverviewPage />} />
         <Route path="treasurer/accounts/:id" element={<AccountDetailPage />} />
         <Route path="treasurer/reports" element={<FinancialReportsPage />} />
+        <Route path="treasurer/reports/:startYear" element={<FinancialReportYearPage />} />
+        <Route path="treasurer/reports/:startYear/:id" element={<FinancialReportDetailPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -1,3 +1,4 @@
+from collections import Counter
 from decimal import Decimal
 
 from django.db.models import Max, Q, Sum
@@ -8,6 +9,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.utils import timezone
+from .fiscal_year import (
+    current_fiscal_year,
+    fiscal_year_bounds,
+    fiscal_year_for_date,
+    fiscal_year_label,
+)
 from .models import Account, FinancialStatement, Transaction, VALID_DENOMINATIONS
 from .pagination import StatementPagePagination, TransactionPagePagination
 from .permissions import CanEditTreasury, CanManageAccounts, CanViewTreasury
@@ -145,6 +152,19 @@ class FinancialStatementListCreateView(APIView):
         queryset = FinancialStatement.objects.select_related(
             "generated_by", "treasurer_signed_by", "president_signed_by"
         ).order_by("-generated_at")
+
+        fy_start = request.query_params.get("fiscal_year_start")
+        if fy_start is not None:
+            try:
+                fy_start = int(fy_start)
+            except ValueError:
+                return Response(
+                    {"detail": "fiscal_year_start must be an integer year."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            lower, upper = fiscal_year_bounds(fy_start)
+            queryset = queryset.filter(period_start__gte=lower, period_start__lte=upper)
+
         paginator = StatementPagePagination()
         page = paginator.paginate_queryset(queryset, request)
         serializer = FinancialStatementSerializer(page, many=True)
@@ -238,3 +258,36 @@ class TreasurerSignView(FinancialStatementSignView):
 
 class PresidentSignView(FinancialStatementSignView):
     capacity = "president"
+
+
+class FiscalYearListView(APIView):
+    """
+    GET /api/treasury/statements/fiscal-years/
+
+    Summarizes existing FinancialStatements into their Sept-Aug fiscal years,
+    always including the current fiscal year (count 0 if empty) so there's
+    always a folder to create the first report of a new year in.
+    """
+
+    permission_classes = [CanViewTreasury]
+
+    def get(self, request):
+        counts = Counter()
+        for period_start in FinancialStatement.objects.values_list("period_start", flat=True):
+            counts[fiscal_year_for_date(period_start)] += 1
+
+        current = current_fiscal_year()
+        if current not in counts:
+            counts[current] = 0
+
+        years = sorted(counts.keys(), key=lambda fy: fy[0], reverse=True)
+        data = [
+            {
+                "start_year": start_year,
+                "end_year": end_year,
+                "label": fiscal_year_label(start_year, end_year),
+                "count": counts[(start_year, end_year)],
+            }
+            for start_year, end_year in years
+        ]
+        return Response(data)
