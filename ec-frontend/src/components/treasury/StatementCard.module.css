@@ -211,8 +211,8 @@
   font-weight: 600;
 }
 
-/* ── Transaction detail (print only on screen) ── */
-.txnDetail { display: none; }
+/* ── Transaction detail ── */
+.txnDetail { display: block; }
 
 .txnDetailTitle {
   font-size: 0.78rem;
