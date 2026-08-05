@@ -48,6 +48,11 @@ export function assignECRole(id, ecRole) {
   return api.patch(`/users/${id}/ec-role/`, { ec_role: ecRole })
 }
 
+/** Download an .xlsx export of active venturers and their achieved badges. Admin only. */
+export function exportVenturers() {
+  return api.downloadFile('/users/export/venturers/', 'active_venturers_export.xlsx')
+}
+
 /** Get site-wide settings. Admin only. */
 export function getEmailSettings() {
   return api.get('/users/settings/')

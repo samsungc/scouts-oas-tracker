@@ -587,6 +587,92 @@ class AssignECRoleView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class ExportVenturersView(APIView):
+    """Export all active venturers (scouts) and their achieved badges as an .xlsx file. Admin only."""
+
+    def get_permissions(self):
+        from badges.permissions import IsAdminOnly
+        return [permissions.IsAuthenticated(), IsAdminOnly()]
+
+    def get(self, request):
+        import io
+
+        from django.http import HttpResponse
+        from openpyxl import Workbook
+        from openpyxl.styles import Font
+
+        from badges.models import Badge
+        from submissions.models import BadgeSubmission
+
+        from .models import User
+
+        scouts = list(
+            User.objects.filter(role="scout", is_active=True)
+            .order_by("last_name", "first_name", "username")
+        )
+
+        badges = Badge.objects.filter(is_active=True).prefetch_related("requirements")
+        badge_req_counts = {b.id: b.requirements.count() for b in badges}
+        badge_names = {b.id: b.name for b in badges}
+
+        approved_subs = BadgeSubmission.objects.filter(
+            scout__role="scout",
+            scout__is_active=True,
+            status="approved",
+            requirement__badge__is_active=True,
+        ).values("scout_id", "requirement__badge_id", "requirement_id", "reviewed_at")
+
+        scout_badge_reqs = defaultdict(lambda: defaultdict(dict))
+        for sub in approved_subs:
+            scout_badge_reqs[sub["scout_id"]][sub["requirement__badge_id"]][sub["requirement_id"]] = sub["reviewed_at"]
+
+        scout_achieved = {}
+        for scout in scouts:
+            achieved = []
+            for badge_id, reqs_approved in scout_badge_reqs.get(scout.id, {}).items():
+                total = badge_req_counts.get(badge_id, 0)
+                if total > 0 and len(reqs_approved) == total:
+                    reviewed_dates = [d for d in reqs_approved.values() if d is not None]
+                    completed_at = max(reviewed_dates) if reviewed_dates else None
+                    achieved.append((badge_names[badge_id], completed_at))
+            achieved.sort(key=lambda item: item[0])
+            scout_achieved[scout.id] = achieved
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Active Venturers"
+        ws.append(["Name", "Username", "Email", "Badge Name", "Completion Date"])
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+
+        for scout in scouts:
+            name = f"{scout.first_name} {scout.last_name}".strip() or scout.username
+            achieved = scout_achieved[scout.id]
+            if not achieved:
+                ws.append([name, scout.username, scout.email, "", ""])
+                continue
+            for badge_name, completed_at in achieved:
+                completion_date = django_tz.localtime(completed_at).date() if completed_at else ""
+                ws.append([name, scout.username, scout.email, badge_name, completion_date])
+                if completion_date:
+                    ws.cell(row=ws.max_row, column=5).number_format = "YYYY-MM-DD"
+
+        for col, width in zip("ABCDE", [24, 18, 28, 30, 18]):
+            ws.column_dimensions[col].width = width
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"active_venturers_export_{django_tz.now().strftime('%Y-%m-%d')}.xlsx"
+        response = HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+
 _RESET_SENT_MSG = "If that email address is registered, a reset link has been sent."
 
 
