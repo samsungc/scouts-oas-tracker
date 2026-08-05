@@ -43,16 +43,20 @@ class AccountListSerializer(serializers.ModelSerializer):
 class AccountDetailSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
     denomination_breakdown = serializers.SerializerMethodField()
+    category_ytd_totals = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
-        fields = ["id", "name", "balance", "denomination_breakdown"]
+        fields = ["id", "name", "balance", "denomination_breakdown", "category_ytd_totals"]
 
     def get_balance(self, obj):
         return self.context.get("balance")
 
     def get_denomination_breakdown(self, obj):
         return self.context.get("denomination_breakdown")
+
+    def get_category_ytd_totals(self, obj):
+        return self.context.get("category_ytd_totals")
 
 
 class TransactionListSerializer(serializers.ModelSerializer):

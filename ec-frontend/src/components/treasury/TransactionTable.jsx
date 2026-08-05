@@ -7,6 +7,7 @@ import styles from './TransactionTable.module.css'
 export default function TransactionTable({
   accountId, newTxn,
   selectedTypes, selectedCategories,
+  search, ordering,
   page, onTotalPagesChange,
 }) {
   const [data, setData] = useState(null)
@@ -21,6 +22,8 @@ export default function TransactionTable({
       page,
       transaction_type: [...selectedTypes],
       category: [...selectedCategories],
+      search,
+      ordering,
     })
       .then((d) => {
         if (!cancelled) {
@@ -31,7 +34,7 @@ export default function TransactionTable({
       })
       .catch((e) => { if (!cancelled) { setError(e.message); setLoading(false) } })
     return () => { cancelled = true }
-  }, [accountId, page, selectedTypes, selectedCategories]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accountId, page, selectedTypes, selectedCategories, search, ordering]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!newTxn || !data) return
@@ -51,18 +54,16 @@ export default function TransactionTable({
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Type</th>
+              <th>Title</th>
               <th>Category</th>
-              <th>Amount</th>
               <th>By</th>
-              <th></th>
+              <th>Amount</th>
             </tr>
           </thead>
           <tbody>
             {!data || data.results.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.empty}>No transactions found</td>
+                <td colSpan={4} className={styles.empty}>No transactions found</td>
               </tr>
             ) : (
               data.results.map((txn) => <TransactionRow key={txn.id} txn={txn} />)
