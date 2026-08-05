@@ -18,7 +18,7 @@ class TransactionPagePagination(PageNumberPagination):
 
 
 class StatementPagePagination(PageNumberPagination):
-    page_size = 3
+    page_size = 10
 
     def get_paginated_response(self, data):
         return Response({
