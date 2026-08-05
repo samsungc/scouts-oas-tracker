@@ -278,4 +278,12 @@
     max-width: none;
     flex-basis: 100%;
   }
+
+  .sortWrap {
+    display: none;
+  }
+
+  .filters {
+    display: none;
+  }
 }

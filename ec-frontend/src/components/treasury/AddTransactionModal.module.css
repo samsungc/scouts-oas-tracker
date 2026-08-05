@@ -224,6 +224,29 @@
   margin-top: 4px;
 }
 
+@media (max-width: 480px) {
+  .row2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .denomGrid {
+    gap: 5px;
+  }
+
+  .denomCell {
+    padding: 6px 3px;
+  }
+
+  .denomLabel {
+    font-size: 0.66rem;
+  }
+
+  .denomInput {
+    font-size: 0.85rem;
+  }
+}
+
 /* Note */
 .textarea {
   padding: 10px 12px;

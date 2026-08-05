@@ -190,4 +190,8 @@
   .grid {
     grid-template-columns: 1fr;
   }
+
+  .newAccountForm {
+    min-width: 0;
+  }
 }
