@@ -18,9 +18,12 @@ function formatCategory(cat) {
   return cat.replace(/_/g, ' ')
 }
 
-export default function TransactionRow({ txn }) {
+export default function TransactionRow({ txn, onClick }) {
   return (
-    <tr className={`${styles.row} ${txn.is_reversal ? styles.reversal : ''}`}>
+    <tr
+      className={`${styles.row} ${txn.is_reversal ? styles.reversal : ''}`}
+      onClick={onClick}
+    >
       <td className={styles.dateTitle}>
         {txn.note && <span className={styles.noteText}>{txn.note}</span>}
         <span className={styles.date}>{formatDate(txn.created_at)}</span>

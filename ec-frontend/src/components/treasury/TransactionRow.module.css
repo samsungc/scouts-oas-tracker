@@ -1,3 +1,12 @@
+.row {
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.row:hover td {
+  background: var(--color-bg-hover);
+}
+
 .row td {
   padding: 11px 14px;
   height: 48px;

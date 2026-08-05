@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getTransactions } from '../../api/treasury'
 import TransactionRow from './TransactionRow'
+import TransactionDetailModal from './TransactionDetailModal'
 import Spinner from '../ui/Spinner'
 import styles from './TransactionTable.module.css'
 
@@ -8,18 +9,18 @@ export default function TransactionTable({
   accountId, newTxn,
   selectedTypes, selectedCategories,
   search, ordering,
-  page, onTotalPagesChange,
 }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedTxn, setSelectedTxn] = useState(null)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     setError('')
     getTransactions(accountId, {
-      page,
+      page_size: 2000,
       transaction_type: [...selectedTypes],
       category: [...selectedCategories],
       search,
@@ -29,12 +30,11 @@ export default function TransactionTable({
         if (!cancelled) {
           setData(d)
           setLoading(false)
-          onTotalPagesChange?.(Math.ceil(d.count / (d.results?.length || 1)))
         }
       })
       .catch((e) => { if (!cancelled) { setError(e.message); setLoading(false) } })
     return () => { cancelled = true }
-  }, [accountId, page, selectedTypes, selectedCategories, search, ordering]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accountId, selectedTypes, selectedCategories, search, ordering])
 
   useEffect(() => {
     if (!newTxn || !data) return
@@ -54,7 +54,7 @@ export default function TransactionTable({
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Title</th>
+              <th>Info</th>
               <th>Category</th>
               <th>By</th>
               <th>Amount</th>
@@ -66,11 +66,17 @@ export default function TransactionTable({
                 <td colSpan={4} className={styles.empty}>No transactions found</td>
               </tr>
             ) : (
-              data.results.map((txn) => <TransactionRow key={txn.id} txn={txn} />)
+              data.results.map((txn) => (
+                <TransactionRow key={txn.id} txn={txn} onClick={() => setSelectedTxn(txn)} />
+              ))
             )}
           </tbody>
         </table>
       </div>
+
+      {selectedTxn && (
+        <TransactionDetailModal txn={selectedTxn} onClose={() => setSelectedTxn(null)} />
+      )}
     </div>
   )
 }

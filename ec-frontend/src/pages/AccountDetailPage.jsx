@@ -7,7 +7,6 @@ import AddTransactionModal from '../components/treasury/AddTransactionModal'
 import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
-import Pagination from '../components/ui/Pagination'
 import IconPlus from '../components/icons/IconPlus'
 import IconSearch from '../components/icons/IconSearch'
 import IconTreasury from '../components/icons/IconTreasury'
@@ -61,10 +60,6 @@ export default function AccountDetailPage() {
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('-created_at')
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-
-  useEffect(() => { setPage(1); setTotalPages(1) }, [selectedTypes, selectedCategories, search, sort])
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput.trim()), 300)
@@ -189,12 +184,8 @@ export default function AccountDetailPage() {
           selectedCategories={selectedCategories}
           search={search}
           ordering={sort}
-          page={page}
-          onTotalPagesChange={setTotalPages}
         />
       </div>
-
-      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       {showModal && (
         <AddTransactionModal
