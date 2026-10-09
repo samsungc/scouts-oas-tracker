@@ -130,13 +130,16 @@ class TransactionListCreateView(APIView):
     def _get_account(self, pk):
         return get_object_or_404(Account, pk=pk, is_active=True)
 
+    # created_at is stored as midnight for the chosen date, so many rows share
+    # the same value. "id" breaks ties in insertion order, keeping same-day
+    # transactions in the order they were entered and pagination stable.
     ORDERING_FIELDS = {
-        "created_at": "created_at",
-        "-created_at": "-created_at",
-        "amount": "amount",
-        "-amount": "-amount",
-        "category": "category",
-        "-category": "-category",
+        "created_at": ("created_at", "id"),
+        "-created_at": ("-created_at", "-id"),
+        "amount": ("amount", "id"),
+        "-amount": ("-amount", "-id"),
+        "category": ("category", "id"),
+        "-category": ("-category", "-id"),
     }
 
     def get(self, request, pk):
@@ -144,7 +147,7 @@ class TransactionListCreateView(APIView):
         queryset = (
             account.transactions
             .select_related("created_by", "reversal_of")
-            .order_by("-created_at")
+            .order_by("-created_at", "-id")
         )
         txn_types = request.query_params.getlist("transaction_type")
         categories = request.query_params.getlist("category")
@@ -163,7 +166,7 @@ class TransactionListCreateView(APIView):
                 | Q(amount__icontains=search)
             )
         if ordering in self.ORDERING_FIELDS:
-            queryset = queryset.order_by(self.ORDERING_FIELDS[ordering])
+            queryset = queryset.order_by(*self.ORDERING_FIELDS[ordering])
 
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = TransactionListSerializer(page, many=True)

@@ -299,7 +299,7 @@ class FinancialStatementSerializer(serializers.ModelSerializer):
             closing = opening + period_revenue - period_expenses
 
             period_txns = list(
-                period.order_by("created_at").values(
+                period.order_by("created_at", "id").values(
                     "created_at", "transaction_type", "category", "amount", "note"
                 )
             )
