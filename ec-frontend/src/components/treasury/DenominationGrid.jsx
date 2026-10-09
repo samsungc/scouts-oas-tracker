@@ -15,6 +15,11 @@ const DENOM_LABELS = {
   5:     '$0.05',
 }
 
+function formatSubtotal(cents) {
+  const abs = '$' + (Math.abs(cents) / 100).toFixed(2)
+  return cents < 0 ? `−${abs}` : abs
+}
+
 const BILLS = new Set([10000, 5000, 2000, 1000, 500, 200, 100])
 
 export default function DenominationGrid({ breakdown }) {
@@ -39,7 +44,7 @@ export default function DenominationGrid({ breakdown }) {
             <span className={styles.denom}>{DENOM_LABELS[cents]}</span>
             <span className={styles.count}>{count === 0 ? '—' : `× ${count}`}</span>
             <span className={styles.subtotal}>
-              {count === 0 ? '' : '$' + ((cents * count) / 100).toFixed(2)}
+              {count === 0 ? '' : formatSubtotal(cents * count)}
             </span>
           </div>
         )
@@ -57,7 +62,7 @@ export default function DenominationGrid({ breakdown }) {
             <span className={styles.denom}>{DENOM_LABELS[cents]}</span>
             <span className={styles.count}>{count === 0 ? '—' : `× ${count}`}</span>
             <span className={styles.subtotal}>
-              {count === 0 ? '' : '$' + ((cents * count) / 100).toFixed(2)}
+              {count === 0 ? '' : formatSubtotal(cents * count)}
             </span>
           </div>
         )

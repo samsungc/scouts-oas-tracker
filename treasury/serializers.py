@@ -120,9 +120,11 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
                 f"denomination_breakdown must contain exactly these keys: {expected}"
             )
         for key, count in value.items():
-            if not isinstance(count, int) or count < 0:
+            # Negative counts are allowed and represent change (bills going the
+            # opposite direction of the transaction).
+            if not isinstance(count, int) or isinstance(count, bool):
                 raise serializers.ValidationError(
-                    f"Count for denomination {key} must be a non-negative integer."
+                    f"Count for denomination {key} must be an integer."
                 )
         return value
 
@@ -155,6 +157,28 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
                         f"Denomination breakdown sums to ${breakdown_cents / 100:.2f} "
                         f"but amount is ${amount_cents / 100:.2f}."
                     )
+                })
+
+        # Bills on hand: the transaction (including any change) must not leave a
+        # negative count for any denomination. Reversals are exempt.
+        account = self.context.get("account")
+        if breakdown is not None and account is not None and not is_reversal:
+            on_hand = {str(d): 0 for d in VALID_DENOMINATIONS}
+            for txn in account.transactions.only("transaction_type", "denomination_breakdown"):
+                s = 1 if txn.transaction_type == "deposit" else -1
+                for denom, count in txn.denomination_breakdown.items():
+                    on_hand[denom] = on_hand.get(denom, 0) + s * count
+            sign = 1 if transaction_type == "deposit" else -1
+            short = [
+                int(denom) for denom, count in breakdown.items()
+                if on_hand.get(denom, 0) + sign * count < 0
+            ]
+            if short:
+                labels = ", ".join(
+                    f"${d / 100:.2f}" for d in sorted(short, reverse=True)
+                )
+                raise serializers.ValidationError({
+                    "denomination_breakdown": f"Not enough on hand for: {labels}."
                 })
 
         # Reversal validation

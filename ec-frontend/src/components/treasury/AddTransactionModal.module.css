@@ -215,6 +215,12 @@
   font-weight: 400;
 }
 
+.denomHint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
 .mismatchMsg {
   font-size: 0.8rem;
   color: var(--color-withdrawal);
