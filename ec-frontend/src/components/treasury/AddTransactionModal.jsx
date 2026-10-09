@@ -58,20 +58,25 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
   const sumMatch = amount !== '' && anyDenomFilled && breakdownCents === amountCents
   const wouldOverdraft = txnType === 'withdrawal' && balanceCents !== null && amountCents > 0 && amountCents > balanceCents
 
-  const overdrawnDenoms = txnType === 'withdrawal' && denominationBreakdown
+  // Negative counts represent change: on a deposit, bills handed back out of
+  // the float; on a withdrawal, bills received back. A denomination is
+  // overdrawn when the transaction would leave fewer than zero on hand.
+  const sign = txnType === 'deposit' ? 1 : -1
+  const overdrawnDenoms = denominationBreakdown
     ? new Set(DENOMINATIONS.filter((d) => {
         const entered = parseInt(breakdown[String(d)]) || 0
         const available = denominationBreakdown[String(d)] ?? 0
-        return entered > available
+        return available + sign * entered < 0
       }))
     : new Set()
   const hasOverdraw = overdrawnDenoms.size > 0
+  const hasChange = DENOMINATIONS.some((d) => (parseInt(breakdown[String(d)]) || 0) < 0)
 
   function setDenom(cents, val) {
     const num = parseInt(val)
     setBreakdown((prev) => ({
       ...prev,
-      [String(cents)]: val === '' ? '' : String(Math.max(0, isNaN(num) ? 0 : num)),
+      [String(cents)]: val === '' ? '' : String(isNaN(num) ? 0 : num),
     }))
   }
 
@@ -212,7 +217,7 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
                   <input
                     className={styles.denomInput}
                     type="number"
-                    min="0"
+                    min={txnType === 'deposit' && available !== null ? -available : undefined}
                     max={txnType === 'withdrawal' && available !== null ? available : undefined}
                     step="1"
                     value={breakdown[String(d)]}
@@ -223,9 +228,15 @@ export default function AddTransactionModal({ accounts, defaultAccountId, onClos
               )
             })}
           </div>
+          <p className={styles.denomHint}>
+            {txnType === 'deposit'
+              ? 'Enter a negative count for change given back (e.g. received a $20, gave back a $5 → $20: 1, $5: -1).'
+              : 'Enter a negative count for change received back (e.g. paid with a $20, got back a $5 → $20: 1, $5: -1).'}
+          </p>
           {hasOverdraw && (
             <p className={styles.mismatchMsg}>
-              Not enough bills on hand for the highlighted denominations.
+              Not enough bills on hand for the highlighted denominations
+              {hasChange && txnType === 'deposit' ? ' — you can’t give change you don’t have' : ''}.
             </p>
           )}
           {wouldOverdraft && !hasOverdraw && (
