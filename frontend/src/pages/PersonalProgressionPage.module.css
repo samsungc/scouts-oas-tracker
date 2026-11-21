@@ -1,0 +1,246 @@
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scroll-margin-top: 80px;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.heroTitle {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+}
+
+.heroNext {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.heroNextLabel {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Level trail */
+
+.trail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  counter-reset: none;
+}
+
+.node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 0;
+}
+
+.node:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: calc(50% + 24px);
+  right: calc(-50% + 24px);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.nodeIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.nodeName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.nodeNote {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nodeDone {
+  color: #fff;
+}
+
+.nodeDone .nodeIcon {
+  background: var(--color-status-approved);
+  border-color: var(--color-status-approved);
+  color: #fff;
+}
+
+.nodeDone:not(:last-child)::after {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.nodeCurrent {
+  color: #fff;
+}
+
+.nodeCurrent .nodeIcon {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.3);
+}
+
+.nodeCurrent .nodeName {
+  font-weight: 800;
+}
+
+/* Step tracker */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.stepNum {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border-light);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stepLabel {
+  overflow-wrap: anywhere;
+}
+
+.stepDone {
+  color: var(--color-status-approved);
+}
+
+.stepDone .stepNum {
+  background: var(--color-status-approved);
+  color: #fff;
+}
+
+.stepCurrent {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+}
+
+.stepCurrent .stepNum {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.panel {
+  display: block;
+}
+
+.finished {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-badge-complete-border);
+  border-radius: var(--radius-lg);
+}
+
+.finished h2 {
+  color: var(--color-heading);
+  margin: 10px 0 6px;
+}
+
+.finished p {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+
+.empty {
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 18px 16px;
+  }
+  .heroTitle {
+    font-size: 1.4rem;
+  }
+  .nodeName {
+    font-size: 0.72rem;
+  }
+  .node:not(:last-child)::after {
+    left: calc(50% + 20px);
+    right: calc(-50% + 20px);
+  }
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

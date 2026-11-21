@@ -226,9 +226,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+.shortLabel { display: none; }
+
 @media (max-width: 640px) {
   .brandName { display: none; }
   .mobileHide { display: none; }
+  .fullLabel { display: none; }
+  .shortLabel { display: inline; }
 }
 
 [data-theme="dark"] .nav {

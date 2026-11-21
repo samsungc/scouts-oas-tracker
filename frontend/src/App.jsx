@@ -9,6 +9,7 @@ import ReviewPage from './pages/ReviewPage'
 import PeerReviewPage from './pages/PeerReviewPage'
 import ScoutsPage from './pages/ScoutsPage'
 import MySubmissionsPage from './pages/MySubmissionsPage'
+import PersonalProgressionPage from './pages/PersonalProgressionPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import NotFoundPage from './pages/NotFoundPage'
 import AdminPage from './pages/AdminPage'
@@ -85,6 +86,17 @@ export default function App() {
           <ProtectedRoute roles={['scout']}>
             <Layout>
               <SubmitPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/personal-progression"
+        element={
+          <ProtectedRoute roles={['scout']}>
+            <Layout>
+              <PersonalProgressionPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import BadgeCard from './BadgeCard'
+import { PP_CATEGORY, getPPState, describeNextStep } from '../../utils/personalProgression'
 import styles from './BadgeCategoryGroup.module.css'
 
 /** Returns a sort key for a badge within its category. Uses the level field when set, otherwise falls back to trailing integer in the name. */
@@ -26,6 +28,27 @@ function isBadgeRejected(badge, detailCache, submissionsMap, isComplete) {
   if (!detail || detail.requirements.length === 0) return false
   return detail.requirements.some(
     (req) => submissionsMap.get(req.id)?.status === 'rejected',
+  )
+}
+
+/** "What's next" bar shown under the Personal Progression header, with a one-click way into the guided page. */
+function PPNextStep({ badges, detailCache, submissionsMap }) {
+  const withReqs = badges.map((b) => detailCache?.get(b.id) ?? b)
+  const state = getPPState(withReqs, submissionsMap)
+  const next = describeNextStep(state)
+  const cta = state.step === 'finished' ? 'View journey' : state.started ? 'Continue' : 'Start'
+  const tone = next.attention ? styles.ppNextAttention : next.waiting ? styles.ppNextWaiting : ''
+  return (
+    <div className={`${styles.ppNext} ${tone}`}>
+      <div className={styles.ppNextText}>
+        <span className={styles.ppNextLabel}>Your next step</span>
+        <span className={styles.ppNextTitle}>{next.title}</span>
+        {next.detail && <span className={styles.ppNextDetail}>{next.detail}</span>}
+      </div>
+      <Link to="/personal-progression" className={styles.ppNextBtn}>
+        {cta} →
+      </Link>
+    </div>
   )
 }
 
@@ -85,6 +108,10 @@ export default function BadgeCategoryGroup({
 
         <span className={`${styles.chevron} ${isOpen ? styles.chevronUp : ''}`}>▾</span>
       </button>
+
+      {isScout && !isSearching && categoryKey === PP_CATEGORY && (
+        <PPNextStep badges={badges} detailCache={detailCache} submissionsMap={submissionsMap} />
+      )}
 
       {isOpen && (
         <div className={styles.grid}>
