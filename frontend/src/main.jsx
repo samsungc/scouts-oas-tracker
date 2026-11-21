@@ -7,6 +7,9 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.jsx'
+import { installAutocorrect } from './utils/autocorrect'
+
+installAutocorrect()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
