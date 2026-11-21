@@ -6,6 +6,7 @@ import SubmissionCard from '../components/submissions/SubmissionCard'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
+import { PP_CATEGORY } from '../utils/personalProgression'
 import styles from './SubmitPage.module.css'
 
 export default function SubmitPage() {
@@ -47,6 +48,11 @@ export default function SubmitPage() {
         const relatedSubs = allSubs.filter(
           (s) => String(s.requirement) === String(requirementId)
         )
+        // Personal Progression requirements are started from the guided page
+        if (badgeData?.category === PP_CATEGORY && relatedSubs.length === 0) {
+          navigate('/personal-progression', { replace: true })
+          return
+        }
         setSubmissions(relatedSubs)
       } catch {
         setError('Failed to load data. Please try refreshing.')

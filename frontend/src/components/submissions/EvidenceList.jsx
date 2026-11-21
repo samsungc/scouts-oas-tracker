@@ -79,6 +79,41 @@ function parseSpicesReview(text) {
   }
 }
 
+function parseCompletedGoal(text) {
+  if (!text || !text.startsWith('{"__type":"completed_goal"')) return null
+  try {
+    const data = JSON.parse(text)
+    return data.__type === 'completed_goal' ? data : null
+  } catch {
+    return null
+  }
+}
+
+function CompletedGoalDisplay({ data }) {
+  return (
+    <div className={styles.smartGoal}>
+      <span className={styles.smartTitle}>Completed Goal</span>
+      {data.category && (
+        <div className={styles.goalStatement}>
+          <span className={styles.goalStatementLabel}>Category: <span className={styles.goalStatementText}>{data.category}</span></span>
+        </div>
+      )}
+      {data.goal && (
+        <div className={styles.goalStatement}>
+          <span className={styles.goalStatementLabel}>Goal</span>
+          <span className={styles.goalStatementText}>{data.goal}</span>
+        </div>
+      )}
+      {data.details && (
+        <div className={styles.goalStatement}>
+          <span className={styles.goalStatementLabel}>How it was completed</span>
+          <span className={styles.goalStatementText}>{data.details}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SpicesReviewDisplay({ data }) {
   return (
     <div className={styles.smartGoal}>
@@ -111,6 +146,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
   const [editText, setEditText] = useState('')
   const [editSmart, setEditSmart] = useState(null)
   const [editSpices, setEditSpices] = useState(null)
+  const [editCompleted, setEditCompleted] = useState(null) // completed_goal record being edited (only `details` changes)
   const [saving, setSaving] = useState(false)
 
   useImperativeHandle(ref, () => ({
@@ -131,8 +167,14 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
   function startEdit(ev) {
     const smartData = ev.text_note ? parseSmartGoal(ev.text_note) : null
     const spicesData = ev.text_note ? parseSpicesReview(ev.text_note) : null
+    const completedData = ev.text_note ? parseCompletedGoal(ev.text_note) : null
     setEditingId(ev.id)
-    if (smartData) {
+    setEditCompleted(completedData)
+    if (completedData) {
+      setEditText(completedData.details || '')
+      setEditSmart(null)
+      setEditSpices(null)
+    } else if (smartData) {
       setEditSmart({ category: smartData.category || '', s: smartData.s || '', m: smartData.m || '', a: smartData.a || '', r: smartData.r || '', t: smartData.t || '', goal: smartData.goal || '' })
       setEditSpices(null)
       setEditText('')
@@ -153,10 +195,13 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
     setEditText('')
     setEditSmart(null)
     setEditSpices(null)
+    setEditCompleted(null)
   }
 
   async function handleSave(ev) {
-    const newTextNote = editSmart
+    const newTextNote = editCompleted
+      ? (editText.trim() ? JSON.stringify({ ...editCompleted, __type: 'completed_goal', details: editText.trim() }) : '')
+      : editSmart
       ? JSON.stringify({ __type: 'smart_goal', ...editSmart })
       : editSpices
       ? JSON.stringify({ __type: 'spices_review', ...editSpices })
@@ -172,6 +217,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
       setEditText('')
       setEditSmart(null)
       setEditSpices(null)
+      setEditCompleted(null)
       addToast({ message: 'Evidence updated', variant: 'success' })
     } catch (err) {
       addToast({ message: err.message || 'Failed to update evidence.', variant: 'error' })
@@ -185,6 +231,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
       ...ev,
       smartData: ev.text_note ? parseSmartGoal(ev.text_note) : null,
       spicesData: ev.text_note ? parseSpicesReview(ev.text_note) : null,
+      completedData: ev.text_note ? parseCompletedGoal(ev.text_note) : null,
     })) ?? [],
     [evidence],
   )
@@ -196,7 +243,7 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
   return (
     <ul className={styles.list}>
       {parsedEvidence.map((ev) => {
-        const { smartData, spicesData } = ev
+        const { smartData, spicesData, completedData } = ev
         const isEditing = editingId === ev.id
         const canEdit = isDraft && !ev.file
 
@@ -306,6 +353,8 @@ const EvidenceList = forwardRef(function EvidenceList({ evidence, isDraft, onDel
                     <SmartGoalDisplay data={smartData} />
                   ) : spicesData ? (
                     <SpicesReviewDisplay data={spicesData} />
+                  ) : completedData ? (
+                    <CompletedGoalDisplay data={completedData} />
                   ) : ev.text_note ? (
                     <p className={styles.textNote}>{ev.text_note}</p>
                   ) : null}

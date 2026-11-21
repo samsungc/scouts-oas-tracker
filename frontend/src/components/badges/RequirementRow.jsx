@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import StatusPill from '../ui/StatusPill'
+import { PP_CATEGORY } from '../../utils/personalProgression'
 import styles from './RequirementRow.module.css'
 
-export default function RequirementRow({ requirement, badgeId, submissionsMap, badgeLocked, onBatchReview, expandDetails = true }) {
+export default function RequirementRow({ requirement, badgeId, badgeCategory, submissionsMap, badgeLocked, onBatchReview, expandDetails = true }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const submission = submissionsMap?.get(requirement.id)
@@ -69,7 +70,12 @@ export default function RequirementRow({ requirement, badgeId, submissionsMap, b
           ) : (
             <button
               className={styles.startBtn}
-              onClick={() => navigate(`/submit?requirementId=${requirement.id}&badgeId=${badgeId}`)}
+              onClick={() => navigate(
+                // Personal Progression is started from its guided page, not requirement by requirement
+                badgeCategory === PP_CATEGORY
+                  ? '/personal-progression'
+                  : `/submit?requirementId=${requirement.id}&badgeId=${badgeId}`,
+              )}
             >
               Start
             </button>

@@ -127,6 +127,7 @@ export default function BadgeCard({
                       key={req.id}
                       requirement={req}
                       badgeId={badge.id}
+                      badgeCategory={badge.category}
                       submissionsMap={submissionsMap}
                       badgeLocked={isLocked}
                       onBatchReview={onBatchReview}

@@ -75,6 +75,17 @@ export default function NavBar() {
           </NavLink>
           {isScout && (
             <NavLink
+              to="/personal-progression"
+              className={({ isActive }) =>
+                `${styles.link} ${isActive ? styles.active : ''}`
+              }
+            >
+              <span className={styles.fullLabel}>Personal Progression</span>
+              <span className={styles.shortLabel}>Goals</span>
+            </NavLink>
+          )}
+          {isScout && (
+            <NavLink
               to="/my-submissions"
               className={({ isActive }) =>
                 `${styles.link} ${styles.mobileHide} ${isActive ? styles.active : ''}`
@@ -90,7 +101,8 @@ export default function NavBar() {
                 `${styles.link} ${isActive ? styles.active : ''}`
               }
             >
-              Peer Review
+              <span className={styles.fullLabel}>Peer Review</span>
+              <span className={styles.shortLabel}>Review</span>
             </NavLink>
           )}
           {isReviewer && (

@@ -1,0 +1,367 @@
+/* Shared styles for the Personal Progression pipeline steps */
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stepTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin: 0;
+}
+
+.stepLead {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cardDone {
+  border-color: var(--color-badge-complete-border);
+  background: var(--color-badge-complete-bg);
+}
+
+.cardAttention {
+  border-color: var(--color-badge-rejected-border);
+}
+
+.cardWaiting {
+  border-color: var(--color-status-submitted);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+
+.cardTitleWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardTitle {
+  font-weight: 700;
+  color: var(--color-heading);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.cardSub {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Keeps a card's buttons on its bottom edge so they line up across a row */
+.actionsBottom {
+  margin-top: auto;
+}
+
+.goalStatement {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.goalStatement::before {
+  content: '“';
+}
+
+.goalStatement::after {
+  content: '”';
+}
+
+.details {
+  font-size: 0.85rem;
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  font-weight: 600;
+  user-select: none;
+}
+
+.smartList {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.smartItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+
+.smartText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.smartLabel {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* Forms */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.labelText {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-heading);
+}
+
+.prompt {
+  flex-basis: 100%;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.textarea,
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.textarea:focus,
+.select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
+.fileInput {
+  font-size: 0.88rem;
+  max-width: 100%;
+}
+
+.fileList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Banners */
+
+.notice {
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  background: var(--color-surface-info);
+  border: 1px solid var(--color-surface-info-border);
+  color: var(--color-text);
+}
+
+.noticeWarning {
+  background: var(--color-surface-warning);
+  border-color: var(--color-surface-warning-border);
+  color: var(--color-surface-warning-text);
+}
+
+.noticeRejected {
+  background: var(--color-surface-rejected-bg);
+  border-color: var(--color-badge-rejected-border);
+  color: var(--color-text);
+}
+
+.noticeTitle {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.waiting {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--color-surface-submitted-bg);
+  border: 1px solid var(--color-status-submitted);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+
+.waitingText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.waitingText strong {
+  font-size: 1rem;
+  color: var(--color-heading);
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-border-light);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-status-approved);
+  border-radius: 999px;
+  transition: width 0.3s;
+}
+
+.sectionLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin: 8px 0 0;
+}
+
+.doneMark {
+  color: var(--color-status-approved);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.introText p {
+  margin: 0 0 10px;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.categoryCard {
+  composes: card;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.footerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.footerHint {
+  flex: 1;
+  min-width: 180px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.confirmText {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-surface-warning-text);
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 14px;
+  }
+  .footerActions {
+    justify-content: stretch;
+  }
+  .footerActions > button {
+    flex: 1;
+  }
+}

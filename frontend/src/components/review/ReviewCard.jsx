@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { approveSubmission, getReviewSubmissions } from '../../api/review'
+import { getBadges } from '../../api/badges'
 import StatusPill from '../ui/StatusPill'
 import Button from '../ui/Button'
 import ErrorMessage from '../ui/ErrorMessage'
@@ -45,7 +46,16 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
     setGoalsError('')
     setShowGoals(true)
 
-    const badge = allBadges.find(b => b.name === requirement?.badge_name)
+    // Not every page passes allBadges (e.g. the Scouts page review modal), so fetch them if needed
+    let badge = allBadges.find(b => b.name === requirement?.badge_name)
+    if (!badge) {
+      try {
+        const badges = await getBadges()
+        badge = badges.find(b => b.name === requirement?.badge_name)
+      } catch {
+        // handled below
+      }
+    }
     if (!badge) {
       setGoalsError('Could not find badge data for this submission.')
       return
@@ -168,9 +178,9 @@ export default function ReviewCard({ submission, requirement, onApproved, onReje
         />
       )}
 
-      {(submission.reviewed_by_username || submission.reviewer_notes) && (
+      {((showScoterNotes && submission.reviewed_by_username) || submission.reviewer_notes) && (
         <div className={styles.reviewerNotes}>
-          {submission.reviewed_by_username && (
+          {showScoterNotes && submission.reviewed_by_username && (
             <span className={styles.reviewedBy}>Reviewed by {submission.reviewed_by_username}</span>
           )}
           {submission.reviewer_notes && (
