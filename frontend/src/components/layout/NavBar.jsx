@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ProfileModal from '../ui/ProfileModal'
+import { isAutocorrectOn, setAutocorrectOn } from '../../utils/autocorrect'
 import styles from './NavBar.module.css'
 
 export default function NavBar() {
@@ -14,7 +15,14 @@ export default function NavBar() {
     if (stored) return stored
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const [autocorrect, setAutocorrectState] = useState(isAutocorrectOn)
   const menuRef = useRef(null)
+
+  function toggleAutocorrect() {
+    const next = !autocorrect
+    setAutocorrectState(next)
+    setAutocorrectOn(next)
+  }
 
   function applyTheme(next) {
     setThemeState(next)
@@ -172,6 +180,18 @@ export default function NavBar() {
                     </button>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={autocorrect}
+                  className={`${styles.menuItem} ${styles.switchRow}`}
+                  onClick={toggleAutocorrect}
+                >
+                  Auto correct
+                  <span className={`${styles.switch} ${autocorrect ? styles.switchOn : ''}`} aria-hidden="true">
+                    <span className={styles.switchKnob} />
+                  </span>
+                </button>
                 <hr className={styles.menuDivider} />
                 <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleLogout}>
                   Sign Out

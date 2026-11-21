@@ -130,6 +130,33 @@ export function correctAt(value, caret, ignore = new Set()) {
 
 const state = new WeakMap() // element -> { ignore, last }
 
+// Each person can switch autocorrect off from the user menu; it's on unless
+// they have. The choice is kept in this browser only.
+const STORAGE_KEY = 'oas_autocorrect'
+
+function readEnabled() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== 'off'
+  } catch {
+    return true
+  }
+}
+
+let enabled = readEnabled()
+
+export function isAutocorrectOn() {
+  return enabled
+}
+
+export function setAutocorrectOn(on) {
+  enabled = on
+  try {
+    localStorage.setItem(STORAGE_KEY, on ? 'on' : 'off')
+  } catch {
+    // Storage blocked (e.g. private mode): the choice lasts until reload
+  }
+}
+
 function isEnabled(el) {
   if (el.tagName === 'TEXTAREA') {
     if (el.getAttribute('autocorrect') === 'off') return false
@@ -149,7 +176,7 @@ function setNativeValue(el, value) {
 
 function handleInput(e) {
   const el = e.target
-  if (!el || !isEnabled(el) || e.isComposing) return
+  if (!enabled || !el || !isEnabled(el) || e.isComposing) return
   if (el.selectionStart !== el.selectionEnd) return
 
   let s = state.get(el)
